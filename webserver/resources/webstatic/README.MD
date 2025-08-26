@@ -1,0 +1,1 @@
+- This is where you put the files from webstatic.mihoyo.com.

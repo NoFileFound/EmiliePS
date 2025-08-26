@@ -1,0 +1,9 @@
+# Protocol buffers
+tools/proto
+webserver/src/main/java/org/genshinhttpsrv/protobuf/*.java
+
+
+# Build output
+webserver/target
+webserver/logs
+webserver/resources/webstatic/admin
