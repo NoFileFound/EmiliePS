@@ -25,10 +25,13 @@ import org.genshinhttpsrv.Application;
 public final class EncryptionManager {
     private static final SecureRandom secureRandom = new SecureRandom();
     private static final String h5logKey = "F#ju0q8I9HbmH8PMpJzzBee&p0b5h@Yb";
+    private static final String overseasMdkKey = "5ba7ef2079a4f72815b8df3edb0b5156"; // 8e8a13e081aec9619ef8647bbc37da59 - sandbox
+    private static final String chinaMdkKey = "6bdc3982c25f3f3c38668a32d287d16b"; // 54c88f02dedb5fdfe997b40d325788ba - sandbox
     private static final String overseasComboKey = "6a4c78fe0356ba4673b8071127b28123"; // 7320c0c14ad8ce0e82fd8483f7d98435 - sandbox,
     private static final String chinaComboKey = "d0d3a7342df2026a70f650b907800111"; // 71f35d945cf97f8f202cef35ae6aa7ed - sandbox
     private static byte[] passwordDecryptionKey;
     private static byte[] identityDecryptionKey;
+    @Getter private static byte[] dispatchSecurityKey;
     @Getter private static final Map<Integer, String> abTestKeys = new HashMap<>(Map.of(60, "d10ff485-06ec-4b9d-8977-14716c0a1dda", 31, "5f876baa-c4c4-43df-880a-c026184fd01c", 28, "df7f6400-ae6e-4850-8ff1-63e1f3f960d6", 45, "2902c529-499a-4a9b-a7b3-3b675632b8c3", 47, "b437f6e3-7e48-445a-8d8b-c8ebb5bd2b3e"));
     @Getter private static byte[] dispatchSeed;
     @Getter private static byte[] dispatchKey;
@@ -102,7 +105,7 @@ public final class EncryptionManager {
             cipher.init(Cipher.DECRYPT_MODE, private_key);
             return new String(cipher.doFinal(Base64.getDecoder().decode(encryptedPassword)), java.nio.charset.StandardCharsets.UTF_8);
         } catch (Exception ignored) {
-            return "6969696969a";
+            return "";
         }
     }
 
@@ -111,9 +114,27 @@ public final class EncryptionManager {
      * @param content The given data.
      * @return A HMAC hash.
      */
-    public static String generateHMAC(String content, Boolean isOverseas) {
+    public static String generateComboSignature(String content, Boolean isOverseas) {
         try {
             SecretKeySpec secretKeySpec = new SecretKeySpec(isOverseas ? overseasComboKey.getBytes() : chinaComboKey.getBytes(), "HmacSHA256");
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(secretKeySpec);
+
+            byte[] result = mac.doFinal(content.getBytes());
+            return java.util.stream.IntStream.range(0, result.length).mapToObj(i -> String.format("%02x", result[i])).reduce("", String::concat);
+        } catch(Exception ex) {
+            return null;
+        }
+    }
+
+    /**
+     * Creates a new HMAC hash by given content and key.
+     * @param content The given data.
+     * @return A HMAC hash.
+     */
+    public static String generateMDKSignature(String content, Boolean isOverseas) {
+        try {
+            SecretKeySpec secretKeySpec = new SecretKeySpec(isOverseas ? overseasMdkKey.getBytes() : chinaMdkKey.getBytes(), "HmacSHA256");
             Mac mac = Mac.getInstance("HmacSHA256");
             mac.init(secretKeySpec);
 
@@ -155,6 +176,7 @@ public final class EncryptionManager {
         try {
             dispatchSeed = Files.readAllBytes(Paths.get("resources/dispatch/dispatchSeed.bin"));
             dispatchKey = Files.readAllBytes(Paths.get("resources/dispatch/dispatchKey.bin"));
+            dispatchSecurityKey = Files.readAllBytes(Paths.get("resources/dispatch/dispatchSecurityKey.bin"));
             passwordDecryptionKey = Files.readAllBytes(Paths.get("resources/dispatch/passwordPriv.bin"));
             identityDecryptionKey = Files.readAllBytes(Paths.get("resources/dispatch/identityPriv.bin"));
             dispatchSignatureKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(Files.readAllBytes(Paths.get("resources/dispatch/SigningKey.der"))));

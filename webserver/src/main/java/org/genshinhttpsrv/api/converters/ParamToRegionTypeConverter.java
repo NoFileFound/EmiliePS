@@ -18,7 +18,6 @@ public final class ParamToRegionTypeConverter implements Converter<String, Regio
         return switch (source) {
             case "hk4e_cn" -> RegionType.REGION_CHINA;
             case "hk4e_global" -> RegionType.REGION_OVERSEAS;
-            case "takumi" -> RegionType.REGION_DEV;
             default -> RegionType.REGION_UNKNOWN;
         };
     }

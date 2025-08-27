@@ -5,6 +5,7 @@ import static org.genshinhttpsrv.libraries.StringUtils.filterString;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.stream.Stream;
 import org.genshinhttpsrv.Application;
 import org.genshinhttpsrv.api.Response;
@@ -18,16 +19,22 @@ import org.genshinhttpsrv.database.collections.Ticket;
 import org.genshinhttpsrv.libraries.EncryptionManager;
 import org.genshinhttpsrv.libraries.GeetestLib;
 import org.genshinhttpsrv.libraries.JsonLoader;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 @RestController
-@RequestMapping(value = {"hk4e_global/mdk/shield/api", "hk4e_cn/mdk/shield/api", "mdk/shield/api"}, produces = "application/json")
+@RequestMapping(value = {"hk4e_global/mdk/shield/api", "hk4e_cn/mdk/shield/api", "mdk/shield/api", "takumi/hk4e_cn/mdk/shield/api", "takumi/hk4e_global/mdk/shield/api", "takumi/mdk/shield/api"}, produces = "application/json")
 public final class Shield implements Response {
     private final String[] ACTIONS = {"bind_mobile", "bind_realname", "modify_realname", "bind_email"};
 
     /**
-     *  Source: <a href="https://hk4e-sdk.mihoyo.com/mdk/shield/api/actionTicket">https://hk4e-sdk.mihoyo.com/mdk/shield/api/actionTicket</a><br><br>
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/mdk/shield/api/actionTicket">https://devapi-takumi.mihoyo.com/mdk/shield/api/actionTicket</a><br><br>
      *  Description: Fetches the ticket id for client's action.<br><br>
      *  Method: POST<br>
      *  Content-Type: application/json<br><br>
@@ -76,7 +83,7 @@ public final class Shield implements Response {
     }
 
     /**
-     *  Source: <a href="https://hk4e-sdk.mihoyo.com/mdk/shield/api/bindEmail">https://hk4e-sdk.mihoyo.com/mdk/shield/api/bindEmail</a><br><br>
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/mdk/shield/api/bindEmail">https://devapi-takumi.mihoyo.com/mdk/shield/api/bindEmail</a><br><br>
      *  Description: Binds the client's email address.<br><br>
      *  Method: POST<br>
      *  Content-Type: application/json<br><br>
@@ -92,9 +99,13 @@ public final class Shield implements Response {
      *        </ul>
      */
     @PostMapping(value = "bindEmail")
-    public ResponseEntity<LinkedHashMap<String, Object>> SendEmailCaptcha(@RequestBody BindEmail body, @RequestHeader(value = "x-rpc-language", required = false) String lang) {
+    public ResponseEntity<LinkedHashMap<String, Object>> SendBindEmail(@RequestBody BindEmail body, @RequestHeader(value = "x-rpc-language", required = false) String lang) {
         if(body.email == null || body.email.isEmpty() || body.action_ticket == null || body.action_ticket.isEmpty() || body.captcha == null || body.captcha.isEmpty()) {
             return ResponseEntity.ok(this.makeResponse(Retcode.RET_PARAMETER_ERROR, Application.getTranslationManager().get(lang, "retcode_parameter_error"), null));
+        }
+
+        if(!body.email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
+            return ResponseEntity.ok(this.makeResponse(Retcode.RET_CONFIGURATION_ERROR, Application.getTranslationManager().get(lang, "retcode_email_address_invalid"), null));
         }
 
         var myTicket = DBUtils.findTicketById(body.action_ticket);
@@ -120,7 +131,7 @@ public final class Shield implements Response {
     }
 
     /**
-     *  Source: <a href="https://hk4e-sdk.mihoyo.com/mdk/shield/api/emailCaptcha">https://hk4e-sdk.mihoyo.com/mdk/shield/api/emailCaptcha</a><br><br>
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/mdk/shield/api/emailCaptcha">https://devapi-takumi.mihoyo.com/mdk/shield/api/emailCaptcha</a><br><br>
      *  Description: Verifies the new email address of the client.<br><br>
      *  Method: POST<br>
      *  Content-Type: application/json<br><br>
@@ -175,7 +186,7 @@ public final class Shield implements Response {
     }
 
     /**
-     *  Source: <a href="https://hk4e-sdk.mihoyo.com/mdk/shield/api/emailCaptchaByActionTicket">https://hk4e-sdk.mihoyo.com/mdk/shield/api/emailCaptchaByActionTicket</a><br><br>
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/mdk/shield/api/emailCaptchaByActionTicket">https://devapi-takumi.mihoyo.com/mdk/shield/api/emailCaptchaByActionTicket</a><br><br>
      *  Description: Sends captcha to email address from given ticket id.<br><br>
      *  Method: POST<br>
      *  Content-Type: application/json<br><br>
@@ -226,7 +237,7 @@ public final class Shield implements Response {
     }
 
     /**
-     *  Source: <a href="https://sdk-static.mihoyo.com/mdk/shield/api/loadConfig">https://sdk-static.mihoyo.com/mdk/shield/api/loadConfig</a><br><br>
+     *  Source: <a href="https://devapi-static.mihoyo.com/takumi/mdk/shield/api/loadConfig">https://devapi-static.mihoyo.com/takumi/mdk/shield/api/loadConfig</a><br><br>
      *  Description: Fetches configuration about the login page and region.<br><br>
      *  Method: GET<br>
      *  Content-Type: application/json<br><br>
@@ -291,7 +302,7 @@ public final class Shield implements Response {
     }
 
     /**
-     *  Source: <a href="https://hk4e-sdk.mihoyo.com/mdk/shield/api/loadFirebaseBlackList">https://hk4e-sdk.mihoyo.com/mdk/shield/api/loadFirebaseBlackList</a><br><br>
+     *  Source: <a href="https://devapi-static.mihoyo.com/takumi/mdk/shield/api/loadFirebaseBlackList">https://devapi-static.mihoyo.com/takumi/mdk/shield/api/loadFirebaseBlackList</a><br><br>
      *  Description: Fetches configuration about the login page and region.<br><br>
      *  Method: GET<br>
      *  Content-Type: application/json<br><br>
@@ -430,7 +441,190 @@ public final class Shield implements Response {
     }
 
     /**
-     *  Source: <a href="https://hk4e-sdk.mihoyo.com/mdk/shield/api/loginCaptcha">https://hk4e-sdk.mihoyo.com/mdk/shield/api/loginCaptcha</a><br><br>
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/mdk/shield/api/loginByAuthTicket">https://devapi-takumi.mihoyo.com/mdk/shield/api/loginByAuthTicket</a><br><br>
+     *  Description: Logins in the game using authorization token.<br><br>
+     *  Method: POST<br>
+     *  Content-Type: application/json<br><br>
+     *  Parameters:<br>
+     *        <ul>
+     *          <li>{@code login_type} — The login type.</li>
+     *          <li>{@code action_ticket} — The authorization ticket.</li>
+     *        </ul>
+     *  Headers:
+     *        <ul>
+     *          <li>{@code x-rpc-device_id} — The client's device id.</li>
+     *          <li>{@code x-rpc-language} — The client's system language iso2 code.</li>
+     *        </ul>
+     */
+    @PostMapping(value = "loginByAuthTicket")
+    public ResponseEntity<LinkedHashMap<String, Object>> SendLogin(@RequestBody LoginByAuthTicket body, @RequestHeader(value = "x-rpc-device_id", required = false) String device_id, @RequestHeader(value = "x-rpc-language", required = false) String lang, HttpServletRequest request) {
+        if(body.auth_ticket == null || body.auth_ticket.isEmpty() || !body.login_type.equals("thirdparty")) {
+            return ResponseEntity.ok(this.makeResponse(Retcode.RET_LOGIN_NETWORK_AT_RISK, Application.getTranslationManager().get(lang, "retcode_network_at_risk"), null));
+        }
+
+        var myTicket = DBUtils.findTicketById(body.auth_ticket);
+        if(myTicket == null || !myTicket.getType().equals("login")) {
+            return ResponseEntity.ok(this.makeResponse(Retcode.RET_LOGIN_NETWORK_AT_RISK, Application.getTranslationManager().get(lang, "retcode_network_at_risk"), null));
+        }
+
+        var myAccount = DBUtils.findAccountById(myTicket.getAccountId());
+        if(myAccount == null) {
+            return ResponseEntity.ok(this.makeResponse(Retcode.RET_SYSTEM_ERROR, Application.getTranslationManager().get(lang, "retcode_system_error"), null));
+        }
+
+        myTicket.delete();
+        if(!myAccount.getApprovedDevices().contains(device_id)) {
+            myAccount.setIsRequireDeviceGrant(true);
+            myTicket = DBUtils.findTicketByAccountId(myAccount.get_id(), "device_grant");
+            if(myTicket == null) {
+                myTicket = new Ticket(myAccount.get_id(), "device_grant");
+                myTicket.save();
+            }
+        }
+
+        myAccount.setIpAddress(request.getRemoteAddr());
+        myAccount.save();
+        DBUtils.getCachedAccountDevices().putIfAbsent(device_id, myAccount);
+        return ResponseEntity.ok(this.makeResponse(Retcode.RETCODE_SUCC, "OK", new LinkedHashMap<>() {{
+            put("account", new LinkedHashMap<>() {{
+                put("uid", myAccount.get_id());
+                put("name", myAccount.getName());
+                put("email", filterString(myAccount.getEmailAddress()));
+                put("mobile", filterString(myAccount.getMobileNumber()));
+                put("is_email_verify", myAccount.getIsEmailVerified() ? '1' : '0');
+                put("realname", filterString(myAccount.getRealname()));
+                put("identity_card", filterString(myAccount.getIdentityCard()));
+                put("token", myAccount.generateGameToken());
+                put("facebook_name", filterString(myAccount.getFacebookName()));
+                put("google_name", filterString(myAccount.getGoogleName()));
+                put("twitter_name", filterString(myAccount.getTwitterName()));
+                put("game_center_name", filterString(myAccount.getGameCenterName()));
+                put("apple_name", filterString(myAccount.getAppleName()));
+                put("sony_name", filterString(myAccount.getSonyName()));
+                put("tap_name", filterString(myAccount.getTapName()));
+                put("country", myAccount.getCountryCode());
+                put("reactivate_ticket", (myAccount.getIsRequireReactivation() ? DBUtils.findTicketByAccountId(myAccount.get_id(), "reactivation").getId() : ""));
+                put("area_code", myAccount.getMobileNumberArea());
+                put("device_grant_ticket", (myAccount.getIsRequireDeviceGrant() ? DBUtils.findTicketByAccountId(myAccount.get_id(), "device_grant").getId() : ""));
+                put("steam_name", filterString(myAccount.getSteamName()));
+                put("unmasked_email", myAccount.getEmailAddress());
+                put("unmasked_email_type", 1);
+                put("cx_name", filterString(myAccount.getCxName()));
+                put("safe_mobile", filterString(myAccount.getSafeMobileNumber()));
+                put("age_gate_info", null);
+            }});
+            put("realperson_required", myAccount.getIsRequireRealname());
+            put("safe_moblie_required", myAccount.getIsRequireSafeMobile());
+            put("reactivate_required", myAccount.getIsRequireReactivation());
+            put("device_grant_required", myAccount.getIsRequireDeviceGrant());
+            put("realname_operation", myAccount.getRealNameOperation().toString());
+        }}));
+    }
+
+    /**
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/mdk/shield/api/loginByThirdparty">https://devapi-takumi.mihoyo.com/mdk/shield/api/loginByThirdparty</a><br><br>
+     *  Description: Logins in the game using third party application.<br><br>
+     *  Method: POST<br>
+     *  Content-Type: application/json<br><br>
+     *  Parameters:<br>
+     *        <ul>
+     *          <li>{@code type} — The thirdparty name.</li>
+     *          <li>{@code token} — The thirdparty token.</li>
+     *          <li>{@code redirect_url} — The redirect page after login.</li>
+     *        </ul>
+     *  Headers:
+     *        <ul>
+     *          <li>{@code x-rpc-device_id} — The client's device id.</li>
+     *          <li>{@code x-rpc-risky} — The verification token after captcha.</li>
+     *          <li>{@code x-rpc-language} — The client's system language iso2 code.</li>
+     *        </ul>
+     */
+    @PostMapping(value = "loginByThirdparty")
+    public ResponseEntity<LinkedHashMap<String, Object>> SendLoginByThirdParty(@RequestBody LoginByThirdPartyModel body, @RequestHeader(value = "x-rpc-device_id", required = false) String device_id, @RequestHeader(value = "x-rpc-risky", required = false) String risky, @RequestHeader(value = "x-rpc-language", required = false) String lang, HttpServletRequest request) {
+        if(body.type == null || body.type.isEmpty() || body.token == null || body.token.isEmpty() || !body.redirect_url.matches("^(https?://)([\\w\\-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/\\S*)?$")) {
+            return ResponseEntity.ok(this.makeResponse(Retcode.RET_PARAMETER_ERROR, Application.getTranslationManager().get(lang, "retcode_parameter_error"), null));
+        }
+
+        if(!GeetestLib.checkVerifiedChallenge(risky)) {
+            return ResponseEntity.ok(this.makeResponse(Retcode.RET_LOGIN_NETWORK_AT_RISK, Application.getTranslationManager().get(lang, "retcode_network_at_risk"), null));
+        }
+
+        Account myAccount = null;
+        if (body.type.equals("Twitter")) {
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(body.token);
+
+            var response = restTemplate.exchange("https://api.twitter.com/2/users/me?user.fields=name", HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<Map<String, Object>>() {});
+            if (response.getStatusCode() != HttpStatusCode.valueOf(200)) {
+                return ResponseEntity.ok(this.makeResponse(Retcode.RET_WRONG_ACCOUNT, Application.getTranslationManager().get(lang, "retcode_account_error"), null));
+            }
+
+            if(response.getBody() != null) {
+                Map<String, Object> data = (Map<String, Object>) response.getBody().get("data");
+                String displayName = (String) data.get("name");
+                myAccount = DBUtils.findAccountByThirdParty(displayName, "Twitter");
+                if (myAccount == null) {
+                    return ResponseEntity.ok(this.makeResponse(Retcode.RET_LOGIN_INVALID_ACCOUNT, Application.getTranslationManager().get(lang, "retcode_login_account_not_found"), null));
+                }
+            }
+        }
+
+        if(myAccount != null) {
+            if(!myAccount.getApprovedDevices().contains(device_id)) {
+                myAccount.setIsRequireDeviceGrant(true);
+                var myTicket = DBUtils.findTicketByAccountId(myAccount.get_id(), "device_grant");
+                if(myTicket == null) {
+                    myTicket = new Ticket(myAccount.get_id(), "device_grant");
+                    myTicket.save();
+                }
+            }
+
+            myAccount.setIpAddress(request.getRemoteAddr());
+            myAccount.save();
+            DBUtils.getCachedAccountDevices().putIfAbsent(device_id, myAccount);
+            Account finalMyAccount = myAccount;
+            return ResponseEntity.ok(this.makeResponse(Retcode.RETCODE_SUCC, "OK", new LinkedHashMap<>() {{
+                put("account", new LinkedHashMap<>() {{
+                    put("uid", finalMyAccount.get_id());
+                    put("name", finalMyAccount.getName());
+                    put("email", filterString(finalMyAccount.getEmailAddress()));
+                    put("mobile", filterString(finalMyAccount.getMobileNumber()));
+                    put("is_email_verify", finalMyAccount.getIsEmailVerified() ? '1' : '0');
+                    put("realname", filterString(finalMyAccount.getRealname()));
+                    put("identity_card", filterString(finalMyAccount.getIdentityCard()));
+                    put("token", finalMyAccount.generateGameToken());
+                    put("facebook_name", filterString(finalMyAccount.getFacebookName()));
+                    put("google_name", filterString(finalMyAccount.getGoogleName()));
+                    put("twitter_name", filterString(finalMyAccount.getTwitterName()));
+                    put("game_center_name", filterString(finalMyAccount.getGameCenterName()));
+                    put("apple_name", filterString(finalMyAccount.getAppleName()));
+                    put("sony_name", filterString(finalMyAccount.getSonyName()));
+                    put("tap_name", filterString(finalMyAccount.getTapName()));
+                    put("country", finalMyAccount.getCountryCode());
+                    put("reactivate_ticket", (finalMyAccount.getIsRequireReactivation() ? DBUtils.findTicketByAccountId(finalMyAccount.get_id(), "reactivation").getId() : ""));
+                    put("area_code", finalMyAccount.getMobileNumberArea());
+                    put("device_grant_ticket", (finalMyAccount.getIsRequireDeviceGrant() ? DBUtils.findTicketByAccountId(finalMyAccount.get_id(), "device_grant").getId() : ""));
+                    put("steam_name", filterString(finalMyAccount.getSteamName()));
+                    put("unmasked_email", finalMyAccount.getEmailAddress());
+                    put("unmasked_email_type", 1);
+                    put("cx_name", filterString(finalMyAccount.getCxName()));
+                    put("safe_mobile", filterString(finalMyAccount.getSafeMobileNumber()));
+                    put("age_gate_info", null);
+                }});
+                put("realperson_required", finalMyAccount.getIsRequireRealname());
+                put("safe_moblie_required", finalMyAccount.getIsRequireSafeMobile());
+                put("reactivate_required", finalMyAccount.getIsRequireReactivation());
+                put("device_grant_required", finalMyAccount.getIsRequireDeviceGrant());
+                put("realname_operation", finalMyAccount.getRealNameOperation().toString());
+                put("redirect_url", body.redirect_url);
+            }}));
+        }
+        return ResponseEntity.ok(this.makeResponse(Retcode.RET_LOGIN_INVALID_ACCOUNT, Application.getTranslationManager().get(lang, "retcode_login_account_not_found"), null));
+    }
+
+    /**
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/mdk/shield/api/loginCaptcha">https://devapi-takumi.mihoyo.com/mdk/shield/api/loginCaptcha</a><br><br>
      *  Description: Generates a captcha for login using a mobile number.<br><br>
      *  Method: POST<br>
      *  Content-Type: application/json<br><br>
@@ -481,7 +675,7 @@ public final class Shield implements Response {
     }
 
     /**
-     *  Source: <a href="https://hk4e-sdk.mihoyo.com/mdk/shield/api/loginMobile">https://hk4e-sdk.mihoyo.com/mdk/shield/api/loginMobile</a><br><br>
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/mdk/shield/api/loginMobile">https://devapi-takumi.mihoyo.com/mdk/shield/api/loginMobile</a><br><br>
      *  Description: Logins in the game using mobile.<br><br>
      *  Method: POST<br>
      *  Content-Type: application/json<br><br>
@@ -568,7 +762,7 @@ public final class Shield implements Response {
     }
 
     /**
-     *  Source: <a href="https://hk4e-sdk.mihoyo.com/mdk/shield/api/mobileCaptcha">https://hk4e-sdk.mihoyo.com/mdk/shield/api/mobileCaptcha</a><br><br>
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/mdk/shield/api/mobileCaptcha">https://devapi-takumi.mihoyo.com/mdk/shield/api/mobileCaptcha</a><br><br>
      *  Description: Sends captcha to the mobile to verify it.<br><br>
      *  Method: POST<br>
      *  Content-Type: application/json<br><br>
@@ -629,7 +823,7 @@ public final class Shield implements Response {
     }
 
     /**
-     *  Source: <a href="https://hk4e-sdk.mihoyo.com/mdk/shield/api/reactivateAccount">https://hk4e-sdk.mihoyo.com/mdk/shield/api/reactivateAccount</a><br><br>
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/mdk/shield/api/reactivateAccount">https://devapi-takumi.mihoyo.com/mdk/shield/api/reactivateAccount</a><br><br>
      *  Description: Reactivates the account by given ticket id.<br><br>
      *  Method: POST<br>
      *  Content-Type: application/json<br><br>
@@ -693,8 +887,8 @@ public final class Shield implements Response {
     }
 
     /**
-     *  Source: <a href="https://hk4e-sdk.mihoyo.com/mdk/shield/api/verify">https://hk4e-sdk.mihoyo.com/mdk/shield/api/verify</a><br><br>
-     *  Description: Fetches the login information based on token (Overseas platform).<br><br>
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/mdk/shield/api/verify">https://devapi-takumi.mihoyo.com/mdk/shield/api/verify</a><br><br>
+     *  Description: Verifies the account login by using token.<br><br>
      *  Method: POST<br>
      *  Content-Type: application/json<br><br>
      *  Parameters:<br>
@@ -760,8 +954,8 @@ public final class Shield implements Response {
     }
 
     /**
-     *  Source: <a href="https://hk4e-sdk.mihoyo.com/mdk/shield/api/verifyEmailCaptcha">https://hk4e-sdk.mihoyo.com/mdk/shield/api/verifyEmailCaptcha</a><br><br>
-     *  Description: Verifies the code (captcha) that was sent by <a href="https://hk4e-sdk.mihoyo.com/mdk/shield/api/emailCaptchaByActionTicket">https://hk4e-sdk.mihoyo.com/mdk/shield/api/emailCaptchaByActionTicket</a>.<br><br>
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/mdk/shield/api/verifyEmailCaptcha">https://devapi-takumi.mihoyo.com/mdk/shield/api/verifyEmailCaptcha</a><br><br>
+     *  Description: Verifies the code (captcha) that was sent by <a href="https://devapi-takumi.mihoyo.com/mdk/shield/api/emailCaptchaByActionTicket">https://devapi-takumi.mihoyo.com/mdk/shield/api/emailCaptchaByActionTicket</a>.<br><br>
      *  Method: POST<br>
      *  Content-Type: application/json<br><br>
      *  Parameters:<br>
@@ -827,6 +1021,17 @@ public final class Shield implements Response {
         public String account;
         public Boolean is_crypto;
         public String password;
+    }
+
+    public static class LoginByAuthTicket {
+        public String login_type;
+        public String auth_ticket;
+    }
+
+    public static class LoginByThirdPartyModel {
+        public String type;
+        public String token;
+        public String redirect_url;
     }
 
     public static class LoginCaptchaModel {

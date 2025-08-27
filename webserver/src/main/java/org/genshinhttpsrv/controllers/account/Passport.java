@@ -37,6 +37,10 @@ public final class Passport implements Response {
      */
     @GetMapping(value = "api/getSwitchStatus")
     public ResponseEntity<LinkedHashMap<String, Object>> SendSwitchStatus(String app_id, ClientType platform, @RequestHeader(value = "x-rpc-language", required = false) String lang) {
+        if(!Application.getPropertiesInfo().app_ids.isEmpty() && !Application.getPropertiesInfo().app_ids.contains(app_id)) {
+            return ResponseEntity.ok(this.makeResponse(Retcode.RET_PARAMETER_ERROR, Application.getTranslationManager().get(lang, "retcode_parameter_error"), null));
+        }
+
         if(platform != ClientType.PLATFORM_ANDROID && platform != ClientType.PLATFORM_IOS && platform != ClientType.PLATFORM_ANDROIDCLOUD && platform != ClientType.PLATFORM_IOSCLOUD) {
             return ResponseEntity.ok(this.makeResponse(Retcode.RET_PARAMETER_ERROR, Application.getTranslationManager().get(lang, "retcode_parameter_error"), null));
         }

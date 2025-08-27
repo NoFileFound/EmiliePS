@@ -13,10 +13,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(value = {"combo/box/api/config"}, produces = "application/json")
+@RequestMapping(value = {"combo/box/api/config", "takumi/combo/box/api/config"}, produces = "application/json")
 public final class Box implements Response {
     /**
-     *  Source: <a href="https://sdk-static.mihoyo.com/combo/box/api/config/sdk/drmSwitch">https://sdk-static.mihoyo.com/combo/box/api/config/sdk/drmSwitch</a><br><br>
+     *  Source: <a href="https://devapi-static.mihoyo.com/takumi/combo/box/api/config/sdk/drmSwitch">https://devapi-static.mihoyo.com/takumi/combo/box/api/config/sdk/drmSwitch</a><br><br>
      *  Description: Fetches client configuration about the httpdns.<br><br>
      *  Method: GET<br>
      *  Content-Type: application/json<br><br>
@@ -25,7 +25,7 @@ public final class Box implements Response {
      *          <li>{@code biz_key} — The game's specified region version. (hk4e_cn/hk4e_global)</li>
      *          <li>{@code client_type} — The client's platform type.</li>
      *        </ul>
-     *  @deprecated The httpdns config is now located in <a href="https://sdk-static.mihoyo.com/combo/box/api/config/sdk/combo">https://sdk-static.mihoyo.com/combo/box/api/config/sdk/combo</a>.
+     *  @deprecated The httpdns config is now located in <a href="https://devapi-static.mihoyo.com/takumi/combo/box/api/config/sdk/combo">https://devapi-static.mihoyo.com/takumi/combo/box/api/config/sdk/combo</a>.
      */
     @GetMapping(value = "sdk/drmSwitch")
     @Deprecated(forRemoval = true)
@@ -42,7 +42,7 @@ public final class Box implements Response {
     }
 
     /**
-     *  Source: <a href="https://sdk-static.mihoyo.com/combo/box/api/config/porte-cn/porte">https://sdk-static.mihoyo.com/combo/box/api/config/porte-cn/porte</a><br><br>
+     *  Source: <a href="https://devapi-static.mihoyo.com/takumi/combo/box/api/config/porte-cn/porte">https://devapi-static.mihoyo.com/takumi/combo/box/api/config/porte-cn/porte</a><br><br>
      *  Description: Fetches client configuration about the blacklisted device list in the chinese version.<br><br>
      *  Method: GET<br>
      *  Content-Type: application/json<br><br>
@@ -70,7 +70,7 @@ public final class Box implements Response {
     }
 
     /**
-     *  Source: <a href="https://sdk-static.mihoyo.com/combo/box/api/config/porte-os/kibana_box">https://sdk-static.mihoyo.com/combo/box/api/config/porte-os/kibana_box</a><br><br>
+     *  Source: <a href="https://devapi-static.mihoyo.com/takumi/combo/box/api/config/porte-os/kibana_box">https://devapi-static.mihoyo.com/takumi/combo/box/api/config/porte-os/kibana_box</a><br><br>
      *  Description: Fetches client configuration about the kibana box.<br><br>
      *  Method: GET<br>
      *  Content-Type: application/json<br><br>
@@ -82,6 +82,10 @@ public final class Box implements Response {
      */
     @GetMapping(value = "porte-os/kibana_box")
     public ResponseEntity<LinkedHashMap<String, Object>> SendKibanaBox(String appId, String platform) throws JsonProcessingException {
+        if(!Application.getPropertiesInfo().app_ids.isEmpty() && !Application.getPropertiesInfo().app_ids.contains(appId)) {
+            return ResponseEntity.ok(this.makeResponse(Retcode.RETCODE_COMBO_INVALID_KEY, "RetCode_InvalidKey", null));
+        }
+
         if(!platform.equals("android") && !platform.equals("ios")) {
             return ResponseEntity.ok(this.makeResponse(Retcode.RETCODE_COMBO_INVALID_MODULE, "RetCode_InvalidModule", null));
         }
@@ -98,7 +102,7 @@ public final class Box implements Response {
     }
 
     /**
-     *  Source: <a href="https://sdk-static.mihoyo.com/combo/box/api/config/sdk/combo">https://sdk-static.mihoyo.com/combo/box/api/config/sdk/combo</a><br><br>
+     *  Source: <a href="https://devapi-static.mihoyo.com/takumi/combo/box/api/config/sdk/combo">https://devapi-static.mihoyo.com/takumi/combo/box/api/config/sdk/combo</a><br><br>
      *  Description: Fetches client configuration about telemetry logging, real person verification, OAID and more.<br><br>
      *  Method: GET<br>
      *  Content-Type: application/json<br><br>
@@ -212,7 +216,7 @@ public final class Box implements Response {
     }
 
     /**
-     *  Source: <a href="https://sdk-static.mihoyo.com/combo/box/api/config/sw/precache">https://sdk-static.mihoyo.com/combo/box/api/config/sw/precache</a><br><br>
+     *  Source: <a href="https://devapi-static.mihoyo.com/takumi/combo/box/api/config/sw/precache">https://devapi-static.mihoyo.com/takumi/combo/box/api/config/sw/precache</a><br><br>
      *  Description: Fetches client configuration about the service worker.<br><br>
      *  Method: GET<br>
      *  Content-Type: application/json<br><br>

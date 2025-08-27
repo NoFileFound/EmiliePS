@@ -22,14 +22,14 @@ public final class Risky implements Response {
     private final String[] ACTIONS = {"login", "device_grant", "bind_mobile", "modify_realname", "bind_email"};
 
     /**
-     *  Source: <a href="https://gameapi-account.mihoyo.com/account/risky/api/check">https://gameapi-account.mihoyo.com/account/risky/api/check</a><br><br>
-     *  Description: Determines should the client do a captcha or not.<br><br>
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/account/risky/api/check">https://devapi-takumi.mihoyo.com/account/risky/api/check</a><br><br>
+     *  Description: Determines whether the client should perform a captcha.<br><br>
      *  Method: POST<br>
      *  Content-Type: application/json<br><br>
      *  Parameters:<br>
      *        <ul>
-     *          <li>{@code action_type} — The client's action to do.</li>
-     *          <li>{@code api_name} — The client's endpoint redirect.</li>
+     *          <li>{@code action_type} — The client's action type.</li>
+     *          <li>{@code api_name} — The client's action redirect endpoint.</li>
      *          <li>{@code username} — The client's account name. (For login)</li>
      *          <li>{@code mobile} — The client account's phone number (If using mobile endpoint).</li>
      *        </ul>

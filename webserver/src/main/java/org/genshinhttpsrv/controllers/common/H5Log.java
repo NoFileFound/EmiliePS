@@ -23,7 +23,7 @@ public final class H5Log implements Response {
     private final String[] allowedTopics = {"plat_apm_sdk", "plat_explog_sdk_v2", "plat_account_sdk", "plat_crash_sdk"};
 
     /**
-     *  Source: <a href="https://minor-api.mihoyo.com/common/h5log/log/batch">https://minor-api.mihoyo.com/common/h5log/log/batch</a><br><br>
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/common/h5log/log/batch">https://devapi-takumi.mihoyo.com/common/h5log/log/batch</a><br><br>
      *  Description: Uploads the H5 network log.<br><br>
      *  Method: POST<br>
      *  Content-Type: application/json<br><br>

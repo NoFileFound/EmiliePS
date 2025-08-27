@@ -52,6 +52,7 @@ public final class Account {
     private final ArrayList<String> deniedAgreements;
     private final List<String> approvedDevices;
     @Setter private String desktopName;
+    @Setter private Long lastDisconnectionDate;
 
     /**
      * Creates a new account.
@@ -92,6 +93,7 @@ public final class Account {
         this.acceptedAgreements = new ArrayList<>();
         this.deniedAgreements = new ArrayList<>();
         this.approvedDevices = new ArrayList<>(List.of(device_id));
+        this.lastDisconnectionDate = 0L;
 
         this.generateGameToken();
     }

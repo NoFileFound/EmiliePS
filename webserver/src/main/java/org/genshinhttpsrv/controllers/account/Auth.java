@@ -17,13 +17,13 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "account/auth/api", produces = "application/json")
 public final class Auth implements Response {
     /**
-     *  Source: <a href="https://gameapi-account.mihoyo.com/account/auth/api/bindMobile">https://gameapi-account.mihoyo.com/account/auth/api/bindMobile</a><br><br>
-     *  Description: Verifies the captcha and binds the mobile number in the account.<br><br>
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/account/auth/api/bindMobile">https://devapi-takumi.mihoyo.com/account/auth/api/bindMobile</a><br><br>
+     *  Description: Binds the phone number to the account.<br><br>
      *  Method: POST<br>
      *  Content-Type: application/json<br><br>
      *  Parameters:<br>
      *        <ul>
-     *          <li>{@code area_code} — The mobile number's area.</li>
+     *          <li>{@code area_code} — The mobile number's area code.</li>
      *          <li>{@code ticket} — The ticket id.</li>
      *          <li>{@code mobile} — The mobile number.</li>
      *          <li>{@code captcha} — The client's verification code.</li>
@@ -45,7 +45,7 @@ public final class Auth implements Response {
         }
 
         var myTicket = DBUtils.findTicketById(body.ticket);
-        if(myTicket == null) {
+        if(myTicket == null || (!myTicket.getType().equals("bind_mobile") && !myTicket.getType().equals("bind_safemobile"))) {
             return ResponseEntity.ok(this.makeResponse(Retcode.RET_SYSTEM_ERROR, Application.getTranslationManager().get(lang, "retcode_system_error"), null));
         }
 
@@ -69,12 +69,13 @@ public final class Auth implements Response {
         myTicket.delete();
         myAccount.save();
 
+        Application.getLogger().debug(Application.getTranslationManager().get("console", "bind_mobile_action_completed", myAccount.getEmailAddress()));
         return ResponseEntity.ok(this.makeResponse(Retcode.RETCODE_SUCC, "OK", null));
     }
 
     /**
-     *  Source: <a href="https://gameapi-account.mihoyo.com/account/auth/api/bindRealname">https://gameapi-account.mihoyo.com/account/auth/api/bindRealname</a><br><br>
-     *  Description: Binds the real name and identity card in the account.<br><br>
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/account/auth/api/bindRealname">https://devapi-takumi.mihoyo.com/account/auth/api/bindRealname</a><br><br>
+     *  Description: Binds the real name and identity card to the account.<br><br>
      *  Method: POST<br>
      *  Content-Type: application/json<br><br>
      *  Parameters:<br>
@@ -106,6 +107,10 @@ public final class Auth implements Response {
             }
         }
 
+        if(!body.identity.matches("^[1-9]\\d{5}(19\\d{2}|20\\d{2})(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01])\\d{3}[\\dXx]$")) {
+            return ResponseEntity.ok(this.makeResponse(Retcode.RET_PARAMETER_ERROR, Application.getTranslationManager().get(lang, "retcode_identity_card_invalid"), null));
+        }
+
         var myTicket = DBUtils.findTicketById(body.ticket);
         if(myTicket == null || !myTicket.getType().equals("bind_realname")) {
             return ResponseEntity.ok(this.makeResponse(Retcode.RET_SYSTEM_ERROR, Application.getTranslationManager().get(lang, "retcode_system_error"), null));
@@ -123,6 +128,7 @@ public final class Auth implements Response {
         myTicket.delete();
         myAccount.save();
 
+        Application.getLogger().debug(Application.getTranslationManager().get("console", "bind_realname_action_completed", myAccount.getEmailAddress()));
         return ResponseEntity.ok(this.makeResponse(Retcode.RETCODE_SUCC, "OK", new LinkedHashMap<>() {{
             put("realname_operation", "completed");
             put("uid", myAccount.get_id());
@@ -134,8 +140,8 @@ public final class Auth implements Response {
     }
 
     /**
-     *  Source: <a href="https://gameapi-account.mihoyo.com/account/auth/api/modifyRealname">https://gameapi-account.mihoyo.com/account/auth/api/modifyRealname</a><br><br>
-     *  Description: Modifies the real name and identity card in the account.<br><br>
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/account/auth/api/modifyRealname">https://devapi-takumi.mihoyo.com/account/auth/api/modifyRealname</a><br><br>
+     *  Description: Modifies the real name and identity card associated with the account.<br><br>
      *  Method: POST<br>
      *  Content-Type: application/json<br><br>
      *  Parameters:<br>
@@ -165,6 +171,10 @@ public final class Auth implements Response {
                 Application.getLogger().error(Application.getTranslationManager().get("console", "unable_to_decrypt_password", request.getRemoteAddr(), "mdk/shield/login"));
                 return ResponseEntity.ok(this.makeResponse(Retcode.RET_SYSTEM_ERROR, Application.getTranslationManager().get(lang, "retcode_system_error"), null));
             }
+        }
+
+        if(!body.identity_card.matches("^[1-9]\\d{5}(19\\d{2}|20\\d{2})(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01])\\d{3}[\\dXx]$")) {
+            return ResponseEntity.ok(this.makeResponse(Retcode.RET_PARAMETER_ERROR, Application.getTranslationManager().get(lang, "retcode_identity_card_invalid"), null));
         }
 
         var myTicket = DBUtils.findTicketById(body.action_ticket);

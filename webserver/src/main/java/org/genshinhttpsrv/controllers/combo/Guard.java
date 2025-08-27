@@ -22,7 +22,7 @@ public final class Guard implements Response {
     @Getter private static final Map<String, Instant> ipStartTimes2 = new ConcurrentHashMap<>();
 
     /**
-     *  Source: <a href="https://hk4e-sdk.mihoyo.com/hk4e_cn/combo/guard/api/ping">https://hk4e-sdk.mihoyo.com/hk4e_cn/combo/guard/api/ping</a><br><br>
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/combo/guard/api/ping">https://devapi-takumi.mihoyo.com/combo/guard/api/ping</a><br><br>
      *  Description: Checks if the player is playing too long (Anti addiction api, available only in chinese version).<br><br>
      *  Method: POST<br>
      *  Content-Type: application/json<br>
@@ -55,7 +55,7 @@ public final class Guard implements Response {
     }
 
     /**
-     *  Source: <a href="https://hk4e-sdk.mihoyo.com/hk4e_cn/combo/guard/api/ping2">https://hk4e-sdk.mihoyo.com/hk4e_cn/combo/guard/api/ping2</a><br><br>
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/combo/guard/api/ping2">https://devapi-takumi.mihoyo.com/combo/guard/api/ping2</a><br><br>
      *  Description: Checks if the player is playing too long (Anti addiction api, available only in chinese version).<br><br>
      *  Method: POST<br>
      *  Content-Type: application/json<br>

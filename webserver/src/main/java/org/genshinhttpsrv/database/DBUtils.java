@@ -4,7 +4,6 @@ package org.genshinhttpsrv.database;
 import static dev.morphia.query.experimental.filters.Filters.eq;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +11,6 @@ import lombok.Getter;
 import org.bson.Document;
 import org.genshinhttpsrv.Application;
 import org.genshinhttpsrv.database.collections.Account;
-import org.genshinhttpsrv.database.collections.Experiment;
 import org.genshinhttpsrv.database.collections.Ticket;
 import org.genshinhttpsrv.libraries.JsonLoader;
 
@@ -58,29 +56,32 @@ public final class DBUtils {
     }
 
     /**
+     * Searches for account by given thirdparty registration.
+     * @param displayName The display name in the thirdparty app.
+     * @param type The thirdparty app.
+     * @return An account if exist or else null.
+     */
+    public static Account findAccountByThirdParty(String displayName, String type) {
+        switch (type) {
+            case "Twitter" -> DBManager.getDataStore().find(Account.class).filter(eq("twitterName", displayName)).first();
+            case "Facebook" -> DBManager.getDataStore().find(Account.class).filter(eq("facebookName", displayName)).first();
+            case "Apple" -> DBManager.getDataStore().find(Account.class).filter(eq("appleName", displayName)).first();
+            case "Google" -> DBManager.getDataStore().find(Account.class).filter(eq("googleName", displayName)).first();
+            case "Sony" -> DBManager.getDataStore().find(Account.class).filter(eq("sonyName", displayName)).first();
+            case "Steam" -> DBManager.getDataStore().find(Account.class).filter(eq("steamName", displayName)).first();
+            case "TapTap" -> DBManager.getDataStore().find(Account.class).filter(eq("tapName", displayName)).first();
+            case "GameCenter" -> DBManager.getDataStore().find(Account.class).filter(eq("gameCenterName", displayName)).first();
+        }
+        return DBManager.getDataStore().find(Account.class).filter(eq("cxName", displayName)).first();
+    }
+
+    /**
      * Searches for account by given game token in the database.
      * @param gameToken The given game token.
      * @return An account if exist or else null.
      */
     public static Account findAccountByToken(String gameToken) {
         return DBManager.getDataStore().find(Account.class).filter(eq("gameToken", gameToken)).first();
-    }
-
-    /**
-     * Searches for experiments by given scene ids.
-     * @param scene_id The given scene id.
-     * @return The list of experiments.
-     */
-    public static List<Experiment> findAllExperiments(String scene_id) {
-        List<String> scenes = new ArrayList<>(Arrays.asList(scene_id.split(",")));
-        List<Experiment> experimentsList = new ArrayList<>();
-
-        for(String scene : scenes) {
-            List<Experiment> tmp = DBManager.getDataStore().find(Experiment.class).filter(eq("config_id", scene)).stream().toList();
-            experimentsList.addAll(tmp);
-        }
-
-        return experimentsList;
     }
 
     /**

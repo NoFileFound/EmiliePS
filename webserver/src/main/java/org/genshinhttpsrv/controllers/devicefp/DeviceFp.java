@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "device-fp/api", produces = "application/json")
 public final class DeviceFp implements Response {
     /**
-     *  Source: <a href="https://public-data-api.mihoyo.com/device-fp/api/getExtList">https://public-data-api.mihoyo.com/device-fp/api/getExtList</a><br><br>
+     *  Source: <a href="https://devop-data-takumi.mihoyo.com/device-fp/api/getExtList">https://devop-data-takumi.mihoyo.com/device-fp/api/getExtList</a><br><br>
      *  Description: Fetches information about the device extensions and package string.<br><br>
      *  Methods: GET<br>
      *  Content-Type: application/json<br><br>
@@ -60,7 +60,7 @@ public final class DeviceFp implements Response {
     }
 
     /**
-     * Source: <a href="https://public-data-api.mihoyo.com/device-fp/api/getFp">https://public-data-api.mihoyo.com/device-fp/api/getFp</a><br><br>
+     * Source: <a href="https://devop-data-takumi.mihoyo.com/device-fp/api/getFp">https://devop-data-takumi.mihoyo.com/device-fp/api/getFp</a><br><br>
      *  Description: Checks if the device fingerprint is valid and extensions are given.<br><br>
      *  Methods: POST<br>
      *  Content-Type: application/json<br><br>

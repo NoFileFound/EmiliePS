@@ -23,7 +23,7 @@ public final class Device implements Response {
     private final Map<String, String> temporarilyDevicesInfo = new HashMap<>();
 
     /**
-     *  Source: <a href="https://gameapi-account.mihoyo.com/account/device/api/preGrantByGame">https://gameapi-account.mihoyo.com/account/device/api/preGrantByGame</a><br><br>
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/account/device/api/preGrantByGame">https://devapi-takumi.mihoyo.com/account/device/api/preGrantByGame</a><br><br>
      *  Description: Sends email or SMS notification about new device entrance with a code.<br><br>
      *  Method: POST<br>
      *  Content-Type: application/json<br><br>
@@ -101,7 +101,7 @@ public final class Device implements Response {
     }
 
     /**
-     *  Source: <a href="https://gameapi-account.mihoyo.com/account/device/api/preGrantByTicket">https://gameapi-account.mihoyo.com/account/device/api/preGrantByTicket</a><br><br>
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/account/device/api/preGrantByTicket">https://devapi-takumi.mihoyo.com/account/device/api/preGrantByTicket</a><br><br>
      *  Description: Sends email or SMS notification about new device entrance with a code.<br><br>
      *  Method: POST<br>
      *  Content-Type: application/json<br><br>
@@ -183,7 +183,7 @@ public final class Device implements Response {
     }
 
     /**
-     *  Source: <a href="https://gameapi-account.mihoyo.com/account/device/api/grant">https://gameapi-account.mihoyo.com/account/device/api/grant</a><br><br>
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/account/device/api/grant">https://devapi-takumi.mihoyo.com/account/device/api/grant</a><br><br>
      *  Description: Sends email or SMS notification about new device entrance with a code.<br><br>
      *  Method: POST<br>
      *  Content-Type: application/json<br><br>

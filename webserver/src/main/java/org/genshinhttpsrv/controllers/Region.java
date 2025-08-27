@@ -273,6 +273,24 @@ public final class Region {
         }
     }
 
+    /**
+     *  Source: <a href="https://dispatchosglobal.yuanshen.com/query_security_file">https://dispatchosglobal.yuanshen.com/query_security_file</a><br><br>
+     *  Description: Fetches the dispatch's security key.<br><br>
+     *  Method: GET<br>
+     *  Content-Type: application/json<br><br>
+     *  Parameters:<br>
+     *        <ul>
+     *          <li>{@code file_key} — The client's game version.</li>
+     *        </ul>
+     */
+    @GetMapping(value = "query_security_file")
+    public String SendQuerySecurityFile(String file_key) {
+        if (file_key == null || Stream.of(this.SUPPORTED_VERSIONS).noneMatch(file_key::startsWith)) {
+            return "";
+        }
+        return new String(EncryptionManager.getDispatchSecurityKey());
+    }
+
 
     // Methods
     public <T> T apply(T obj, Consumer<T> consumer) {

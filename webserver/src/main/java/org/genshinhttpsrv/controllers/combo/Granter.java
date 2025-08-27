@@ -22,10 +22,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(value = {"hk4e_global/combo/granter", "hk4e_cn/combo/granter", "combo/granter"}, produces = "application/json")
+@RequestMapping(value = {"hk4e_global/combo/granter", "hk4e_cn/combo/granter", "combo/granter", "takumi/hk4e_global/combo/granter", "takumi/hk4e_cn/combo/granter", "takumi/combo/granter"}, produces = "application/json")
 public final class Granter implements Response {
     /**
-     *  Source: <a href="https://hk4e-sdk.mihoyo.com/combo/granter/api/getConfig">https://hk4e-sdk.mihoyo.com/combo/granter/api/getConfig</a><br><br>
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/combo/granter/api/getConfig">https://devapi-takumi.mihoyo.com/combo/granter/api/getConfig</a><br><br>
      *  Description: Fetches configuration about the game.<br><br>
      *  Method: GET<br>
      *  Content-Type: application/json<br><br>
@@ -79,7 +79,7 @@ public final class Granter implements Response {
     }
 
     /**
-     *  Source: <a href="https://hk4e-sdk.mihoyo.com/combo/granter/api/getDynamicClientConfig">https://hk4e-sdk.mihoyo.com/combo/granter/api/getDynamicClientConfig</a><br><br>
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/combo/granter/api/getDynamicClientConfig">https://devapi-takumi.mihoyo.com/combo/granter/api/getDynamicClientConfig</a><br><br>
      *  Description: Fetches dynamic configuration about the game.<br><br>
      *  Method: GET<br>
      *  Content-Type: application/json<br><br>
@@ -100,7 +100,7 @@ public final class Granter implements Response {
     }
 
     /**
-     *  Source: <a href="https://hk4e-sdk.mihoyo.com/combo/granter/api/getFont">https://hk4e-sdk.mihoyo.com/combo/granter/api/getFont</a><br><br>
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/combo/granter/api/getFont">https://devapi-takumi.mihoyo.com/combo/granter/api/getFont</a><br><br>
      *  Description: Fetches the game fonts for special languages like chinese and japanese.<br><br>
      *  Method: GET<br>
      *  Content-Type: application/json<br><br>
@@ -140,7 +140,7 @@ public final class Granter implements Response {
     }
 
     /**
-     *  Source: <a href="https://hk4e-sdk.mihoyo.com/combo/granter/api/compareProtocolVersion">https://hk4e-sdk.mihoyo.com/combo/granter/api/compareProtocolVersion</a><br><br>
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/combo/granter/api/getProtocol">https://devapi-takumi.mihoyo.com/combo/granter/api/getProtocol</a><br><br>
      *  Description: Fetches information about the API protocol version.<br><br>
      *  Methods: GET, POST<br>
      *  Content-Type: application/json<br><br>
@@ -187,70 +187,7 @@ public final class Granter implements Response {
     }
 
     /**
-     *  Source: <a href="https://hk4e-sdk.mihoyo.com/combo/granter/login/v2/login">https://hk4e-sdk.mihoyo.com/combo/granter/login/v2/login</a><br><br>
-     *  Description: Verifies the login process.<br><br>
-     *  Method: POST<br>
-     *  Content-Type: application/json<br><br>
-     *  Parameters:<br>
-     *        <ul>
-     *          <li>{@code app_id} — The application id.</li>
-     *          <li>{@code channel_id} — The client's channel id.</li>
-     *          <li>{@code data} — The provided information needed for verification, like user id and variable to check if its guest.</li>
-     *          <li>{@code device} — The client's device id..</li>
-     *          <li>{@code sign} — The signature to check if the provided data is correct.</li>
-     *        </ul>
-     *  Headers:
-     *        <ul>
-     *          <li>{@code x-rpc-language} — The client's system language iso2 code.</li>
-     *        </ul>
-     */
-    @PostMapping(value = {"login/login", "login/v2/login"})
-    public ResponseEntity<LinkedHashMap<String, Object>> SendLogin(@RequestBody LoginModel body, @RequestHeader(value = "x-rpc-language", required = false) String lang, HttpServletRequest request) throws JsonProcessingException {
-        if(body.app_id != ApplicationId.APP_GENSHIN && body.app_id != ApplicationId.APP_3NNN && body.app_id != ApplicationId.APP_CLOUDPLATFORM) {
-            return ResponseEntity.ok(this.makeResponse(Retcode.RET_PARAMETER_ERROR, Application.getTranslationManager().get(lang, "retcode_parameter_error"), null));
-        }
-
-        if(body.channel_id == ChannelType.CHANNEL_UNKNOWN) {
-            return ResponseEntity.ok(this.makeResponse(Retcode.RET_PARAMETER_ERROR, Application.getTranslationManager().get(lang, "retcode_parameter_error"), null));
-        }
-
-        JsonNode data_node = JsonLoader.parseJsonSafe(body.data);
-        if(data_node == null || !data_node.has("uid") || !data_node.has("guest")) {
-            return ResponseEntity.ok(this.makeResponse(Retcode.RET_PARAMETER_ERROR, Application.getTranslationManager().get(lang, "retcode_parameter_error"), null));
-        }
-
-        String hmacSign = EncryptionManager.generateHMAC(String.format("app_id=%s&channel_id=%s&data=%s&device=%s", body.app_id.getValue(), body.channel_id.getValue(), body.data, body.device), !request.getRequestURL().toString().contains("hk4e_cn"));
-        if(hmacSign == null || !hmacSign.equals(body.sign)) {
-            return ResponseEntity.ok(this.makeResponse(Retcode.RET_CONFIGURATION_ERROR, Application.getTranslationManager().get(lang, "retcode_signature_error"), null));
-        }
-
-        Long uid = data_node.get("uid").asLong();
-        String guest = data_node.get("guest").asText();
-        var myAccount = DBUtils.findAccountById(uid);
-
-        if(myAccount == null || (guest.equals("true") && !myAccount.getIsGuest()) || (data_node.has("token") && !myAccount.getGameToken().equals(data_node.get("token").asText()))) {
-            return ResponseEntity.ok(this.makeResponse(Retcode.RET_LOGIN_NETWORK_AT_RISK, Application.getTranslationManager().get(lang, "retcode_network_at_risk"), null));
-        }
-
-        LinkedHashMap<String, Object> data = new LinkedHashMap<>();
-        data.put("combo_id", "0");
-        data.put("open_id", String.valueOf(myAccount.get_id()));
-        data.put("combo_token", EncryptionManager.md5Encode(myAccount.getGameToken()));
-        data.put("data", JsonLoader.toJson(new LinkedHashMap<>() {{
-            put("guest", guest);
-            put("country", data_node.has("country_code") ? data_node.get("country_code").asText() : myAccount.getCountryCode());
-            if(data_node.has("is_new_register")) put("is_new_register", data_node.get("is_new_register").asBoolean());
-            if(data_node.has("ps_account_id")) put("ps_account_id", data_node.get("ps_account_id").asText());
-            if(data_node.has("online_id")) put("online_id", data_node.get("online_id").asText());
-        }}));
-        data.put("heartbeat", Application.getPropertiesInfo().enable_heartbeat);
-        data.put("account_type", (guest.equals("true") ? AccountType.ACCOUNT_GUEST.getValue() : AccountType.ACCOUNT_NORMAL.getValue()));
-        data.put("fatigue_remind", (myAccount.getFatigueRemind() == null) ? null : JsonLoader.toJson(myAccount.getFatigueRemind()));
-        return ResponseEntity.ok(this.makeResponse(Retcode.RETCODE_SUCC, "OK", data));
-    }
-
-    /**
-     *  Source: <a href="https://hk4e-sdk.mihoyo.com/combo/granter/login/beforeVerify">https://hk4e-sdk.mihoyo.com/combo/granter/login/beforeVerify</a><br><br>
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/combo/granter/login/beforeVerify">https://devapi-takumi.mihoyo.com/combo/granter/login/beforeVerify</a><br><br>
      *  Description: Fetches the account's additional security features.<br><br>
      *  Method: POST<br>
      *  Content-Type: application/json<br><br>
@@ -289,6 +226,97 @@ public final class Granter implements Response {
         }}));
     }
 
+    /**
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/combo/granter/login/v2/login">https://devapi-takumi.mihoyo.com/combo/granter/login/v2/login</a><br><br>
+     *  Description: Verifies the login process.<br><br>
+     *  Method: POST<br>
+     *  Content-Type: application/json<br><br>
+     *  Parameters:<br>
+     *        <ul>
+     *          <li>{@code app_id} — The application id.</li>
+     *          <li>{@code channel_id} — The client's channel id.</li>
+     *          <li>{@code data} — The provided information needed for verification, like user id and variable to check if its guest.</li>
+     *          <li>{@code device} — The client's device id..</li>
+     *          <li>{@code sign} — The signature to check if the provided data is correct.</li>
+     *        </ul>
+     *  Headers:
+     *        <ul>
+     *          <li>{@code x-rpc-language} — The client's system language iso2 code.</li>
+     *        </ul>
+     */
+    @PostMapping(value = {"login/login", "login/v2/login"})
+    public ResponseEntity<LinkedHashMap<String, Object>> SendLogin(@RequestBody LoginModel body, @RequestHeader(value = "x-rpc-language", required = false) String lang, HttpServletRequest request) throws JsonProcessingException {
+        if(body.app_id != ApplicationId.APP_GENSHIN && body.app_id != ApplicationId.APP_3NNN && body.app_id != ApplicationId.APP_CLOUDPLATFORM) {
+            return ResponseEntity.ok(this.makeResponse(Retcode.RET_PARAMETER_ERROR, Application.getTranslationManager().get(lang, "retcode_parameter_error"), null));
+        }
+
+        if(body.channel_id == ChannelType.CHANNEL_UNKNOWN) {
+            return ResponseEntity.ok(this.makeResponse(Retcode.RET_PARAMETER_ERROR, Application.getTranslationManager().get(lang, "retcode_parameter_error"), null));
+        }
+
+        JsonNode data_node = JsonLoader.parseJsonSafe(body.data);
+        if(data_node == null || !data_node.has("uid") || !data_node.has("guest")) {
+            return ResponseEntity.ok(this.makeResponse(Retcode.RET_PARAMETER_ERROR, Application.getTranslationManager().get(lang, "retcode_parameter_error"), null));
+        }
+
+        String hmacSign = EncryptionManager.generateComboSignature(String.format("app_id=%s&channel_id=%s&data=%s&device=%s", body.app_id.getValue(), body.channel_id.getValue(), body.data, body.device), !request.getRequestURL().toString().contains("hk4e_cn"));
+        if(hmacSign == null || !hmacSign.equals(body.sign)) {
+            return ResponseEntity.ok(this.makeResponse(Retcode.RET_CONFIGURATION_ERROR, Application.getTranslationManager().get(lang, "retcode_signature_error"), null));
+        }
+
+        Long uid = data_node.get("uid").asLong();
+        String guest = data_node.get("guest").asText();
+        var myAccount = DBUtils.findAccountById(uid);
+
+        if(myAccount == null || (guest.equals("true") && !myAccount.getIsGuest()) || (data_node.has("token") && !myAccount.getGameToken().equals(data_node.get("token").asText()))) {
+            return ResponseEntity.ok(this.makeResponse(Retcode.RET_LOGIN_NETWORK_AT_RISK, Application.getTranslationManager().get(lang, "retcode_network_at_risk"), null));
+        }
+
+        LinkedHashMap<String, Object> data = new LinkedHashMap<>();
+        data.put("combo_id", "0");
+        data.put("open_id", String.valueOf(myAccount.get_id()));
+        data.put("combo_token", EncryptionManager.md5Encode(myAccount.getGameToken()));
+        data.put("data", JsonLoader.toJson(new LinkedHashMap<>() {{
+            put("guest", guest);
+            put("country", data_node.has("country_code") ? data_node.get("country_code").asText() : myAccount.getCountryCode());
+            if(data_node.has("is_new_register")) put("is_new_register", data_node.get("is_new_register").asBoolean());
+            if(data_node.has("ps_account_id")) put("ps_account_id", data_node.get("ps_account_id").asText());
+            if(data_node.has("online_id")) put("online_id", data_node.get("online_id").asText());
+        }}));
+        data.put("heartbeat", Application.getPropertiesInfo().enable_heartbeat);
+        data.put("account_type", (guest.equals("true") ? AccountType.ACCOUNT_GUEST.getValue() : AccountType.ACCOUNT_NORMAL.getValue()));
+        data.put("fatigue_remind", (myAccount.getFatigueRemind() == null) ? null : JsonLoader.toJson(myAccount.getFatigueRemind()));
+        return ResponseEntity.ok(this.makeResponse(Retcode.RETCODE_SUCC, "OK", data));
+    }
+
+    /**
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/combo/granter/login/webLogin">https://devapi-takumi.mihoyo.com/combo/granter/login/webLogin</a><br><br>
+     *  Description: Verifies the login process.<br><br>
+     *  Method: POST<br>
+     *  Content-Type: application/json<br><br>
+     *  Parameters:<br>
+     *        <ul>
+     *          <li>{@code app_id} — The application id.</li>
+     *          <li>{@code channel_id} — The client's channel id.</li>
+     *        </ul>
+     *  Headers:
+     *        <ul>
+     *          <li>{@code x-rpc-language} — The client's system language iso2 code.</li>
+     *        </ul>
+     */
+    @PostMapping(value = "login/webLogin")
+    public ResponseEntity<LinkedHashMap<String, Object>> SendWebLogin(@RequestBody WebLoginModel body, @RequestHeader(value = "x-rpc-language", required = false) String lang) {
+        if(body.app_id != ApplicationId.APP_GENSHIN && body.app_id != ApplicationId.APP_3NNN && body.app_id != ApplicationId.APP_CLOUDPLATFORM) {
+            return ResponseEntity.ok(this.makeResponse(Retcode.RET_PARAMETER_ERROR, Application.getTranslationManager().get(lang, "retcode_parameter_error"), null));
+        }
+
+        if(body.channel_id == ChannelType.CHANNEL_UNKNOWN) {
+            return ResponseEntity.ok(this.makeResponse(Retcode.RET_PARAMETER_ERROR, Application.getTranslationManager().get(lang, "retcode_parameter_error"), null));
+        }
+
+        return ResponseEntity.ok(this.makeResponse(Retcode.RET_LOGIN_INVALID_ACCOUNT, Application.getTranslationManager().get(lang, "retcode_community_unavailable"), null));
+    }
+
 
     // Classes
     public static class BeforeVerifyModel {
@@ -310,5 +338,10 @@ public final class Granter implements Response {
         public String data;
         public String device;
         public String sign;
+    }
+
+    public static class WebLoginModel {
+        public ApplicationId app_id;
+        public ChannelType channel_id;
     }
 }

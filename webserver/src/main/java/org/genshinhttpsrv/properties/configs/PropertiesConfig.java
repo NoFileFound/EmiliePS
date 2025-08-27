@@ -75,6 +75,7 @@ public final class PropertiesConfig implements Property {
         public KibanaBoxMobile kibanabox_mobile = new KibanaBoxMobile();
         public ComboConfig combo_config = new ComboConfig();
         public ArrayList<MarketingAgreement> marketing_agreements = new ArrayList<>();
+        public ArrayList<String> app_ids = new ArrayList<>();
         public SwitchStatus switch_status_map = new SwitchStatus();
 
 

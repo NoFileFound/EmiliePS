@@ -6,8 +6,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum RegionType {
     REGION_UNKNOWN(""),
     REGION_CHINA("hk4e_cn"),
-    REGION_OVERSEAS("hk4e_global"),
-    REGION_DEV("takumi");
+    REGION_OVERSEAS("hk4e_global");
 
     private final String value;
     RegionType(String value) {

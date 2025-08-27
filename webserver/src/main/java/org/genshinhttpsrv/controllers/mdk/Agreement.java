@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = {"hk4e_global/mdk/agreement/api", "mdk/agreement/api"}, produces = "application/json")
 public final class Agreement implements Response {
     /**
-     *  Source: <a href="https://hk4e-sdk-os.hoyoverse.com/mdk/agreement/api/getAgreementInfos">https://hk4e-sdk-os.hoyoverse.com/mdk/agreement/api/getAgreementInfos</a><br><br>
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/mdk/agreement/api/getAgreementInfos">https://devapi-takumi.mihoyo.com/mdk/agreement/api/getAgreementInfos</a><br><br>
      *  Description: Fetches the marketing agreements (Available only in overseas version).<br><br>
      *  Method: GET<br>
      *  Content-Type: application/json<br><br>
@@ -54,7 +54,7 @@ public final class Agreement implements Response {
     }
 
     /**
-     *  Source: <a href="https://hk4e-sdk-os.hoyoverse.com/mdk/agreement/api/operateAgreement">https://hk4e-sdk-os.hoyoverse.com/mdk/agreement/api/operateAgreement</a><br><br>
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/mdk/agreement/api/operateAgreement">https://devapi-takumi.mihoyo.com/mdk/agreement/api/operateAgreement</a><br><br>
      *  Description: Operates an agreement (Available only in overseas version).<br><br>
      *  Method: POST<br>
      *  Content-Type: application/json<br><br>

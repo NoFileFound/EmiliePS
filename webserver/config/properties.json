@@ -63,8 +63,8 @@
 		  "models": "TECNO KE5j,TECNO KE5k"
 		}
 	],
-	"server_guest": false,
-	"enable_guest_login": false,
+	"server_guest": true,
+	"enable_guest_login": true,
 	"maximum_guests": 15,
 	"fetch_instance_id": false,
 	"enable_flash_login": false,
@@ -176,6 +176,7 @@
 		}
 	},
 	"marketing_agreements": [],
+	"app_ids": [],
 	"switch_status_map": {
 		"enable_ui_v2": true,
 		"ui_v2_disabled_versions": [],

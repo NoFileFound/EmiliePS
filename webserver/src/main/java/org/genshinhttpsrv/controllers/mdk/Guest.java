@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = {"hk4e_global/mdk/guest/guest","hk4e_cn/mdk/guest/guest","mdk/guest/guest"}, produces = "application/json")
 public final class Guest implements Response {
     /**
-     *  Source: <a href="https://hk4e-sdk.mihoyo.com/mdk/guest/guest/v2/login">https://hk4e-sdk.mihoyo.com/mdk/guest/guest/v2/login</a><br><br>
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/mdk/guest/guest/v2/login">https://devapi-takumi.mihoyo.com/mdk/guest/guest/v2/login</a><br><br>
      *  Description: Processes a guest login.<br><br>
      *  Method: POST<br>
      *  Content-Type: application/json<br><br>
@@ -50,9 +50,9 @@ public final class Guest implements Response {
             return ResponseEntity.ok(this.makeResponse(Retcode.RET_PARAMETER_ERROR, Application.getTranslationManager().get(lang, "retcode_parameter_error"), null));
         }
 
-        String hmacSign = EncryptionManager.generateHMAC(String.format("game_key=%s&client=%s&device=%s", body.game_key.getValue(), body.client.getValue(), body.device), !request.getRequestURL().toString().contains("hk4e_cn"));
+        String hmacSign = EncryptionManager.generateMDKSignature(String.format("%s%s%s", body.client.getValue(), body.device, body.game_key.getValue()), !request.getRequestURL().toString().contains("hk4e_cn"));
         if(hmacSign == null || !hmacSign.equals(body.sign)) {
-            /// TODO: return ResponseEntity.ok(this.makeResponse(Retcode.RET_CONFIGURATION_ERROR, Application.getTranslationManager().get("retcode_signature_error"), null));
+            return ResponseEntity.ok(this.makeResponse(Retcode.RET_CONFIGURATION_ERROR, Application.getTranslationManager().get(lang, "retcode_signature_error"), null));
         }
 
         if(DBManager.getDataStore().getDatabase().getCollection("guests").countDocuments() > Application.getPropertiesInfo().maximum_guests) {
