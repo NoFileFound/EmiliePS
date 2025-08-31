@@ -1,2 +1,2 @@
 syntax = "proto3";
-option java_package = "org.genshinhttpsrv.protobuf";
+option java_package = "generated.emilieps.protobuf";
