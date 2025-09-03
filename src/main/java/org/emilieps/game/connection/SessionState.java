@@ -1,9 +1,9 @@
 package org.emilieps.game.connection;
 
 public enum SessionState {
-    INACTIVE,
+    CLOSED,
     WAITING_FOR_TOKEN,
     WAITING_FOR_LOGIN,
-    PICKING_CHARACTER,
+    WAITING_FOR_PICKING_CHARACTER,
     ACTIVE
 }

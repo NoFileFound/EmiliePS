@@ -1,0 +1,10 @@
+{
+	"database_url": "mongodb://localhost:27017",
+	"collection_name": "genshin69",
+	"applicationType": "BOTH",
+	"blacklist_ips": [],
+	"whitelist_ips": [],
+	"enable_encryption": true,
+	"is_debug": true,
+	"is_debug_packets": false
+}

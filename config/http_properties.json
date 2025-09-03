@@ -1,0 +1,344 @@
+{
+  "geetest": {
+    "gt": "",
+    "private_key": ""
+  },
+  "enable_qrcode_login": true,
+  "announcement_url": "https://sdk.mihoyo.com/hk4e/announcement/index.html?sdk_presentation_style=fullscreen&sdk_screen_transparent=true&auth_appid=announcement&authkey_ver=1&game_biz=hk4e_cn&sign_type=2&version=2.40&game=hk4e#/",
+  "push_alias_type": 1,
+  "ignore_versions": "",
+  "disable_ysdk_guard": false,
+  "enable_announce_pic_popup": true,
+  "disable_regist": false,
+  "enable_heartbeat": true,
+  "heartbeat_internal": 80,
+  "disable_mmt": true,
+  "enable_ps_bind_account": true,
+  "initialize_firebase": true,
+  "firebase_blacklist_devices_switch": true,
+  "firebase_blacklist_devices_version": 1,
+  "firebase_blacklist_devices": [
+    {
+      "firm": "vivo",
+      "models": "V2111,V2207,V2038,V2043,V2048,V2254,V2252,V2203,V2069,V2039,V2068,vivo 2019,V2062,V2027,V2032,V2134,V2102"
+    },
+    {
+      "firm": "samsung",
+      "models": "SM-A037F,SM-A037F/DS,SM-A037M,SM-A037G,SM-A037U,SM-S134DL,SM-A037W, SM-A037U1,SM-A035F,SM-A035F/DS,SM-A035M, SM-A035G,SM-A217F,SM-A217F/DS,SM-A217F/DSN,SM-A217M,SM-A217M/DS,SM-A217N,SM-A042F,SM-A042F/DS,SM-A042M,SM-A042M/DS,SM-T225,SM-T220,SM-T225N,SM-T227U,SM-A045F,SM-A045F/DS,SM-A045M,SM-T500,SM-T505,SM-T505N,SM-M127F,SM-F127G,SM-M127G,SM-M127F/DSN,SM-A415F/DSN,SM-A415F/DSM,SM-A415F,SM-A415F/DS,SCV48,SC-41A"
+    },
+    {
+      "firm": "HUAWEI",
+      "models": "SNE-AL00,SNE-LX1,SNE-LX2,SNE-LX3,INE-LX2"
+    },
+    {
+      "firm": "OPPO",
+      "models": "CPH2477,CPH2269,CPH2127,CPH2131,CPH2471,CPH2185,CPH1931,CPH1959,CPH1933,CPH1935,CPH1943,CPH1823,CPH1881,CPH1825,CPH2325,CPH2349"
+    },
+    {
+      "firm": "realme",
+      "models": "RMX3261,RMX3263,RMX3624,RMX2180,RMX2195,RMX3193,RMX3191,RMX3201,RMX3501,RMX3506"
+    },
+    {
+      "firm": "Redmi",
+      "models": "M1908C3IC,MZB8255IN,M1908C3IG,M1908C3IH,M1908C3JH,M1908C3JG,M1908C3JI,M1810F6LG,M1810F6LH,M1810F6LI"
+    },
+    {
+      "firm": "Infinix",
+      "models": "Infinix X6517,Infinix X6515,Infinix X688B,Infinix X688C,Infinix X680B, Infinix X680F,Infinix X6816,Infinix X6816C,Infinix X665B,Infinix X665"
+    },
+    {
+      "firm": "motorola",
+      "models": "moto e(7) plus,moto e32,moto g(7) power,moto e40,moto g(8) power lite,moto e(7),moto g(10),motorola one macro,moto g power 2021,moto g(7)"
+    },
+    {
+      "firm": "POCO",
+      "models": "220333QPG"
+    },
+    {
+      "firm": "TECNO",
+      "models": "TECNO KE5j,TECNO KE5k"
+    }
+  ],
+  "server_guest": true,
+  "enable_guest_login": true,
+  "maximum_guests": 15,
+  "fetch_instance_id": false,
+  "enable_flash_login": false,
+  "enable_douyin_flash_login": false,
+  "enable_cx_bind_account": true,
+  "hoyoplay_auth_login": true,
+  "bbs_auth_login": true,
+  "bbs_auth_login_ignore": [],
+  "hoyolab_auth_login": true,
+  "hoyolab_auth_login_ignore": [],
+  "enable_age_gate": true,
+  "enable_age_gate_ignore": [],
+  "thirdparty": [],
+  "thirdparty_ignore": {},
+  "thirdparty_login_configs": {},
+  "functional_switch_configs": {},
+  "logo_eighteenplus": {
+    "enabled": false,
+    "logo_height": 0,
+    "logo_width": 0
+  },
+  "porte_cn_config": {
+    "downgrade": true,
+    "disabledVersionsBelow": 9,
+    "disabledDeviceModels": [
+      "cloud",
+      "arm64",
+      "bilibili",
+      "tap",
+      "ido",
+      "tianyiyun"
+    ]
+  },
+  "httpdns": {
+    "enabled": false,
+    "cache_expire_time": 60,
+    "keep_alive_time": 60
+  },
+  "serviceworker": {
+    "enabled": true,
+    "url": "https://sdk.mihoyo.com/sw.html"
+  },
+  "kibanabox_mobile": {
+    "enabled": true,
+    "minimum_upload_interval": 10,
+    "upload_event_page_size": 50,
+    "minimum_upload_event_trigger_size": 10,
+    "disabled_paths": []
+  },
+  "combo_config": {
+    "enable_apm_sdk": true,
+    "enable_attribution": true,
+    "enable_appsflyer_config": true,
+    "enable_kcp": true,
+    "enable_list_price_tierv2": true,
+    "enable_new_register_page": true,
+    "enable_register_autologin": true,
+    "enable_telemetry_h5log": true,
+    "enable_telemetry_data_upload": true,
+    "enable_user_center_v2": true,
+    "enable_spint_prodqa_realname": true,
+    "enable_os_new_rsa_lib": true,
+    "enable_twitter_v2": true,
+    "enable_web_dpi": true,
+    "email_bind_remind": true,
+    "email_bind_remind_interval": 7,
+    "disable_email_bind_skip": false,
+    "disable_try_verify": false,
+    "console_login_method": 0,
+    "modify_real_name_other_verify": true,
+    "email_register_hide": false,
+    "enable_oaid": true,
+    "oaid_call_hms": true,
+    "oaid_multi_process": true,
+    "oaid_expire_time": {
+      "huawei": 6000,
+      "honor": 6000
+    },
+    "bili_pay_cancel_strings": [
+      "用户取消交易"
+    ],
+    "alipay_recommend": true,
+    "enable_bind_google_sdk_order": true,
+    "enable_google_credential_login": true,
+    "enable_google_cancel_callback": true,
+    "watermark_enable_web_notice": true,
+    "pay_platform_block_h5_cashier": true,
+    "h5_cashier_enable": true,
+    "h5_cashier_timeout": 3,
+    "pay_platform_h5_loading_limit": 3,
+    "enable_available_rom_v2": true,
+    "account_list_page_enable": true,
+    "new_forgotpwd_page_enable": true,
+    "login_flow_notification": true,
+    "pay_payco_centered_host": "bill.payco.com",
+    "crash_capture_enable": true,
+    "webview_rendermethod_config": true,
+    "login_record_config": true,
+    "kibana_pc_config": {
+      "enable": 1,
+      "level": "Debug",
+      "modules": [
+        "download"
+      ]
+    },
+    "network_report_config": {
+      "enable": 1,
+      "status_codes": [
+        206
+      ],
+      "url_paths": [
+        "/dataUpload"
+      ]
+    },
+    "h5log_filter_config": {
+      "function": {
+        "event_name": [
+          "info_get_cps",
+          "notice_close_notice",
+          "info_get_uapc",
+          "report_set_info",
+          "info_get_channel_id",
+          "info_get_sub_channel_id"
+        ]
+      }
+    },
+    "report_black_list": {
+      "key": [
+        "download_update_progress"
+      ]
+    }
+  },
+  "marketing_agreements": [],
+  "app_ids": [],
+  "switch_status_map": {
+    "enable_ui_v2": true,
+    "ui_v2_disabled_versions": [],
+    "enable_apple_login": true,
+    "apple_login_disabled_versions": [],
+    "enable_password_reset_entry": true,
+    "password_reset_entry_disabled_versions": [],
+    "enable_vn_real_name_v2": false,
+    "vn_real_name_v2_disabled_versions": [],
+    "enable_common_question_entry": true,
+    "common_question_entry_disabled_versions": [],
+    "enable_pwd_login_tab": true,
+    "pwd_login_tab_disabled_versions": [],
+    "enable_vn_real_name": false,
+    "vn_real_name_disabled_versions": [],
+    "enable_firebase_return_unmasked_email": false,
+    "firebase_return_unmasked_email_disabled_versions": [],
+    "enable_google_login": true,
+    "google_login_disabled_versions": [],
+    "enable_bind_user_thirdparty_email": true,
+    "bind_user_thirdparty_email_disabled_versions": [],
+    "enable_third_party_bind_email": true,
+    "third_party_bind_email_disabled_versions": [],
+    "enable_bind_thirdparty": false,
+    "bind_thirdparty_disabled_versions": [],
+    "enable_user_name_bind_email": true,
+    "user_name_bind_email_disabled_versions": [],
+    "enable_account_register_tab": true,
+    "account_register_tab_disabled_versions": [],
+    "enable_twitter_login": true,
+    "twitter_login_disabled_versions": [],
+    "enable_facebook_login": true,
+    "facebook_login_disabled_versions": [],
+    "enable_marketing_authorization": false,
+    "marketing_authorization_disabled_versions": []
+  },
+  "email_info": {
+    "smtpHost": "",
+    "smtpPort": 0,
+    "smtpUsername": "",
+    "smtpPassword": ""
+  },
+  "regions": [
+    {
+      "gateserver_name": "os_localhost",
+      "gateserver_title": "Localhost",
+      "gateserver_type": "DEV_PUBLIC",
+      "gateserver_domain_name": "",
+      "gateserver_ip": "127.0.0.1",
+      "gateserver_ipv6_ip": "",
+      "gateserver_port": 8882,
+      "gateserver_version": "5.0.0",
+      "connect_gate_ticket": "EmiliePS2025",
+      "resource_config": {
+        "area_type": "CN",
+        "game_biz": "hk4e_cn",
+        "data_url": "https://autopatchcn.yuanshen.com/client_design_data/5.0_live",
+        "resource_url": "https://autopatchcn.yuanshen.com/client_game_res/5.0_live",
+        "next_resource_url": "https://autopatchcn.yuanshen.com/client_game_res/5.0_live",
+        "resource_url_bak": "5.0_live",
+        "client_data_version": 26487341,
+        "client_silence_data_version": 26368837,
+        "client_version_suffix": "57a90bbd52",
+        "client_silence_version_suffix": "0af120923b",
+        "pay_callback_url": "http://10.101.11.129:22601/recharge",
+        "cdkey_url": "https://public-operation-hk4e.mihoyo.com/common/apicdkey/api/exchangeCdkey?sign_type=2&auth_appid=apicdkey&authkey_ver=1",
+        "privacy_policy_url": "https://user.mihoyo.com/#/about/privacyInGame?app_id=4&lang=zh-cn&biz=hk4e_cn",
+        "account_bind_url": "https://user.mihoyo.com",
+        "official_community_url": "https://act.mihoyo.com/ys/event/community-content-collection/index.html?game_biz=hk4e_cn&sign_type=2&auth_appid=contenthub&authkey_ver=1&utm_source=game&utm_medium=ys&utm_campaign=menu&red_point=2214,2215",
+        "handbook_url": "https://webstatic.mihoyo.com/ys/event/blue-post/index.html?gamewebview=1&page_sn=b480280b939e4bbd&mode=fullscreen&game_biz=hk4e_cn&sign_type=2&auth_appid=bluepost&authkey_ver=1&utm_source=game&utm_medium=ys&utm_campaign=hot",
+        "feedback_url": "https://webstatic.mihoyo.com/csc-service-center-fe/index.html?goToHall=true&sign_type=2&auth_appid=csc&authkey_ver=1&win_direction=portrait&login_type=account&page_id=1",
+        "bulletin_url": "",
+        "user_center_url": "",
+        "client_data_md5": [
+          {
+            "remoteName": "data_versions",
+            "md5": "88a0d1f6825ec3b6aaf9ea39a02f78da",
+            "hash": "a72baf3b5c76f0ac",
+            "fileSize": 68545
+          },
+          {
+            "remoteName": "data_versions_medium",
+            "md5": "9429b4e9dd8cbdaf19c41ff05f18b384",
+            "hash": "a79950c775cf1630",
+            "fileSize": 6662
+          }
+        ],
+        "client_silence_data_md5": {
+          "remoteName": "data_versions",
+          "md5": "8ae3d12ddeffa27349ab306ce05ec0b7",
+          "hash": "ef8cb53633584c7a",
+          "fileSize": 522
+        },
+        "res_version_config": {
+          "re_login": true,
+          "md5": {
+            "remoteName": "base_revision",
+            "md5": "149cad27b543e345df504a496949ec7d",
+            "fileSize": 19
+          },
+          "version": 26458901,
+          "release_total_size": "0",
+          "version_suffix": "befdda25ff",
+          "branch": "5.0_live"
+        },
+        "next_res_version_config": null
+      },
+      "custom_config": {
+        "bilibiliShareTopics": "3219",
+        "cloud_h5_url": "https://webstatic.mihoyo.com/ys/event/e20210830cloud/index.html?mode=fullscreen&game_biz=hk4e_cn",
+        "codeSwitch": [
+          5817
+        ],
+        "douyinShareTopics": "原神",
+        "homeItemFilter": 20,
+        "mtrConfig": {
+          "isOpen": false
+        },
+        "perf_report_config_url": "https://ys-log-upload.mihoyo.com/perf/config/verify",
+        "perf_report_record_url": "https://ys-log-upload.mihoyo.com/perf/dataUpload",
+        "platformCoverSwitch": {
+          "7": [
+            4,
+            5
+          ]
+        },
+        "post_client_data_url": "https://api-takumi.mihoyo.com/common/csc/client/addCliTempInfo?sign_type=2&auth_appid=csc&authkey_ver=1",
+        "reportNetDelayConfig": {
+          "openGateserver": false
+        },
+        "safeOptionalResourceCategories": [
+          1002076,
+          2002076
+        ],
+        "urlCheckConfig": {
+          "isOpen": false
+        }
+      },
+      "maintenance": null
+    }
+  ],
+  "enable_login_pc": true,
+  "custom_config": {
+    "regionConfig": "pm|fk|add",
+    "showexception": true
+  }
+}

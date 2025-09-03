@@ -1,0 +1,258 @@
+package org.emilieps.webroutes.account;
+
+// Imports
+import com.fasterxml.jackson.databind.JsonNode;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import org.emilieps.Application;
+import org.emilieps.data.HttpRetcode;
+import org.emilieps.data.webserver.Response;
+import org.emilieps.data.enums.webserver.GrantType;
+import org.emilieps.database.Ticket;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+// Libraries
+import org.emilieps.library.EncryptionLib;
+import org.emilieps.library.EmailLib;
+import org.emilieps.library.GeetestLib;
+import org.emilieps.library.JsonLib;
+import org.emilieps.library.MongodbLib;
+
+@RestController
+@RequestMapping(value = "account/device/api", produces = "application/json")
+public final class Device implements Response {
+    private final Map<String, String> temporarilyDevicesInfo = new HashMap<>();
+
+    /**
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/account/device/api/preGrantByGame">https://devapi-takumi.mihoyo.com/account/device/api/preGrantByGame</a><br><br>
+     *  Description: Sends email or SMS notification about new device entrance with a code.<br><br>
+     *  Method: POST<br>
+     *  Content-Type: application/json<br><br>
+     *  Parameters:<br>
+     *        <ul>
+     *          <li>{@code game_token} — The client's game token.</li>
+     *          <li>{@code device} — Information about the client's current device. (type, name, id and model).</li>
+     *          <li>{@code way} — The way of sending the notification (SMS/Email).</li>
+     *        </ul>
+     *  Headers:
+     *        <ul>
+     *          <li>{@code x-rpc-risky} — The verification token after captcha.</li>
+     *          <li>{@code x-rpc-language} — The client's system language iso2 code.</li>
+     *        </ul>
+     */
+    @PostMapping(value = "preGrantByGame")
+    public ResponseEntity<LinkedHashMap<String, Object>> SendPreGrantByGame(@RequestBody PreGrantByGameModel body, @RequestHeader(value = "x-rpc-risky", required = false) String risky, @RequestHeader(value = "x-rpc-language", required = false) String lang) {
+        if(body.game_token == null || body.game_token.isEmpty() || body.device == null | body.way == null) {
+            return ResponseEntity.ok(this.makeResponse(HttpRetcode.RET_INVALID_PARAMETER_ERROR, Application.getTranslations().get(lang, "retcode_parameter_error"), null));
+        }
+
+        if(!GeetestLib.checkVerifiedChallenge(risky)) {
+            return ResponseEntity.ok(this.makeResponse(HttpRetcode.RET_LOGIN_NETWORK_AT_RISK, Application.getTranslations().get(lang, "retcode_network_at_risk"), null));
+        }
+
+        var myAccount = MongodbLib.findAccountByToken(body.game_token);
+        if(myAccount == null || !myAccount.getIsRequireDeviceGrant()) {
+            return ResponseEntity.ok(this.makeResponse(HttpRetcode.RET_LOGIN_NETWORK_AT_RISK, Application.getTranslations().get(lang, "retcode_network_at_risk"), null));
+        }
+
+        var myTicket = new Ticket(myAccount.get_id(), "device_grant");
+        switch (body.way) {
+            case Way_Email -> {
+                if(myAccount.getEmailAddress().isEmpty()) {
+                    return ResponseEntity.ok(this.makeResponse(HttpRetcode.RET_LOGIN_NETWORK_AT_RISK, Application.getTranslations().get(lang, "retcode_network_at_risk"), null));
+                }
+
+                String code = EncryptionLib.generateVerificationCode();
+                Application.getLogger().info(Application.getTranslations().get("console", "new_ver_code_generated_email", myAccount.getEmailAddress(), code, "device_grant"));
+
+                EmailLib.sendMessage(myAccount.getEmailAddress(), "Device verification", String.format("Your verification code is: %s\nWe noticed a sign-in attempt from a new device.\nIf you didn’t request this code ignore it.", code));
+                myTicket.setVerificationCode(code);
+                myTicket.save();
+            }
+            case Way_BindMobile -> {
+                if(myAccount.getMobileNumber().isEmpty()) {
+                    return ResponseEntity.ok(this.makeResponse(HttpRetcode.RET_LOGIN_NETWORK_AT_RISK, Application.getTranslations().get(lang, "retcode_network_at_risk"), null));
+                }
+
+                String code = EncryptionLib.generateVerificationCode();
+                Application.getLogger().info(Application.getTranslations().get("console", "new_ver_code_generated_mobile", myAccount.getMobileNumberArea() + myAccount.getMobileNumber(), code, "device_grant"));
+
+                /// TODO: Send SMS.
+                myTicket.setVerificationCode(code);
+                myTicket.save();
+            }
+            case Way_SafeMobile -> {
+                if(myAccount.getSafeMobileNumber().isEmpty()) {
+                    return ResponseEntity.ok(this.makeResponse(HttpRetcode.RET_LOGIN_NETWORK_AT_RISK, Application.getTranslations().get(lang, "retcode_network_at_risk"), null));
+                }
+
+                String code = EncryptionLib.generateVerificationCode();
+                Application.getLogger().info(Application.getTranslations().get("console", "new_ver_code_generated_mobile", myAccount.getMobileNumberArea() + myAccount.getSafeMobileNumber(), code, "device_grant"));
+
+                /// TODO: Send SMS.
+                myTicket.setVerificationCode(code);
+                myTicket.save();
+            }
+        }
+
+        this.temporarilyDevicesInfo.putIfAbsent(myTicket.getId(), body.device.toString());
+        return ResponseEntity.ok(this.makeResponse(HttpRetcode.RETCODE_SUCC, "OK", new LinkedHashMap<>() {{
+            put("ticket", myTicket.getId());
+        }}));
+    }
+
+    /**
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/account/device/api/preGrantByTicket">https://devapi-takumi.mihoyo.com/account/device/api/preGrantByTicket</a><br><br>
+     *  Description: Sends email or SMS notification about new device entrance with a code.<br><br>
+     *  Method: POST<br>
+     *  Content-Type: application/json<br><br>
+     *  Parameters:<br>
+     *        <ul>
+     *          <li>{@code action_ticket} — The ticket id.</li>
+     *          <li>{@code device} — Information about the client's current device. (type, name, id and model).</li>
+     *          <li>{@code way} — The way of sending the notification (SMS/Email).</li>
+     *        </ul>
+     *  Headers:
+     *        <ul>
+     *          <li>{@code x-rpc-risky} — The verification token after captcha.</li>
+     *          <li>{@code x-rpc-language} — The client's system language iso2 code.</li>
+     *        </ul>
+     */
+    @PostMapping(value = "preGrantByTicket")
+    public ResponseEntity<LinkedHashMap<String, Object>> SendPreGrantByTicket(@RequestBody PreGrantByTicketModel body, @RequestHeader(value = "x-rpc-risky", required = false) String risky, @RequestHeader(value = "x-rpc-language", required = false) String lang) {
+        if(body.action_ticket == null || body.action_ticket.isEmpty() || body.device == null | body.way == null) {
+            return ResponseEntity.ok(this.makeResponse(HttpRetcode.RET_INVALID_PARAMETER_ERROR, Application.getTranslations().get(lang, "retcode_parameter_error"), null));
+        }
+
+        if(!GeetestLib.checkVerifiedChallenge(risky)) {
+            return ResponseEntity.ok(this.makeResponse(HttpRetcode.RET_LOGIN_NETWORK_AT_RISK, Application.getTranslations().get(lang, "retcode_network_at_risk"), null));
+        }
+
+        var myTicket = MongodbLib.findTicketById(body.action_ticket);
+        if(myTicket == null || !myTicket.getType().equals("device_grant")) {
+            return ResponseEntity.ok(this.makeResponse(HttpRetcode.RET_INVALID_PARAMETER_ERROR, Application.getTranslations().get(lang, "retcode_parameter_error"), null));
+        }
+
+        var myAccount = MongodbLib.findAccountById(myTicket.getAccountId());
+        if(myAccount == null || !myAccount.getIsRequireDeviceGrant()) {
+            return ResponseEntity.ok(this.makeResponse(HttpRetcode.RET_LOGIN_NETWORK_AT_RISK, Application.getTranslations().get(lang, "retcode_network_at_risk"), null));
+        }
+
+        switch (body.way) {
+            case Way_Email -> {
+                if(myAccount.getEmailAddress().isEmpty()) {
+                    return ResponseEntity.ok(this.makeResponse(HttpRetcode.RET_LOGIN_NETWORK_AT_RISK, Application.getTranslations().get(lang, "retcode_network_at_risk"), null));
+                }
+
+                String code = EncryptionLib.generateVerificationCode();
+                Application.getLogger().info(Application.getTranslations().get("console", "new_ver_code_generated_email", myAccount.getEmailAddress(), code, "device_grant"));
+
+                EmailLib.sendMessage(myAccount.getEmailAddress(), "Device verification", String.format("Your verification code is: %s\nWe noticed a sign-in attempt from a new device.\nIf you didn’t request this code ignore it.", code));
+                myTicket.setVerificationCode(code);
+                myTicket.save();
+            }
+            case Way_BindMobile -> {
+                if(myAccount.getMobileNumber().isEmpty()) {
+                    return ResponseEntity.ok(this.makeResponse(HttpRetcode.RET_LOGIN_NETWORK_AT_RISK, Application.getTranslations().get(lang, "retcode_network_at_risk"), null));
+                }
+
+                String code = EncryptionLib.generateVerificationCode();
+                Application.getLogger().info(Application.getTranslations().get("console", "new_ver_code_generated_mobile", myAccount.getMobileNumberArea() + myAccount.getMobileNumber(), code, "device_grant"));
+
+                /// TODO: Send SMS.
+                myTicket.setVerificationCode(code);
+                myTicket.save();
+            }
+            case Way_SafeMobile -> {
+                if(myAccount.getSafeMobileNumber().isEmpty()) {
+                    return ResponseEntity.ok(this.makeResponse(HttpRetcode.RET_LOGIN_NETWORK_AT_RISK, Application.getTranslations().get(lang, "retcode_network_at_risk"), null));
+                }
+
+                String code = EncryptionLib.generateVerificationCode();
+                Application.getLogger().info(Application.getTranslations().get("console", "new_ver_code_generated_mobile", myAccount.getMobileNumberArea() + myAccount.getSafeMobileNumber(), code, "device_grant"));
+
+                /// TODO: Send SMS.
+                myTicket.setVerificationCode(code);
+                myTicket.save();
+            }
+        }
+
+        this.temporarilyDevicesInfo.putIfAbsent(myTicket.getId(), body.device.toString());
+        return ResponseEntity.ok(this.makeResponse(HttpRetcode.RETCODE_SUCC, "OK", new LinkedHashMap<>() {{
+            put("ticket", body.action_ticket);
+        }}));
+    }
+
+    /**
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/account/device/api/grant">https://devapi-takumi.mihoyo.com/account/device/api/grant</a><br><br>
+     *  Description: Sends email or SMS notification about new device entrance with a code.<br><br>
+     *  Method: POST<br>
+     *  Content-Type: application/json<br><br>
+     *  Parameters:<br>
+     *        <ul>
+     *          <li>{@code ticket} — The ticket id.</li>
+     *          <li>{@code code} — The verification code.</li>
+     *        </ul>
+     *  Headers:
+     *        <ul>
+     *          <li>{@code x-rpc-language} — The client's system language iso2 code.</li>
+     *        </ul>
+     */
+    @PostMapping(value = "grant")
+    public ResponseEntity<LinkedHashMap<String, Object>> SendGrant(@RequestBody GrantModel body, @RequestHeader(value = "x-rpc-language", required = false) String lang) {
+        if(body.ticket == null || body.ticket.isEmpty() || body.code == null || body.code.length() != 6) {
+            return ResponseEntity.ok(this.makeResponse(HttpRetcode.RET_INVALID_PARAMETER_ERROR, Application.getTranslations().get(lang, "retcode_parameter_error"), null));
+        }
+
+        var myTicket = MongodbLib.findTicketById(body.ticket);
+        if(myTicket == null || !myTicket.getType().equals("device_grant")) {
+            return ResponseEntity.ok(this.makeResponse(HttpRetcode.RET_INVALID_PARAMETER_ERROR, Application.getTranslations().get(lang, "retcode_parameter_error"), null));
+        }
+
+        if(!myTicket.getVerificationCode().equals(body.code)) {
+            return ResponseEntity.ok(this.makeResponse(HttpRetcode.RET_CONFIGURATION_ERROR, Application.getTranslations().get(lang, "retcode_verification_code_invalid"), null));
+        }
+
+        var myAccount = MongodbLib.findAccountById(myTicket.getAccountId());
+        if(myAccount == null || !myAccount.getIsRequireDeviceGrant()) {
+            return ResponseEntity.ok(this.makeResponse(HttpRetcode.RET_LOGIN_NETWORK_AT_RISK, Application.getTranslations().get(lang, "retcode_network_at_risk"), null));
+        }
+
+        JsonNode data = JsonLib.parseJsonSafe(this.temporarilyDevicesInfo.get(body.ticket));
+        if(data == null) {
+            return ResponseEntity.ok(this.makeResponse(HttpRetcode.RET_SYSTEM_ERROR, Application.getTranslations().get(lang, "retcode_system_error"), null));
+        }
+
+        String gameToken = myAccount.generateGameToken();
+        myAccount.getApprovedDevices().add(data.get("device_id").asText());
+        myAccount.setIsRequireDeviceGrant(false);
+        myAccount.save();
+        myTicket.delete();
+
+        return ResponseEntity.ok(this.makeResponse(HttpRetcode.RETCODE_SUCC, "OK", new LinkedHashMap<>() {{
+            put("login_ticket", "");
+            put("game_token", gameToken);
+        }}));
+    }
+
+
+    // Classes
+    public static class GrantModel {
+        public String ticket;
+        public String code;
+    }
+
+    public static class PreGrantByGameModel {
+        public String game_token;
+        public JsonNode device;
+        public GrantType way;
+    }
+
+    public static class PreGrantByTicketModel {
+        public String action_ticket;
+        public JsonNode device;
+        public GrantType way;
+    }
+}

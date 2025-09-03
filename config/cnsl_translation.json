@@ -24,9 +24,12 @@
 		"totalpackets": "[Packet] Registered total packets: %d",
 		"newgameconnection": "[Game] The IP Address %s established connection with the game server.",
 		"closedgameconnection": "[Game] The IP Address %s has disconnected from the game server.",
-		"packeterror": "[Packet] Error when receiving packet ",
+		"packeterror": "[Packet] Error when receiving packet %s",
 		"badpacketfound": "[Packet] The IP Address %s has sent an invalid packet.",
-		"packetnotfound": "[Packet] Unhandled packet -> %d (%s)"
+		"packetnotfound": "[Packet] Unhandled packet -> %d (%s)",
+		"packetsent" : "[Packet] The IP Address %s sent the packet %d (%s).",
+		"packetreceive": "[Packet] The IP Address %s received the packet %d (%s).",
+		"clientvermismatch": "[Game] The account uid %s has mismatched game version (%s -> %s)"
 	},
 	"en": {
 		"retcode_protocol_failed": "协议加载失败",

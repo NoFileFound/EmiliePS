@@ -1,0 +1,13 @@
+Req:
+GetPlayerTokenReq
+PlayerLoginReq
+
+Rsp:
+GetPlayerTokenRsp
+PingRsp
+PlayerLoginRsp
+QueryCurrRegionHttpRsp
+QueryRegionListHttpRsp
+
+Notify:
+ServerDisconnectClientNotify
