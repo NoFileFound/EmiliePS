@@ -41,3 +41,14 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### Custom ###
+/tools/proxy/cert.pem
+/tools/proxy/key.pem
+/tools/proto/archive/
+/tools/proto/7za.dll
+/tools/proto/7za.exe
+/tools/proto/7zxa.dll
+/tools/proto/protoc.exe
+/tools/proto/all-in-one.proto-debug.txt
+/src/main/java/org/generated/protobuf/**

@@ -21,7 +21,7 @@ public enum AppName {
     /**
      * Returns the AppName corresponding to the given string value.
      *
-     * @param value The string representation of the channel value.
+     * @param value The string representation of the application name value.
      * @return The matching AppName, or APP_UNKNOWN if not found or invalid.
      */
     public static AppName fromValue(String value) {

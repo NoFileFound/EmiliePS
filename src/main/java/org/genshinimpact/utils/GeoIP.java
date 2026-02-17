@@ -1,4 +1,4 @@
-package org.genshinimpact.libraries;
+package org.genshinimpact.utils;
 
 // Imports
 import com.maxmind.geoip2.DatabaseReader;
@@ -7,7 +7,7 @@ import java.io.InputStream;
 import java.net.InetAddress;
 import org.genshinimpact.Application;
 
-public class GeoIP {
+public final class GeoIP {
     private static DatabaseReader reader;
 
     /**

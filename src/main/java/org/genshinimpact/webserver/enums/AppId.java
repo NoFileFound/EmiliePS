@@ -33,7 +33,7 @@ public enum AppId {
     /**
      * Returns the AppId corresponding to the given string value.
      *
-     * @param value The string representation of the channel value.
+     * @param value The string representation of the application id value.
      * @return The matching AppId, or APP_UNKNOWN if not found or invalid.
      */
     public static AppId fromValue(String value) {

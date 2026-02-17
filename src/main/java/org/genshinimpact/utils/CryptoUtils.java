@@ -2,23 +2,35 @@ package org.genshinimpact.utils;
 
 // Imports
 import com.fasterxml.jackson.databind.JsonNode;
-import java.security.MessageDigest;
-import java.security.SecureRandom;
+import lombok.Getter;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 public final class CryptoUtils {
     private static final String h5logKey = "F#ju0q8I9HbmH8PMpJzzBee&p0b5h@Yb";
+    @Getter private static byte[] dispatchSeed;
+    @Getter private static byte[] dispatchKey;
+    @Getter private static final Map<Integer, PublicKey> dispatchEncryptionKeys = new HashMap<>();
+    @Getter private static PrivateKey dispatchSignatureKey;
 
     /**
      * Encodes the given string into a Base64-encoded string.
      *
-     * @param input The string to encode.
+     * @param input The string to encode (as bytes).
      * @return The Base64-encoded representation of the input string.
      */
-    public static String encodeBase64(String input) {
-        return Base64.getEncoder().encodeToString(input.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    public static String encodeBase64(byte[] input) {
+        return Base64.getEncoder().encodeToString(input);
     }
 
     /**
@@ -109,6 +121,21 @@ public final class CryptoUtils {
     }
 
     /**
+     * Perfoms a xor encryption on the given data with the given key.
+     * @param data The given data.
+     * @param key The given key.
+     * @return Xor-ed array.
+     */
+    public static byte[] getXor(byte[] data, byte[] key) {
+        byte[] result = new byte[data.length];
+        for(int i = 0; i < data.length; i++) {
+            result[i] = (byte) (data[i] ^ key[i % key.length]);
+        }
+
+        return result;
+    }
+
+    /**
      * Generates a random string of the specified length.
      *
      * @param len The length of the string to generate.
@@ -122,5 +149,34 @@ public final class CryptoUtils {
         }
 
         return sb.toString();
+    }
+
+    /**
+     * Loads dispatch-related cryptographic resources.
+     */
+    public static void loadDispatchFiles() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+        try(InputStream seedStream = CryptoUtils.class.getClassLoader().getResourceAsStream("webserver/dispatchSeed.bin");
+             InputStream keyStream = CryptoUtils.class.getClassLoader().getResourceAsStream("webserver/dispatchKey.bin");
+             InputStream signingStream = CryptoUtils.class.getClassLoader().getResourceAsStream("webserver/dispatchSignatureKey.der"))
+        {
+            if(seedStream == null || keyStream == null || signingStream == null) {
+                throw new FileNotFoundException("One or more dispatch resources could not be found.");
+            }
+
+            dispatchSeed = seedStream.readAllBytes();
+            dispatchKey = keyStream.readAllBytes();
+            dispatchSignatureKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(signingStream.readAllBytes()));
+        }
+
+        for(int i = 1; i <= 5; i++) {
+            String resourcePath = "webserver/dispatch_" + i + ".der";
+            try(InputStream is = CryptoUtils.class.getClassLoader().getResourceAsStream(resourcePath)) {
+                if(is == null) {
+                    throw new FileNotFoundException("Missing key file: " + resourcePath);
+                }
+
+                dispatchEncryptionKeys.put(i, KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(is.readAllBytes())));
+            } catch(Exception ignored) {}
+        }
     }
 }

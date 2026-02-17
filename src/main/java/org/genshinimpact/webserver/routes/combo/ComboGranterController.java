@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.genshinimpact.libraries.GeoIP;
+import org.genshinimpact.utils.GeoIP;
 import org.genshinimpact.utils.JsonUtils;
 import org.genshinimpact.webserver.SpringBootApp;
 import org.genshinimpact.webserver.enums.*;

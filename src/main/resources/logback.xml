@@ -1,6 +1,6 @@
 <configuration>
     <appender name="COLORED_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="org.genshinimpact.tools.LoggerEncoder">
+        <encoder class="org.genshinimpact.LoggerEncoder">
             <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>

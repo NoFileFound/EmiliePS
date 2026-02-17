@@ -7,6 +7,8 @@ import dev.morphia.mapping.MapperOptions;
 import lombok.Getter;
 import org.genshinimpact.Application;
 
+import java.util.List;
+
 public final class Database {
     @Getter
     private static Datastore dataStore;
@@ -29,5 +31,9 @@ public final class Database {
 
     public static void saveLog(Object log, String dbName) {
 
+    }
+
+    public static Object getSceneExperiments(List<String> list) {
+        return "";
     }
 }

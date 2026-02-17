@@ -11,7 +11,52 @@
 		"enable_appsflyer": false,
 		"enable_ugc_protocol": true,
 		"enable_jpush": true,
-		"push_alias_type": 2
+		"enable_email_captcha": true,
+		"enable_mtt": false,
+		"enable_ps_bind_account": true,
+		"enable_flash_login": true,
+		"enable_cx_bind_account": true,
+		"enable_douyin_flash_login": true,
+		"enable_guest": true,
+		"enable_server_guest": true,
+		"enable_regist": true,
+		"enable_crash_sdk": true,
+		"push_alias_type": 2,
+		"ignore_versions": "",
+		"fetch_instance_id": false,
+		"enable_logo_18": false,
+		"enable_logo_18_height": 0,
+		"enable_logo_18_width": 0,
+		"bbs_auth_login": false,
+		"bbs_auth_login_ignore": [],
+		"hoyolab_auth_login": false,
+		"hoyolab_auth_login_ignore": [],
+		"hoyoplay_auth_login": false,
+		"enable_age_gate": false,
+		"enable_age_gate_ignore": [],
+		"thirdparty": ["ap", "fb", "tw", "gc"],
+		"thirdparty_login_configs": {
+		  "tw": {
+			"token_type": "TK_GAME_TOKEN",
+			"game_token_expires_in": 2592000
+		  },
+		  "ap": {
+			"token_type": "TK_GAME_TOKEN",
+			"game_token_expires_in": 604800
+		  },
+		  "fb": {
+			"token_type": "TK_GAME_TOKEN",
+			"game_token_expires_in": 2592000
+		  },
+		  "gc": {
+			"token_type": "TK_GAME_TOKEN",
+			"game_token_expires_in": 604800
+		  }
+		},
+		"enable_firebase": false,
+		"enable_firebase_device_switch": false,
+		"firebase_blacklist_devices": [],
+		"firebase_blacklist_lowenddevices": []
 	},
 	"boxConfig": {
 		"precache_worker_url": "https://webstatic.mihoyo.com/sw.html",
@@ -69,19 +114,58 @@
 		"porte_os_kibana_box": {"enabled":true,"minUploadEventTriggerSize":10,"uploadEventPageSize":50,"minimumUploadInterval":10,"disabledPaths":[]},
 		"console_login_method": 0
 	},
+	"regionConfig": [
+		{
+			"name": "dev01",
+			"title": "Localhost",
+			"regionType": "DEV_PRIVATE",
+			"dispatchUrl": "http://127.0.0.1:8881/query_cur_region/dev01",
+			"dispatchIp": "127.0.0.1",
+			"dispatchPort": 8882,
+			"dispatchVersions": [],
+			"dispatchTicket": "yuki12",
+			"resourceConfig": {
+				"area_type": "CN",
+				"game_biz": "hk4e_global",
+				"data_url": "https://ysdownload.mihoyo.com/bh4/GenshinDownloads/design_data/",
+				"resource_url": "https://ysdownload.mihoyo.com/bh4/GenshinDownloads/game_res/",
+				"next_resource_url": "https://ysdownload.mihoyo.com/bh4/GenshinDownloads/design_data/",
+				"resource_url_bak": "",
+				"client_data_version": 0,
+				"client_silence_data_version": 0,
+				"client_version_suffix": "",
+				"client_silence_version_suffix": "",
+				"pay_callback_url": "http://10.101.11.129:22601/recharge",
+				"cdkey_url": "https://public-operation-hk4e.mihoyo.com/common/apicdkey/api/exchangeCdkey?sign_type=2&auth_appid=apicdkey&authkey_ver=1",
+				"privacy_policy_url": "https://user.mihoyo.com/#/about/privacyInGame?app_id=4&lang=zh-cn&biz=hk4e_cn",
+				"account_bind_url": "https://user.mihoyo.com",
+				"official_community_url": "https://act.mihoyo.com/ys/event/community-content-collection/index.html?game_biz=hk4e_cn&sign_type=2&auth_appid=contenthub&authkey_ver=1&utm_source=game&utm_medium=ys&utm_campaign=menu&red_point=2214,2215",
+				"handbook_url": "https://webstatic.mihoyo.com/ys/event/blue-post/index.html?gamewebview=1&page_sn=b480280b939e4bbd&mode=fullscreen&game_biz=hk4e_cn&sign_type=2&auth_appid=bluepost&authkey_ver=1&utm_source=game&utm_medium=ys&utm_campaign=hot",
+				"feedback_url": "https://webstatic.mihoyo.com/csc-service-center-fe/index.html?goToHall=true&sign_type=2&auth_appid=csc&authkey_ver=1&win_direction=portrait&login_type=account&page_id=1",
+				"bulletin_url": "",
+				"user_center_url": "",
+				"client_data_md5": {},
+				"client_silence_data_md5": {},
+				"res_version_config": null,
+				"next_res_version_config": null
+			},
+			"maintenanceConfig": null,
+			"encryptedConfig": {}
+		}
+	],
 	"extensionList": {
-		"1": ["IDFV", "model", "osVersion", "screenSize", "vendor", "cpuType", "cpuCores", "isJailBreak", "networkType", "proxyStatus", "batteryStatus", "chargeStatus", "romCapacity", "romRemain", "ramCapacity", "ramRemain", "appMemory", "accelerometer", "gyroscope", "magnetometer", "deviceName", "screenBrightness", "isSimInserted", "isPushEnabled", "buildTime", "appInstallTimeDiff", "appUpdateTimeDiff", "hasVpn", "packageName", "packageVersion"],
-		"2": ["oaid", "vaid", "aaid", "board", "brand", "hardware", "cpuType", "deviceType", "display", "hostname", "manufacturer", "productName", "model", "deviceInfo", "sdkVersion", "osVersion", "devId", "buildTags", "buildType", "buildUser", "buildTime", "screenSize", "vendor", "romCapacity", "romRemain", "ramCapacity", "ramRemain", "appMemory", "accelerometer", "gyroscope", "magnetometer", "isRoot", "debugStatus", "proxyStatus", "emulatorStatus", "isTablet", "simState", "ui_mode", "sdCapacity", "sdRemain", "hasKeyboard", "isMockLocation", "ringMode", "isAirMode", "batteryStatus", "chargeStatus", "deviceName", "appInstallTimeDiff", "appUpdateTimeDiff", "packageName", "packageVersion", "networkType"],
-		"3": ["cpuName", "deviceModel", "deviceName", "deviceType", "deviceUID", "gpuID", "gpuName", "gpuAPI", "gpuVendor", "gpuVersion", "gpuMemory", "osVersion", "cpuCores", "cpuFrequency", "gpuVendorID", "isGpuMultiTread", "memorySize", "screenSize", "engineName", "addressMAC"],
-		"4": ["userAgent", "browserScreenSize", "maxTouchPoints", "isTouchSupported", "browserLanguage", "browserPlat", "browserTimeZone", "webGlRender", "webGlVendor", "numOfPlugins", "listOfPlugins", "screenRatio", "deviceMemory", "hardwareConcurrency", "cpuClass", "ifNotTrack", "ifAdBlock", "hasLiedLanguage", "hasLiedResolution", "hasLiedOs", "hasLiedBrowser", "canvas", "webDriver", "colorDepth", "pixelRatio", "packageName", "packageVersion", "webgl"],
+		"1": [],
+		"2": [],
+		"3": [],
+		"4": [],
 		"5": [],
 		"6": [],
 		"7": [],
-		"8": ["oaid", "vaid", "aaid", "board", "brand", "hardware", "cpuType", "deviceType", "display", "hostname", "manufacturer", "productName", "model", "deviceInfo", "sdkVersion", "osVersion", "devId", "buildTags", "buildType", "buildUser", "buildTime", "screenSize", "vendor", "romCapacity", "romRemain", "ramCapacity", "ramRemain", "appMemory", "accelerometer", "gyroscope", "magnetometer", "isRoot", "debugStatus", "proxyStatus", "emulatorStatus", "isTablet", "simState", "ui_mode", "sdCapacity", "sdRemain", "hasKeyboard", "isMockLocation", "ringMode", "isAirMode", "batteryStatus", "chargeStatus", "deviceName", "appInstallTimeDiff", "appUpdateTimeDiff", "packageName", "packageVersion", "networkType"],
-		"9": ["cpuName", "deviceModel", "deviceName", "deviceType", "deviceUID", "gpuID", "gpuName", "gpuAPI", "gpuVendor", "gpuVersion", "gpuMemory", "osVersion", "cpuCores", "cpuFrequency", "gpuVendorID", "isGpuMultiTread", "memorySize", "screenSize", "engineName", "addressMAC"],
-		"10": ["IDFV", "model", "osVersion", "screenSize", "vendor", "cpuType", "cpuCores", "isJailBreak", "networkType", "proxyStatus", "batteryStatus", "chargeStatus", "romCapacity", "romRemain", "ramCapacity", "ramRemain", "appMemory", "accelerometer", "gyroscope", "magnetometer", "deviceName", "screenBrightness", "isSimInserted", "isPushEnabled", "buildTime", "appInstallTimeDiff", "appUpdateTimeDiff", "hasVpn", "packageName", "packageVersion"],
+		"8": [],
+		"9": [],
+		"10": [],
 		"11": [],
 		"12": [],
-		"13": ["deviceModel", "osVersion", "screenSize", "cpuName", "cpuType", "cpuCores", "cpuFrequency", "gpuName", "deviceUID", "gpuVendor", "gpuVersion", "gpuMemory", "bootRomVersion", "smcVersion", "macosUUID", "board", "addressMAC", "networkType", "proxyStatus", "batteryStatus", "chargeStatus", "romCapacity", "romRemain", "ramCapacity", "ramRemain", "appMemory", "hostname", "deviceType", "serialNumber", "IDFV", "deviceName", "screenBrightness", "buildTime", "appInstallTimeDiff", "appUpdateTimeDiff", "hasVpn", "packageName", "packageVersion"]
+		"13": []
 	}
 }

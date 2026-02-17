@@ -14,7 +14,7 @@ repositories {
 
 dependencies {
     implementation('org.springframework.boot:spring-boot-starter-web')
-    implementation('com.google.protobuf:protobuf-java:4.28.2')
+    implementation('com.google.protobuf:protobuf-java:3.19.4')
     implementation('org.fusesource.jansi:jansi:2.4.0')
     implementation('org.slf4j:slf4j-api:2.0.9')
     implementation('ch.qos.logback:logback-classic:1.4.11')

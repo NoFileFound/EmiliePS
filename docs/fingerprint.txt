@@ -1,0 +1,88 @@
+aaid – Android Advertising ID (same)
+addressMAC – Device MAC address
+accelerometer – Motion sensor readings
+appInstallTimeDiff – Time since installation
+appMemory – App memory usage
+appUpdateTimeDiff – Time since last update
+aaid – (duplicate, removed)
+batteryStatus – Battery percentage/level
+buildTags – Firmware build tags
+buildTime – Firmware build timestamp
+buildType – Build release type
+buildUser – Build creator/username
+browserLanguage – Browser language setting
+browserPlat – Browser platform/OS
+browserScreenSize – Browser viewport width × height
+canvas – HTML5 canvas fingerprinting
+chargeStatus – Charging or not
+colorDepth – Bits per pixel
+cpuClass – CPU type class
+cpuCores – Number of CPU cores
+cpuFrequency – CPU clock speed
+cpuName – Processor model name
+cpuType – Processor type/model
+deviceInfo – General device description
+deviceModel – Device model identifier
+deviceName – User-assigned device name
+deviceType – Phone, tablet, or PC
+deviceUID – Unique device identifier
+devId – Device unique ID
+display – Screen resolution/details
+emulatorStatus – Running on emulator
+engineName – Game/graphics engine used
+folder – (not in list, ignore)
+gpuAPI – GPU API supported
+gpuID – GPU identifier code
+gpuMemory – GPU memory size
+gpuName – Graphics card name
+gpuVendor – GPU manufacturer
+gpuVendorID – GPU vendor numeric ID
+gpuVersion – GPU driver/software version
+hasLiedBrowser – Browser spoofed status
+hasLiedLanguage – Language spoofed status
+hasLiedOs – OS spoofed status
+hasLiedResolution – Screen resolution spoofed
+hasKeyboard – Physical keyboard present
+hasMockLocation – Fake GPS detected
+hasVpn – VPN connection active
+hardware – Hardware platform info
+hardwareConcurrency – CPU threads available
+hostname – Device network hostname
+ifAdBlock – AdBlock enabled status
+ifNotTrack – Do Not Track enabled
+isAirMode – Airplane mode enabled
+isJailBreak – Jailbreak/root status
+isMockLocation – Fake GPS detected
+isPushEnabled – Notifications enabled status
+isRoot – Root/jailbreak status
+isSimInserted – SIM card present
+isTablet – Device is tablet
+isTouchSupported – Touch input capability
+listOfPlugins – Names of installed plugins
+maxTouchPoints – Maximum touch points supported
+model – Device model identifier
+networkType – Wi-Fi, 4G, 5G, etc.
+numOfPlugins – Installed browser plugins count
+oaid – Android device advertising ID
+packageName – App/package identifier
+packageVersion – App/package version
+pixelRatio – Device pixel ratio
+productName – Product model name
+proxyStatus – Using proxy server
+ramCapacity – Total RAM capacity
+ramRemain – Free RAM available
+ringMode – Silent/vibrate/normal mode
+romCapacity – Total storage capacity
+romRemain – Free storage available
+screenBrightness – Current brightness level
+screenRatio – Screen width ÷ height
+screenSize – Screen width × height
+sdkVersion – Android SDK version
+sdCapacity – SD card total size
+sdRemain – SD card free space
+userAgent – Browser/OS identification string
+vendor – Device manufacturer/vendor
+webDriver – Selenium/WebDriver automation detected
+webGlRender – GPU renderer via WebGL
+webGlVendor – GPU vendor via WebGL
+webgl – WebGL context detection

@@ -1,4 +1,4 @@
-package org.genshinimpact.tools;
+package org.genshinimpact;
 
 // Imports
 import ch.qos.logback.classic.Level;

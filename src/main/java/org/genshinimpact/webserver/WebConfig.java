@@ -1,8 +1,10 @@
 package org.genshinimpact.webserver;
 
 // Imports
+import com.fasterxml.jackson.databind.JsonNode;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import org.genshinimpact.webserver.enums.ClientType;
 
 @SuppressWarnings("unused")
@@ -11,9 +13,11 @@ public class WebConfig {
     public MDKConfig mdkConfig;
     public BoxConfig boxConfig;
     public EnumMap<ClientType, List<String>> extensionList;
+    public List<RegionConfig> regionConfig = List.of();
 
     public static class MainConfig {
         public int springbootPort = 8881;
+        public String mongodbUrl = "mongodb://localhost:27017";
     }
 
     public static class MDKConfig {
@@ -25,7 +29,35 @@ public class WebConfig {
         public Boolean enable_appsflyer = false;
         public Boolean enable_ugc_protocol = false;
         public Boolean enable_jpush = false;
+        public Boolean enable_email_captcha = true;
+        public Boolean enable_mtt = true;
+        public Boolean enable_ps_bind_account = true;
+        public Boolean enable_flash_login = true;
+        public Boolean enable_cx_bind_account = true;
+        public Boolean enable_douyin_flash_login = true;
+        public Boolean enable_guest = true;
+        public Boolean enable_server_guest = true;
+        public Boolean enable_regist = true;
+        public Boolean enable_firebase = true;
+        public Boolean enable_firebase_device_switch = true;
+        public Boolean enable_crash_sdk = false;
         public Integer push_alias_type = 2;
+        public String ignore_versions = "";
+        public Boolean fetch_instance_id = false;
+        public Boolean enable_logo_18 = false;
+        public Integer enable_logo_18_height = 0;
+        public Integer enable_logo_18_width = 0;
+        public Boolean bbs_auth_login = false;
+        public List<String> bbs_auth_login_ignore = List.of();
+        public Boolean hoyolab_auth_login = false;
+        public List<String> hoyolab_auth_login_ignore = List.of();
+        public Boolean hoyoplay_auth_login = false;
+        public Boolean enable_age_gate = false;
+        public List<String> enable_age_gate_ignore = List.of();
+        public List<String> thirdparty = List.of();
+        public Map<String, Map<String, Object>> thirdparty_login_configs = Map.of();
+        public List<JsonNode> firebase_blacklist_devices = List.of();
+        public List<JsonNode> firebase_blacklist_lowenddevices = List.of();
     }
 
     public static class BoxConfig {
@@ -121,6 +153,61 @@ public class WebConfig {
             public int uploadEventPageSize = 50;
             public int minimumUploadInterval = 10;
             public List<String> disabledPaths = List.of();
+        }
+    }
+
+    public static class RegionConfig {
+        public String name;
+        public String title;
+        public String regionType;
+        public String dispatchUrl;
+        public String dispatchIp;
+        public Integer dispatchPort;
+        public List<String> dispatchVersions;
+        public String dispatchTicket;
+        public ResourceConfig resourceConfig;
+        public JsonNode encryptedConfig;
+        public Maintenance maintenanceConfig = new Maintenance();
+
+        public static class ResourceConfig {
+            public String area_type = "";
+            public String game_biz = "";
+            public String data_url = "";
+            public String resource_url = "";
+            public String next_resource_url = "";
+            public String resource_url_bak = "";
+            public Integer client_data_version = 0;
+            public Integer client_silence_data_version = 0;
+            public String client_version_suffix = "";
+            public String client_silence_version_suffix = "";
+            public String pay_callback_url = "";
+            public String cdkey_url = "";
+            public String privacy_policy_url = "";
+            public String account_bind_url = "";
+            public String official_community_url = "";
+            public String handbook_url = "";
+            public String feedback_url = "";
+            public String bulletin_url = "";
+            public String user_center_url = "";
+            public JsonNode client_data_md5 = null;
+            public JsonNode client_silence_data_md5 = null;
+            public ResourceVersionConfig res_version_config = new ResourceVersionConfig();
+            public ResourceVersionConfig next_res_version_config = new ResourceVersionConfig();
+            public static class ResourceVersionConfig {
+                public boolean re_login = true;
+                public JsonNode md5 = null;
+                public int version = 0;
+                public String release_total_size = "0";
+                public String version_suffix = "";
+                public String branch = "";
+            }
+        }
+
+        public static class Maintenance {
+            public String url;
+            public Integer startDate;
+            public Integer endDate;
+            public String msg;
         }
     }
 }

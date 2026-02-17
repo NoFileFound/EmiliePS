@@ -1,0 +1,2 @@
+openssl genrsa -out key.pem 2048
+openssl req -new -x509 -key key.pem -out cert.pem -days 825 -subj "/C=SG/O=Hoyoverse Proxy/CN=*.hoyoverse.com" -addext "subjectAltName=DNS:*.hoyoverse.com,DNS:hoyoverse.com,DNS:*.yuanshen.com,DNS:yuanshen.com,DNS:*.mihoyo.com,DNS:mihoyo.com"

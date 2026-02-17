@@ -37,7 +37,7 @@ public enum ClientType {
     /**
      * Returns The ClientType corresponding to the given string value.
      *
-     * @param value The string representation of the channel value.
+     * @param value The string representation of the client type value.
      * @return The matching ClientType, or PLATFORM_UNKNOWN if not found or invalid.
      */
     public static ClientType fromValue(String value) {

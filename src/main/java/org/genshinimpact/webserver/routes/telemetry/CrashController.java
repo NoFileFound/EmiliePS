@@ -53,13 +53,13 @@ public final class CrashController {
             String message = String.join("\n", request.getMethod(), contentMd5 != null ? contentMd5 : "", contentType != null ? contentType : "", "", cmsSignature);
             String computedHmac = CryptoUtils.getHMAC1(message, "mihoyo2020hk4e");
             if(!computedHmac.equals(authorization)) {
-                return ResponseEntity.ok(new Response<>(RETCODE_FAIL, "请求格式错误"));
+                return ResponseEntity.ok(new Response<>(RETCODE_FAIL, "上报数据校验失败，请检查"));
             }
 
             body = JsonUtils.readList(new ByteArrayInputStream(payload), CrashDataUploadModel.class).get(0);
             String payloadMd5 = CryptoUtils.getMd5(JsonUtils.toJsonString(body).getBytes());
             if(!payloadMd5.equalsIgnoreCase(contentMd5)) {
-                return ResponseEntity.ok(new Response<>(RETCODE_FAIL, "请求格式错误"));
+                return ResponseEntity.ok(new Response<>(RETCODE_FAIL, "上报数据校验失败，请检查"));
             }
 
             if(body == null
