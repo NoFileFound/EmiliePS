@@ -44,12 +44,12 @@ public final class SDKController {
             String message = String.join("\n", request.getMethod(), contentMd5 != null ? contentMd5 : "", contentType != null ? contentType : "", date != null ? date : "", cmsSignature);
             String computedHmac = CryptoUtils.getHMAC1(message, "mihoyo2020hk4e");
             if(!computedHmac.equals(authorization)) {
-                return ResponseEntity.ok(new Response<>(RETCODE_FAIL, "上报数据校验失败，请检查"));
+                return ResponseEntity.ok(new Response<>(RETCODE_FAIL, "请求格式错误"));
             }
 
             String payloadMd5 = CryptoUtils.getMd5(payload);
             if(!payloadMd5.equalsIgnoreCase(contentMd5)) {
-                return ResponseEntity.ok(new Response<>(RETCODE_FAIL, "上报数据校验失败，请检查"));
+                return ResponseEntity.ok(new Response<>(RETCODE_FAIL, "请求格式错误"));
             }
 
             body = JsonUtils.readList(new ByteArrayInputStream(payload), SdkDataUploadModel.class).get(0);
@@ -112,26 +112,42 @@ public final class SDKController {
      * </ul>
      */
     @PostMapping(value = "adsdk/dataUpload")
-    public ResponseEntity<Response<?>> ReceiveAndroidSDKLog(HttpServletRequest request) {
+    public ResponseEntity<Response<?>> ReceiveAndroidSDKLog(HttpServletRequest request, @RequestHeader(value = "CONTENT-MD5", required = false) String contentMd5, @RequestHeader(value = "Content-Type", required = false) String contentType, @RequestHeader(value = "DATE", required = false) String date, @RequestHeader(value = "cms-signature", defaultValue = "hmac-sha1") String cmsSignature, @RequestHeader(value = "Authorization", required = false) String authorization) {
         AndroidSdkDataUploadModel body;
         try {
-            body = JsonUtils.readList(request.getInputStream(), AndroidSdkDataUploadModel.class).get(0);
+            byte[] payload = request.getInputStream().readAllBytes();
+            String message = String.join("\n", request.getMethod(), contentMd5 != null ? contentMd5 : "", contentType != null ? contentType : "", date != null ? date : "", cmsSignature);
+            String computedHmac = CryptoUtils.getHMAC1(message, "mihoyo2020hk4e");
+            if(!computedHmac.equals(authorization)) {
+                return ResponseEntity.ok(new Response<>(RETCODE_FAIL, "请求格式错误"));
+            }
+
+            String payloadMd5 = CryptoUtils.getMd5(payload);
+            if(!payloadMd5.equalsIgnoreCase(contentMd5)) {
+                return ResponseEntity.ok(new Response<>(RETCODE_FAIL, "请求格式错误"));
+            }
+
+            body = JsonUtils.readList(new ByteArrayInputStream(payload), AndroidSdkDataUploadModel.class).get(0);
             if(body == null
                     || body.applicationId == null
-                    || body.applicationName == null || !body.applicationName.equals("mihoyosdk")
+                    || body.applicationName == null || !body.applicationName.equals("adsdk")
                     || body.msgId == null
                     || body.eventTime == null
                     || body.eventId == null
                     || body.eventName == null
                     || body.uploadContent == null
-                    || body.uploadContent.attributionInfo == null) {
+                    || body.uploadContent.attributionInfo == null
+
+                    // Attribution info
+                    || body.uploadContent.attributionInfo.launch_trace_id == null || body.uploadContent.attributionInfo.launch_trace_id.isBlank()
+                    || body.uploadContent.attributionInfo.androidid == null || body.uploadContent.attributionInfo.androidid.isBlank()
+                    || body.uploadContent.attributionInfo.pkgname == null || body.uploadContent.attributionInfo.pkgname.isBlank()
+                    || body.uploadContent.attributionInfo.event_name == null || body.uploadContent.attributionInfo.event_name.isBlank()) {
                 return ResponseEntity.ok(new Response<>(RETCODE_FAIL, "请求格式错误"));
             }
         } catch(Exception ex) {
             return ResponseEntity.ok(new Response<>(RETCODE_FAIL, "请求格式错误"));
         }
-
-        ///  TODO: [Unfinished #1] Check more about android sdk.
 
         Database.saveLog(body, "android_sdk_logs");
         return ResponseEntity.ok(new Response<>(RETCODE_SUCC, "OK"));

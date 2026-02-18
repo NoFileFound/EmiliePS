@@ -1,14 +1,15 @@
 package org.genshinimpact.webserver.routes;
 
 // Imports
-import static org.genshinimpact.gameserver.enums.Retcode.RET_NOT_FOUND_CONFIG;
 import static org.genshinimpact.gameserver.enums.Retcode.RET_STOP_SERVER;
 import static org.genshinimpact.gameserver.enums.Retcode.RET_CLIENT_FORCE_UPDATE;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.protobuf.ByteString;
 import java.io.ByteArrayOutputStream;
 import java.security.Signature;
 import java.util.*;
+import java.util.stream.Collectors;
 import javax.crypto.Cipher;
 import org.genshinimpact.Application;
 import org.genshinimpact.utils.CryptoUtils;
@@ -37,6 +38,7 @@ public final class RegionController {
     private record RegionMap(WebConfig.RegionConfig regionClass, String base64) {}
     private String queryAllRegionResponse, queryAllRegionResponseOverseas;
     private final Map<String, RegionMap> serverRegions = new HashMap<>();
+    private final Map<String, Set<String>> regionPrefixes = new HashMap<>();
 
     public RegionController() {
         var regionsConfig = SpringBootApp.getWebConfig().regionConfig;
@@ -61,18 +63,22 @@ public final class RegionController {
                                 .build()
                                 .toByteArray()
                 )));
-            } catch(Exception e) {
-                throw new IllegalStateException("Failed building region response: " + region.name, e);
+                this.regionPrefixes.put(region.name, region.dispatchVersions.stream().map(v -> v.replaceAll("[0-9.]+$", "")).collect(Collectors.toSet()));
+            } catch(Exception ex) {
+                throw new IllegalStateException("Failed building region response: " + region.name, ex);
             }
         }
 
         try {
-            ObjectNode root = (ObjectNode)JsonUtils.read("{}");
-            /// TODO: ADD GLOBAL REGION CONFIG.
-            queryAllRegionResponse = this.buildRegionList(regions, root, 1, dispatchKey, dispatchSeed);
-            queryAllRegionResponseOverseas = this.buildRegionList(regions, root, 3, dispatchKey, dispatchSeed);
-        } catch(Exception e) {
-            Application.getLogger().severe(e.getMessage());
+            ObjectNode root = (ObjectNode)SpringBootApp.getWebConfig().regionGlobalConfig;
+            if(root == null) {
+                root = JsonNodeFactory.instance.objectNode();
+            }
+
+            this.queryAllRegionResponse = this.buildRegionList(regions, root, 1, dispatchKey, dispatchSeed);
+            this.queryAllRegionResponseOverseas = this.buildRegionList(regions, root, 3, dispatchKey, dispatchSeed);
+        } catch(Exception ex) {
+            Application.getLogger().severe(ex.getMessage());
             System.exit(1);
         }
     }
@@ -88,13 +94,13 @@ public final class RegionController {
      *          <li>{@code lang} — The client's game language id.</li>
      *          <li>{@code platform} — The client's platform type.</li>
      *          <li>{@code binary} — Fetch the list as binary or string.</li>
-     *          <li>{@code time} — The milliseconds before going to fetch.</li>
+     *          <li>{@code time} — The milliseconds before going to fetch again.</li>
      *          <li>{@code channel_id} — The client's channel id.</li>
      *          <li>{@code sub_channel_id} — The client's sub channel id.</li>
      *        </ul>
      */
     @GetMapping(value = "query_region_list")
-    public Object SendQueryRegionList(String version, String lang, String platform, Boolean binary, Integer time, String channel_id, String sub_channel_id) {
+    public Object SendQueryRegionList(String version, String lang, String platform, Boolean binary, String time, String channel_id, String sub_channel_id) {
         try {
             ClientType clientType = ClientType.fromValue(platform);
             ChannelType channelType = ChannelType.fromValue(channel_id);
@@ -120,7 +126,7 @@ public final class RegionController {
      *          <li>{@code lang} — The client's game language id.</li>
      *          <li>{@code platform} — The client's platform type.</li>
      *          <li>{@code binary} — Fetch the list as binary or string.</li>
-     *          <li>{@code time} — The milliseconds before going to fetch.</li>
+     *          <li>{@code time} — The milliseconds before going to fetch again.</li>
      *          <li>{@code channel_id} — The client's channel id.</li>
      *          <li>{@code sub_channel_id} — The client's sub channel id.</li>
      *          <li>{@code account_type} — The client's account type.</li>
@@ -141,19 +147,11 @@ public final class RegionController {
             }
 
             var region = this.serverRegions.get(regionName);
-            version = version.replaceFirst("^[A-Za-z]+", "");
-            String response;
-            if(region == null) {
-                response = this.buildCurRegionResponse(QueryCurrRegionHttpRsp.newBuilder()
-                        .setRetcode(RET_NOT_FOUND_CONFIG.getValue())
-                        .setMsg("No config")
-                        .setRegionInfo(RegionInfo.newBuilder().build())
-                        .build()
-                        .toByteArray(), keyId, dispatchSeed);
-
-                return (binary) ? response.getBytes() : response;
+            if(region == null || !this.regionPrefixes.get(regionName).contains(version.replaceAll("[0-9.]+$", ""))) {
+                return "CAESGE5vdCBGb3VuZCB2ZXJzaW9uIGNvbmZpZw==";
             }
 
+            String response;
             if(region.regionClass.maintenanceConfig != null) {
                 response = this.buildCurRegionResponse(QueryCurrRegionHttpRsp.newBuilder()
                         .setRetcode(RET_STOP_SERVER.getValue())
@@ -171,17 +169,20 @@ public final class RegionController {
                 return (binary) ? response.getBytes() : response;
             }
 
-            String numVer = version.replaceAll("^[^0-9]+", "");
-            if(region.regionClass.dispatchVersions.stream().map(v -> v.replaceAll("^[^0-9]+", "")).noneMatch(v -> v.equals(numVer))) {
-                response = this.buildCurRegionResponse(QueryCurrRegionHttpRsp.newBuilder()
-                        .setRetcode(RET_CLIENT_FORCE_UPDATE.getValue())
-                        .setMsg(String.format("Version update found. Please start the launcher to download the latest version.\n\nServer Version: %s\nClient Version: %s", region.regionClass.dispatchVersions.get(0).replaceAll("[0-9.]+$", "") + numVer, version))
-                        .setRegionInfo(RegionInfo.newBuilder().build())
-                        .setForceUpdate(ForceUpdateInfo.newBuilder()
-                                .setForceUpdateUrl("hoyoverse.com")
-                                .build())
-                        .buildPartial()
-                        .toByteArray(), keyId, dispatchSeed);
+            if(!region.regionClass.dispatchVersions.contains(version)) {
+                response = this.buildCurRegionResponse(
+                        QueryCurrRegionHttpRsp.newBuilder()
+                                .setRetcode(RET_CLIENT_FORCE_UPDATE.getValue())
+                                .setMsg(String.format("Version update found. Please start the launcher to download the latest version.\n\nServer Version: %s\nClient Version: %s", region.regionClass.dispatchVersions.get(0).replaceAll("^[^0-9]+", ""), version.replaceAll("^[^0-9]+", "")))
+                                .setRegionInfo(RegionInfo.newBuilder().build())
+                                .setForceUpdate(ForceUpdateInfo.newBuilder()
+                                        .setForceUpdateUrl("hoyoverse.com")
+                                        .build())
+                                .buildPartial()
+                                .toByteArray(),
+                        keyId,
+                        dispatchSeed
+                );
 
                 return (binary) ? response.getBytes() : response;
             }
@@ -206,7 +207,6 @@ public final class RegionController {
     @GetMapping(value = "query_security_file")
     public String SendQuerySecurityFile(String file_key) {
         return "";
-        ///  TODO: INVESTIGATE WHAT IS THIS.
     }
 
     /**
@@ -290,40 +290,44 @@ public final class RegionController {
 
     /**
      * Encrypts the given region using RSA and signs it.
-     * @param responseBytes The raw protobuf response bytes to encrypt and sign.
+     * @param data The raw protobuf response bytes to encrypt and sign.
      * @param key_id The identifier used to select the RSA public encryption key.
      * @param dispatchSeed The dispatch seed associated with the response.
      * @return The JSON response of the encrypted content and signature.
      */
-    private String buildCurRegionResponse(byte[] responseBytes, int key_id, String dispatchSeed) {
+    private String buildCurRegionResponse(byte[] data, int key_id, String dispatchSeed) {
+        if(key_id == 0) {
+            return CryptoUtils.encodeBase64(data);
+        }
+
+        ///  TODO: INVESTIGATE dispatchSeed
         try {
             var keyId = CryptoUtils.getDispatchEncryptionKeys().get(key_id);
             if(keyId == null) {
-                throw new NullPointerException("Invalid key was found.");
+                return "500";
             }
+
             ByteArrayOutputStream encryptedStream = new ByteArrayOutputStream();
             Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             cipher.init(Cipher.ENCRYPT_MODE, keyId);
             int chunkSize = 256 - 11;
-            int length = responseBytes.length;
+            int length = data.length;
             int numChunks = (int) Math.ceil(length / (double) chunkSize);
             for(int i = 0; i < numChunks; i++) {
-                byte[] chunk = Arrays.copyOfRange(responseBytes, i * chunkSize, Math.min((i + 1) * chunkSize, length));
+                byte[] chunk = Arrays.copyOfRange(data, i * chunkSize, Math.min((i + 1) * chunkSize, length));
                 byte[] encryptedChunk = cipher.doFinal(chunk);
                 encryptedStream.write(encryptedChunk);
             }
 
             Signature privateSignature = Signature.getInstance("SHA256withRSA");
             privateSignature.initSign(CryptoUtils.getDispatchSignatureKey());
-            privateSignature.update(responseBytes);
+            privateSignature.update(data);
             return JsonUtils.toJsonString(new LinkedHashMap<>() {{
-                put("content", Base64.getEncoder().encodeToString(encryptedStream.toByteArray()));
-                put("sign", Base64.getEncoder().encodeToString(privateSignature.sign()));
+                put("content", CryptoUtils.encodeBase64(encryptedStream.toByteArray()));
+                put("sign", CryptoUtils.encodeBase64(privateSignature.sign()));
             }});
         } catch(Exception ignored) {
             return "CAESGE5vdCBGb3VuZCB2ZXJzaW9uIGNvbmZpZw==";
         }
     }
 }
-
-/// TODO: Investigate CAESGE5vdCBGb3VuZCB2ZXJzaW9uIGNvbmZpZw==

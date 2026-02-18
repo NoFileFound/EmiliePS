@@ -52,7 +52,7 @@ public final class MDKShieldController {
             data.put("disable_mmt", !SpringBootApp.getWebConfig().mdkConfig.enable_mtt);
             data.put("server_guest", SpringBootApp.getWebConfig().mdkConfig.enable_server_guest);
             data.put("enable_crash_sdk", SpringBootApp.getWebConfig().mdkConfig.enable_crash_sdk);
-            //data.put("thirdparty_ignore", SpringBootApp.getWebConfig().mdkConfig.thirdparty_ignore);
+            data.put("thirdparty_ignore", SpringBootApp.getWebConfig().mdkConfig.thirdparty_ignore);
             data.put("enable_ps_bind_account", SpringBootApp.getWebConfig().mdkConfig.enable_ps_bind_account);
             data.put("thirdparty_login_configs", SpringBootApp.getWebConfig().mdkConfig.thirdparty_login_configs);
             data.put("initialize_firebase", SpringBootApp.getWebConfig().mdkConfig.enable_firebase);

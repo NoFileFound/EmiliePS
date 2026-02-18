@@ -1,6 +1,8 @@
 {
 	"mainConfig": {
-		"springbootPort": 8881
+		"springbootPort": 8881,
+		"mongodbUrl": "mongodb://localhost:27017",
+		"mongodbEnableSdkLogs": true
 	},
 	"mdkConfig": {
 		"announce_url": "https://sdk.hoyoverse.com/hk4e/announcement/index.html?sdk_presentation_style=fullscreen&announcement_version=2.43&sdk_screen_transparent=true&game_biz=hk4e_global&auth_appid=announcement&game=hk4e#/",
@@ -53,6 +55,7 @@
 			"game_token_expires_in": 604800
 		  }
 		},
+		"thirdparty_ignore": {},
 		"enable_firebase": false,
 		"enable_firebase_device_switch": false,
 		"firebase_blacklist_devices": [],
@@ -122,7 +125,7 @@
 			"dispatchUrl": "http://127.0.0.1:8881/query_cur_region/dev01",
 			"dispatchIp": "127.0.0.1",
 			"dispatchPort": 8882,
-			"dispatchVersions": [],
+			"dispatchVersions": ["OSLoc3.1.51", "CNLoc3.1.51"],
 			"dispatchTicket": "yuki12",
 			"resourceConfig": {
 				"area_type": "CN",
@@ -153,6 +156,9 @@
 			"encryptedConfig": {}
 		}
 	],
+	"regionGlobalConfig": {
+		"debugmenu": false
+	},
 	"extensionList": {
 		"1": [],
 		"2": [],

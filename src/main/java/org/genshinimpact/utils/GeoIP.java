@@ -9,17 +9,24 @@ import org.genshinimpact.Application;
 
 public final class GeoIP {
     private static DatabaseReader reader;
+    private static Boolean isLoaded = false;
 
     /**
      * Initializes the geo ip database.
      */
     public static void loadGeoDatabase() {
+        if(isLoaded) {
+            return;
+        }
+
         try(InputStream dbStream = Application.class.getClassLoader().getResourceAsStream("GeoIP.dat")) {
             if (dbStream == null) {
+                isLoaded = false;
                 throw new IOException("GeoIP.dat not found in resources");
             }
 
             reader = new DatabaseReader.Builder(dbStream).build();
+            isLoaded = true;
             Application.getLogger().info("GeoIP database loaded.");
         } catch (Exception e) {
             Application.getLogger().severe("GeoIP database could not be loaded: " + e.getMessage());
@@ -32,6 +39,10 @@ public final class GeoIP {
      * @return Country object.
      */
     public static String getCountryCode(String ipAddress) {
+        if(!isLoaded) {
+            throw new NullPointerException("The database is not loaded, the results may produce NullException");
+        }
+
         try {
             return reader.country(InetAddress.getByName(ipAddress)).getCountry().getIsoCode();
         } catch (Exception ignored) {

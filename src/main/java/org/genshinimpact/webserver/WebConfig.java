@@ -2,6 +2,7 @@ package org.genshinimpact.webserver;
 
 // Imports
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -12,12 +13,14 @@ public class WebConfig {
     public MainConfig mainConfig;
     public MDKConfig mdkConfig;
     public BoxConfig boxConfig;
-    public EnumMap<ClientType, List<String>> extensionList;
     public List<RegionConfig> regionConfig = List.of();
+    public JsonNode regionGlobalConfig;
+    public EnumMap<ClientType, List<String>> extensionList;
 
     public static class MainConfig {
         public int springbootPort = 8881;
         public String mongodbUrl = "mongodb://localhost:27017";
+        public boolean mongodbEnableSdkLogs = false;
     }
 
     public static class MDKConfig {
@@ -55,6 +58,7 @@ public class WebConfig {
         public Boolean enable_age_gate = false;
         public List<String> enable_age_gate_ignore = List.of();
         public List<String> thirdparty = List.of();
+        public JsonNode thirdparty_ignore = JsonNodeFactory.instance.objectNode();
         public Map<String, Map<String, Object>> thirdparty_login_configs = Map.of();
         public List<JsonNode> firebase_blacklist_devices = List.of();
         public List<JsonNode> firebase_blacklist_lowenddevices = List.of();

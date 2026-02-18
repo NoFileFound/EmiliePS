@@ -25,8 +25,7 @@ public enum ClientType {
     PLATFORM_CX(26),
     PLATFORM_DOUYIN_IOSCLOUD(27),
     PLATFORM_DOUYIN_ANDROIDCLOUD(28),
-    PLATFORM_HARMONYOSNEXT(50),
-    PLATFORM_HOSTCLOUD(100);
+    PLATFORM_HARMONYOSNEXT(50);
 
     @JsonValue @Getter private final int value;
     private static final Map<Integer, ClientType> MAP = Arrays.stream(values()).collect(Collectors.toMap(ClientType::getValue, e -> e));

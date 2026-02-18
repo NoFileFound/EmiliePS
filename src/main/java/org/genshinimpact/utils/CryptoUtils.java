@@ -121,7 +121,7 @@ public final class CryptoUtils {
     }
 
     /**
-     * Perfoms a xor encryption on the given data with the given key.
+     * Performs a xor encryption on the given data with the given key.
      * @param data The given data.
      * @param key The given key.
      * @return Xor-ed array.
@@ -155,9 +155,9 @@ public final class CryptoUtils {
      * Loads dispatch-related cryptographic resources.
      */
     public static void loadDispatchFiles() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-        try(InputStream seedStream = CryptoUtils.class.getClassLoader().getResourceAsStream("webserver/dispatchSeed.bin");
-             InputStream keyStream = CryptoUtils.class.getClassLoader().getResourceAsStream("webserver/dispatchKey.bin");
-             InputStream signingStream = CryptoUtils.class.getClassLoader().getResourceAsStream("webserver/dispatchSignatureKey.der"))
+        try(InputStream seedStream = CryptoUtils.class.getClassLoader().getResourceAsStream("webserver/dispatch/dispatchSeed.bin");
+            InputStream keyStream = CryptoUtils.class.getClassLoader().getResourceAsStream("webserver/dispatch/dispatchKey.bin");
+            InputStream signingStream = CryptoUtils.class.getClassLoader().getResourceAsStream("webserver/dispatch/dispatchSignatureKey.der"))
         {
             if(seedStream == null || keyStream == null || signingStream == null) {
                 throw new FileNotFoundException("One or more dispatch resources could not be found.");
@@ -169,7 +169,7 @@ public final class CryptoUtils {
         }
 
         for(int i = 1; i <= 5; i++) {
-            String resourcePath = "webserver/dispatch_" + i + ".der";
+            String resourcePath = "webserver/dispatch/key_id_" + i + ".der";
             try(InputStream is = CryptoUtils.class.getClassLoader().getResourceAsStream(resourcePath)) {
                 if(is == null) {
                     throw new FileNotFoundException("Missing key file: " + resourcePath);

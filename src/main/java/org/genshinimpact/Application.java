@@ -14,11 +14,19 @@ public class Application {
     @Getter private static final Logger logger = Logger.getLogger(Application.class.getName());
 
     public static void main(String[] args) {
+        initializeWebServer(args);
+    }
+
+    public static void initializeWebServer(String[] args) {
         try {
             CryptoUtils.loadDispatchFiles();
-        } catch (Exception ignored) {};
-        SpringBootApp.main(args);
-        GeoIP.loadGeoDatabase();
-        Database.initialize();
+            SpringBootApp.main(args);
+            GeoIP.loadGeoDatabase();
+            Database.initialize();
+        } catch (Exception ignored) {}
+    }
+
+    public static void initializeGameServer(String[] args) {
+
     }
 }
