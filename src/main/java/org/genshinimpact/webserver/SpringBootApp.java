@@ -10,7 +10,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = {org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration.class, org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration.class})
 public class SpringBootApp {
     @Getter private static final WebConfig webConfig;
 
@@ -29,9 +29,14 @@ public class SpringBootApp {
     public static void main(String[] args) {
         SpringApplication app = new SpringApplication(SpringBootApp.class);
         Map<String, Object> defaultProperties = new HashMap<>();
-        defaultProperties.put("server.port", webConfig.mainConfig.springbootPort);
+        defaultProperties.put("server.port", webConfig.springBootConfig.springbootPort);
+        defaultProperties.put("logging.level.root", webConfig.springBootConfig.springbootLogLevel);
+        defaultProperties.put("logging.level.org.springframework", webConfig.springBootConfig.springbootLogLevel);
+        defaultProperties.put("server.compression.enabled", webConfig.springBootConfig.springbootEnableCompression);
+        defaultProperties.put("spring.web.locale", "ja_JP");
         app.setDefaultProperties(defaultProperties);
         app.setWebApplicationType(WebApplicationType.SERVLET);
+        app.setBannerMode(org.springframework.boot.Banner.Mode.OFF);
         app.run(args);
     }
 }

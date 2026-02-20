@@ -2,12 +2,20 @@
   <dictionary name="project">
     <words>
       <w>adsdk</w>
-      <w>androidcloud</w>
       <w>apmconfig</w>
+      <w>catcafe</w>
       <w>cdkey</w>
       <w>cloudplatform</w>
       <w>coolpad</w>
+      <w>dismatch</w>
+      <w>epicgames</w>
+      <w>filmfes</w>
+      <w>fishblaster</w>
+      <w>flycloak</w>
       <w>forgotpwd</w>
+      <w>gameserver</w>
+      <w>hachi</w>
+      <w>hcoin</w>
       <w>honkai</w>
       <w>honkainexus</w>
       <w>honkairpg</w>
@@ -15,19 +23,27 @@
       <w>hoyoplay</w>
       <w>httpdns</w>
       <w>ioscloud</w>
+      <w>irodori</w>
       <w>jinli</w>
       <w>macoscloud</w>
+      <w>mcoin</w>
+      <w>mechanicus</w>
       <w>meizu</w>
       <w>mihoyosdk</w>
       <w>millits</w>
-      <w>pccloud</w>
+      <w>openstate</w>
       <w>pjsh</w>
+      <w>regist</w>
       <w>retcode</w>
+      <w>samachurl</w>
+      <w>scoin</w>
       <w>starrailscloud</w>
       <w>starrysky</w>
       <w>succ</w>
       <w>tearsofthemis</w>
+      <w>tothemoon</w>
       <w>vivo</w>
+      <w>wandojia</w>
       <w>wegame</w>
       <w>ysdk</w>
       <w>zenless</w>

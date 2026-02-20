@@ -10,17 +10,19 @@ import org.genshinimpact.webserver.enums.ClientType;
 
 @SuppressWarnings("unused")
 public class WebConfig {
-    public MainConfig mainConfig;
+    public SpringBootConfig springBootConfig;
+    public boolean mongodbEnableSdkLogs = true;
     public MDKConfig mdkConfig;
     public BoxConfig boxConfig;
     public List<RegionConfig> regionConfig = List.of();
     public JsonNode regionGlobalConfig;
     public EnumMap<ClientType, List<String>> extensionList;
 
-    public static class MainConfig {
+    public static class SpringBootConfig {
         public int springbootPort = 8881;
-        public String mongodbUrl = "mongodb://localhost:27017";
-        public boolean mongodbEnableSdkLogs = false;
+        public boolean mongodbEnableSdkLogs = true;
+        public String springbootLogLevel = "INFO";
+        public boolean springbootEnableCompression = false;
     }
 
     public static class MDKConfig {

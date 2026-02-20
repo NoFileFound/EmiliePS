@@ -5,7 +5,7 @@ import static org.genshinimpact.webserver.enums.Retcode.RETCODE_FAIL;
 import static org.genshinimpact.webserver.enums.Retcode.RETCODE_SUCC;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
-import org.genshinimpact.database.Database;
+import org.genshinimpact.database.DBUtils;
 import org.genshinimpact.utils.CryptoUtils;
 import org.genshinimpact.utils.JsonUtils;
 import org.genshinimpact.webserver.models.telemetry.AndroidSdkDataUploadModel;
@@ -88,7 +88,7 @@ public final class SDKController {
                 return ResponseEntity.ok(new Response<>(RETCODE_FAIL, "请求格式错误"));
             }
 
-            Database.saveLog(body, "sdk_logs");
+            DBUtils.saveLogCache(body, "sdk_logs");
             return ResponseEntity.ok(new Response<>(RETCODE_SUCC, "OK"));
         } catch(Exception ex) {
             return ResponseEntity.ok(new Response<>(RETCODE_FAIL, "请求格式错误"));
@@ -149,7 +149,7 @@ public final class SDKController {
             return ResponseEntity.ok(new Response<>(RETCODE_FAIL, "请求格式错误"));
         }
 
-        Database.saveLog(body, "android_sdk_logs");
+        DBUtils.saveLogCache(body, "android_sdk_logs");
         return ResponseEntity.ok(new Response<>(RETCODE_SUCC, "OK"));
     }
 }

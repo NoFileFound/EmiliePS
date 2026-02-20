@@ -5,7 +5,7 @@ import com.maxmind.geoip2.DatabaseReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
-import org.genshinimpact.Application;
+import org.genshinimpact.bootstrap.AppBootstrap;
 
 public final class GeoIP {
     private static DatabaseReader reader;
@@ -19,7 +19,7 @@ public final class GeoIP {
             return;
         }
 
-        try(InputStream dbStream = Application.class.getClassLoader().getResourceAsStream("GeoIP.dat")) {
+        try(InputStream dbStream = AppBootstrap.class.getClassLoader().getResourceAsStream("GeoIP.dat")) {
             if (dbStream == null) {
                 isLoaded = false;
                 throw new IOException("GeoIP.dat not found in resources");
@@ -27,9 +27,9 @@ public final class GeoIP {
 
             reader = new DatabaseReader.Builder(dbStream).build();
             isLoaded = true;
-            Application.getLogger().info("GeoIP database loaded.");
+            AppBootstrap.getLogger().info("GeoIP database loaded.");
         } catch (Exception e) {
-            Application.getLogger().severe("GeoIP database could not be loaded: " + e.getMessage());
+            AppBootstrap.getLogger().error("GeoIP database could not be loaded: " + e.getMessage());
         }
     }
 

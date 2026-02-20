@@ -65,7 +65,7 @@ public final class ComboGranterController {
             data.put("disable_ysdk_guard", !SpringBootApp.getWebConfig().mdkConfig.enable_ysdk_guard);
             data.put("enable_announce_pic_popup", SpringBootApp.getWebConfig().mdkConfig.enable_announce_pic_popup);
             data.put("app_name", "原神");
-            if(clientType == ClientType.PLATFORM_PC || clientType == ClientType.PLATFORM_PCCLOUD) {
+            if(clientType == ClientType.PLATFORM_PC || clientType == ClientType.PLATFORM_PC_CLOUD) {
                 data.put("qr_enabled_apps", new LinkedHashMap<>() {{
                     put("bbs", true);
                     put("cloud", true);

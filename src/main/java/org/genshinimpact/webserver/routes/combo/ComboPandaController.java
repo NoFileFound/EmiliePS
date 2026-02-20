@@ -160,6 +160,10 @@ public final class ComboPandaController {
             return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SYSTEM_ERROR, "系统请求失败，请返回重试"));
         }
 
+        if(!SpringBootApp.getWebConfig().mdkConfig.enable_qrcode_login) {
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_REQUEST_FAILED, "二维码功能已关闭"));
+        }
+
         int status = this.pandaQRCodesStore.getQrCodeStatus(body.ticket);
         return switch(status) {
             case -1000 -> // The QR code does not exist.

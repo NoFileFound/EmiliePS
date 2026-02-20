@@ -3,6 +3,7 @@ package org.genshinimpact.utils;
 // Imports
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Getter;
+import org.genshinimpact.bootstrap.AppBootstrap;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -154,18 +155,22 @@ public final class CryptoUtils {
     /**
      * Loads dispatch-related cryptographic resources.
      */
-    public static void loadDispatchFiles() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-        try(InputStream seedStream = CryptoUtils.class.getClassLoader().getResourceAsStream("webserver/dispatch/dispatchSeed.bin");
-            InputStream keyStream = CryptoUtils.class.getClassLoader().getResourceAsStream("webserver/dispatch/dispatchKey.bin");
-            InputStream signingStream = CryptoUtils.class.getClassLoader().getResourceAsStream("webserver/dispatch/dispatchSignatureKey.der"))
-        {
-            if(seedStream == null || keyStream == null || signingStream == null) {
-                throw new FileNotFoundException("One or more dispatch resources could not be found.");
-            }
+    public static void loadDispatchFiles(boolean dispatch) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+        if(dispatch) {
+            try(InputStream seedStream = CryptoUtils.class.getClassLoader().getResourceAsStream("webserver/dispatch/dispatchSeed.bin");
+                InputStream keyStream = CryptoUtils.class.getClassLoader().getResourceAsStream("webserver/dispatch/dispatchKey.bin");
+                InputStream signingStream = CryptoUtils.class.getClassLoader().getResourceAsStream("webserver/dispatch/dispatchSignatureKey.der"))
+            {
+                if(seedStream == null || keyStream == null || signingStream == null) {
+                    throw new FileNotFoundException("One or more dispatch resources could not be found.");
+                }
 
-            dispatchSeed = seedStream.readAllBytes();
-            dispatchKey = keyStream.readAllBytes();
-            dispatchSignatureKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(signingStream.readAllBytes()));
+                dispatchSeed = seedStream.readAllBytes();
+                dispatchKey = keyStream.readAllBytes();
+                dispatchSignatureKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(signingStream.readAllBytes()));
+            }
+        } else {
+            /// TODO: Client files.
         }
 
         for(int i = 1; i <= 5; i++) {
@@ -178,5 +183,7 @@ public final class CryptoUtils {
                 dispatchEncryptionKeys.put(i, KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(is.readAllBytes())));
             } catch(Exception ignored) {}
         }
+
+        AppBootstrap.getLogger().info("The dispatch encryption files were loaded successfully.");
     }
 }

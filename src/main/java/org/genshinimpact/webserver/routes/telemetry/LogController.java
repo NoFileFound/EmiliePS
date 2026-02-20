@@ -5,7 +5,7 @@ import static org.genshinimpact.webserver.enums.Retcode.RETCODE_FAIL;
 import static org.genshinimpact.webserver.enums.Retcode.RETCODE_SUCC;
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.servlet.http.HttpServletRequest;
-import org.genshinimpact.Application;
+import org.genshinimpact.bootstrap.AppBootstrap;
 import org.genshinimpact.utils.CryptoUtils;
 import org.genshinimpact.utils.JsonUtils;
 import org.genshinimpact.webserver.models.telemetry.H5LogModel;
@@ -68,14 +68,16 @@ public final class LogController {
 
         switch (body.logType) {
             case "Warning":
-                Application.getLogger().warning(sb.toString());
+                AppBootstrap.getLogger().warn(sb.toString());
                 break;
             case "Error":
+                AppBootstrap.getLogger().error(sb.toString());
+                break;
             case "Exception":
-                Application.getLogger().severe(sb.toString());
+                AppBootstrap.getLogger().trace(sb.toString());
                 break;
             default:
-                Application.getLogger().info(sb.toString());
+                AppBootstrap.getLogger().info(sb.toString());
                 break;
         }
 

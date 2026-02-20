@@ -11,7 +11,7 @@ import java.security.Signature;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.crypto.Cipher;
-import org.genshinimpact.Application;
+import org.genshinimpact.bootstrap.AppBootstrap;
 import org.genshinimpact.utils.CryptoUtils;
 import org.genshinimpact.utils.JsonUtils;
 import org.genshinimpact.webserver.SpringBootApp;
@@ -45,7 +45,7 @@ public final class RegionController {
         var dispatchKey = CryptoUtils.getDispatchKey();
         var dispatchSeed = CryptoUtils.getDispatchSeed();
         if(regionsConfig.isEmpty()) {
-            Application.getLogger().severe("There are no game servers available. Exiting due to unplayable state.");
+            AppBootstrap.getLogger().error("There are no game servers available. Exiting due to unplayable state.");
             System.exit(1);
         }
 
@@ -56,8 +56,8 @@ public final class RegionController {
                 this.serverRegions.put(region.name, new RegionMap(region, CryptoUtils.encodeBase64(
                         QueryCurrRegionHttpRsp.newBuilder()
                                 .setRetcode(0)
-                                .setRegionInfo(buildRegionInfo(region))
-                                .setClientSecretKey(ByteString.copyFrom(dispatchKey))
+                                .setRegionInfo(this.buildRegionInfo(region))
+                                .setClientSecretKey(ByteString.copyFrom(dispatchSeed))
                                 .setRegionCustomConfigEncrypted(ByteString.copyFrom(CryptoUtils.getXor(JsonUtils.toJsonString(region.encryptedConfig).getBytes(), dispatchKey)))
                                 .setConnectGateTicket(region.dispatchTicket)
                                 .build()
@@ -78,7 +78,7 @@ public final class RegionController {
             this.queryAllRegionResponse = this.buildRegionList(regions, root, 1, dispatchKey, dispatchSeed);
             this.queryAllRegionResponseOverseas = this.buildRegionList(regions, root, 3, dispatchKey, dispatchSeed);
         } catch(Exception ex) {
-            Application.getLogger().severe(ex.getMessage());
+            AppBootstrap.getLogger().error(ex.getMessage());
             System.exit(1);
         }
     }

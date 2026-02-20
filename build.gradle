@@ -16,13 +16,12 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-web')
     implementation('com.google.protobuf:protobuf-java:3.19.4')
     implementation('org.fusesource.jansi:jansi:2.4.0')
-    implementation('org.slf4j:slf4j-api:2.0.9')
-    implementation('ch.qos.logback:logback-classic:1.4.11')
     implementation('org.mongodb:mongodb-driver-sync:4.2.3')
     implementation('org.mongodb:mongodb-driver-core:4.2.3')
     implementation('org.mongodb:bson:4.2.3')
     implementation('dev.morphia.morphia:morphia-core:2.2.7')
-    implementation 'com.maxmind.geoip2:geoip2:4.4.0'
+    implementation('com.maxmind.geoip2:geoip2:4.4.0')
+    implementation('org.slf4j:jul-to-slf4j:2.0.9')
     compileOnly('org.projectlombok:lombok:1.18.30')
     annotationProcessor('org.projectlombok:lombok:1.18.30')
 }

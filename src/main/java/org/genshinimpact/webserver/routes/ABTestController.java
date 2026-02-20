@@ -5,9 +5,9 @@ import static org.genshinimpact.webserver.enums.Retcode.RETCODE_ABTEST_AUTHENTIC
 import static org.genshinimpact.webserver.enums.Retcode.RETCODE_PARAMETER_ERROR;
 import static org.genshinimpact.webserver.enums.Retcode.RETCODE_SUCC;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
-import org.genshinimpact.database.Database;
+import org.genshinimpact.database.DBUtils;
 import org.genshinimpact.utils.CryptoUtils;
 import org.genshinimpact.utils.JsonUtils;
 import org.genshinimpact.webserver.models.ABTestExperimentsListModel;
@@ -55,6 +55,6 @@ public final class ABTestController {
             return ResponseEntity.ok(new ABTestExperimentsListResponse<>(RETCODE_ABTEST_AUTHENTICATION_FAILED, "认证失败"));
         }
 
-        return ResponseEntity.ok(new ABTestExperimentsListResponse<>(RETCODE_SUCC, "", Database.getSceneExperiments(Arrays.asList(body.scene_id.split(",")))));
+        return ResponseEntity.ok(new ABTestExperimentsListResponse<>(RETCODE_SUCC, "", DBUtils.getSceneExperiments(List.of(body.scene_id.split(",")))));
     }
 }

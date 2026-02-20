@@ -113,7 +113,7 @@ public final class ComboBoxController {
             }
 
             switch(clientType) {
-                case PLATFORM_ANDROID, PLATFORM_ANDROIDCLOUD -> {
+                case PLATFORM_ANDROID, PLATFORM_ANDROID_CLOUD -> {
                     vals.put("enable_consent_by_country", String.valueOf(SpringBootApp.getWebConfig().boxConfig.enable_consent_by_country));
                     vals.put("set_consent_false_country", SpringBootApp.getWebConfig().boxConfig.set_consent_false_country.toString());
                     vals.put("set_consent_by_age_country", "{\"US\":[\"1\"]}");
@@ -157,7 +157,7 @@ public final class ComboBoxController {
                     vals.put("kibana_pc_config", SpringBootApp.getWebConfig().boxConfig.kibana_pc_config.toString());
                     vals.put("ps4_bind_mobile_config", SpringBootApp.getWebConfig().boxConfig.ps4_bind_mobile_config.toString());
                 }
-                case PLATFORM_PC, PLATFORM_PCCLOUD -> {
+                case PLATFORM_PC, PLATFORM_PC_CLOUD -> {
                     vals.put("domain_region_enable", String.valueOf(SpringBootApp.getWebConfig().boxConfig.enable_domain_region));
                     vals.put("kibana_pc_config", SpringBootApp.getWebConfig().boxConfig.kibana_pc_config.toString());
                     vals.put("enable_web_dpi", String.valueOf(SpringBootApp.getWebConfig().boxConfig.enable_web_dpi));
