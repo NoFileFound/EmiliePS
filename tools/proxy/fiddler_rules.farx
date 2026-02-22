@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<AutoResponder RulesVersion="3" LastSave="2026-02-22T22:22:37.9287554+09:00" FiddlerVersion="6.0.0.0">
+  <State Enabled="true" AcceptAllConnects="false" Fallthrough="true" UseLatency="false">
+    <ResponseGroup Id="336a16ba-c0ac-4bdb-93b4-db1f941014d6" Priority="1" Header="Genshin impact" Enabled="true" />
+    <ResponseRule ParentId="336a16ba-c0ac-4bdb-93b4-db1f941014d6" Priority="2" MaxMatchCount="1" Comment="Name translations" Enabled="true" Match="{&quot;matches&quot;:[&quot;%%eyJ0eXBlIjo0LCJrZXkiOm51bGwsImNvbmRpdGlvbiI6ImNvbnRhaW5zIiwidmFsdWUiOiJoazRlLXVzcGlkZXIubWlob3lvLmNvbTo4MTAwL1RyYW5zbGF0ZSIsImVuYWJsZWQiOnRydWUsImNhc2VJbnNlbnNpdGl2ZVZhbHVlIjp0cnVlLCJjYXNlSW5zZW5zaXRpdmVLZXkiOnRydWUsImlkIjowfQ==&quot;],&quot;matchCondition&quot;:1}" Action="[&quot;%%eyJ0eXBlIjoxLCJjb25kaXRpb24iOiJzZXQiLCJrZXkiOiIjZmZlYzFhZmYiLCJ2YWx1ZSI6InVuY2hhbmdlZCIsImNhc2VJbnNlbnNpdGl2ZUtleSI6dHJ1ZSwiY2FzZUluc2Vuc2l0aXZlVmFsdWUiOnRydWUsImlkIjoiYTgxamYzZHR6dWMiLCJleHRyYURhdGEiOnsid2FybmluZ3MiOltdLCJlcnJvcnMiOltdfSwiaXNVbnJlYWNoYWJsZSI6ZmFsc2V9&quot;,&quot;%%eyJ0eXBlIjo2LCJjb25kaXRpb24iOiJzZXQiLCJrZXkiOiIiLCJ2YWx1ZSI6Imh0dHA6Ly8xMjcuMC4wLjE6ODEwMC9UcmFuc2xhdGUiLCJpZCI6ImE2aXp3MnVkNWhlIiwiY2FzZUluc2Vuc2l0aXZlS2V5Ijp0cnVlLCJjYXNlSW5zZW5zaXRpdmVWYWx1ZSI6dHJ1ZSwiZXh0cmFEYXRhIjp7Indhcm5pbmdzIjpbXSwiZXJyb3JzIjpbXX0sImlzVW5yZWFjaGFibGUiOmZhbHNlLCJpc0ZpbmFsIjpmYWxzZSwiZmluZCI6IiJ9&quot;]" HasFinalAction="False" />
+  </State>
+</AutoResponder>

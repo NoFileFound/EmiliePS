@@ -1,8 +1,17 @@
 package org.genshinimpact.webserver.routes.mdk;
 
 // Imports
+import com.github.benmanes.caffeine.cache.Cache;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.LinkedHashMap;
-import org.genshinimpact.utils.JsonUtils;
+import java.util.concurrent.atomic.AtomicInteger;
+import org.genshinimpact.database.DBUtils;
+import org.genshinimpact.database.collections.Account;
+import org.genshinimpact.database.collections.Ticket;
+import org.genshinimpact.utils.CryptoUtils;
+import org.genshinimpact.webserver.models.LoginModel;
+import org.genshinimpact.webserver.responses.LoginResponse;
+import org.genshinimpact.webserver.utils.JsonUtils;
 import org.genshinimpact.webserver.SpringBootApp;
 import org.genshinimpact.webserver.enums.AppName;
 import org.genshinimpact.webserver.enums.ClientType;
@@ -10,12 +19,24 @@ import org.genshinimpact.webserver.enums.Retcode;
 import org.genshinimpact.webserver.responses.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = {"hk4e_global/mdk/shield/api", "hk4e_cn/mdk/shield/api", "mdk/shield/api", "takumi/hk4e_cn/mdk/shield/api", "takumi/hk4e_global/mdk/shield/api", "takumi/mdk/shield/api"}, produces = "application/json")
 public final class MDKShieldController {
+    private final Cache<String, AtomicInteger> requestRateCache;
+
+    /**
+     * Creates a new {@code MDKShieldController}.
+     * @param requestRateCache The rate limit cache.
+     */
+    public MDKShieldController(Cache<String, AtomicInteger> requestRateCache) {
+        this.requestRateCache = requestRateCache;
+    }
+
     /**
      * Source: <a href="https://devapi-static.mihoyo.com/takumi/mdk/shield/api/loadConfig">https://devapi-static.mihoyo.com/takumi/mdk/shield/api/loadConfig</a><br><br>
      *  Description: Fetches client configuration about the login page.<br><br>
@@ -111,6 +132,79 @@ public final class MDKShieldController {
             return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", data));
         }catch(Exception ignored) {
             return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR2, "缺少配置"));
+        }
+    }
+
+    /**
+     *  Source: <a href="https://hk4e-sdk.mihoyo.com/mdk/shield/api/login">https://hk4e-sdk.mihoyo.com/mdk/shield/api/login</a><br><br>
+     *  Description: Logins in the game.<br><br>
+     *  Method: POST<br>
+     *  Content-Type: application/json<br><br>
+     *  Parameters:<br>
+     *        <ul>
+     *          <li>{@code account} — The account's email or nickname.</li>
+     *          <li>{@code is_crypto} — Is the account password encrypted with AES256.</li>
+     *          <li>{@code password} — The account's password.</li>
+     *        </ul>
+     *  Headers:
+     *        <ul>
+     *          <li>{@code x-rpc-device_id} — The client's device id.</li>
+     *          <li>{@code x-rpc-risky} — The verification token after captcha.</li>
+     *        </ul>
+     */
+    @PostMapping(value = "login")
+    public ResponseEntity<Response<?>> SendMdkLogin(HttpServletRequest request, @RequestHeader(value = "x-rpc-device_id", required = false) String device_id, @RequestHeader(value = "x-rpc-risky", required = false) String risky) {
+        String ipAddress = request.getRemoteAddr();
+        AtomicInteger counter = this.requestRateCache.get(ipAddress, k -> new AtomicInteger(0));
+        if(counter.incrementAndGet() > 15) {
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_RATE_LIMIT_EXCEEDED, "操作次數過多，請稍後再試"));
+        }
+
+        LoginModel body;
+        try {
+            body = JsonUtils.read(request.getInputStream(), LoginModel.class);
+            if(body.account == null || body.account.isBlank() || body.password == null || body.password.isBlank() || body.is_crypto == null || device_id == null || device_id.isBlank() || risky == null || risky.isBlank()) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
+            }
+
+            if(SpringBootApp.getWebConfig().mdkConfig.enable_mtt) {
+                if(!SpringBootApp.getCaptchaStore().checkCaptchaStatus(risky)) {
+                    return ResponseEntity.ok(new Response<>(Retcode.RETCODE_NETWORK_AT_RISK, "请求失败，当前网络环境存在风险"));
+                }
+            }
+
+            if(!body.account.matches("^(?:[A-Za-z0-9][A-Za-z0-9._]{2,19}|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,})$")) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_ACCOUNT_INVALID_FORMAT, "账号格式不正确"));
+            }
+
+            if(body.is_crypto == true) {
+                body.password = CryptoUtils.decryptPassword(body.password);
+                if(body.password.isEmpty()) {
+                    return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SYSTEM_ERROR, "密码解密错误"));
+                }
+            }
+
+            if(!body.password.matches("^[!-~]{8,32}$")) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "密碼格式為8-30位，並且至少包含數字、大小寫字母、英文特殊符號其中兩種"));
+            }
+
+            Account myAccount = (body.account.contains("@") ? DBUtils.findAccountByEmailAddress(body.account) : DBUtils.findAccountByUsername(body.account));
+            if(myAccount == null || !myAccount.getPassword().equals(CryptoUtils.getMd5(body.password.getBytes()))) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_INVALID_ACCOUNT, "未找到账户"));
+            }
+
+            ///  TODO: HEARTBEAT SUPPORT.
+            if(myAccount.getDeviceInfo().get(device_id) == null) {
+                myAccount.setSessionToken(CryptoUtils.generateStringKey(32));
+                SpringBootApp.getTicketStore().createTicket(myAccount, Ticket.TicketType.TICKET_DEVICE_GRANT);
+            } else {
+                myAccount.setSessionToken(CryptoUtils.generateStringKey(32));
+                myAccount.save();
+            }
+
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new LoginResponse(myAccount, request.getRemoteAddr())));
+        } catch(Exception ignored) {
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
         }
     }
 }

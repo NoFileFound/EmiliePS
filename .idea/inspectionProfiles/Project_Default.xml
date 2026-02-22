@@ -12,6 +12,8 @@
           <option value="x-rpc-game_biz" />
           <option value="x-rpc-client_type" />
           <option value="cms-signature" />
+          <option value="x-rpc-device_id" />
+          <option value="x-rpc-risky" />
         </set>
       </option>
     </inspection_tool>

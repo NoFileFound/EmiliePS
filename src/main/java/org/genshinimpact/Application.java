@@ -13,9 +13,11 @@ public class Application {
         SLF4JBridgeHandler.install();
 
         int startType = 2;
-        AppBootstrap.init(startType == 0 || startType == 2);
+        AppBootstrap.init(startType);
         if(startType == 2) {
             SpringBootApp.main(args);
         }
+
+        Runtime.getRuntime().addShutdownHook(new Thread(AppBootstrap::stopServer));
     }
 }

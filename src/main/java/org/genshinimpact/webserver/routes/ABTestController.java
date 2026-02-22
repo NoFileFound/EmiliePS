@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import org.genshinimpact.database.DBUtils;
 import org.genshinimpact.utils.CryptoUtils;
-import org.genshinimpact.utils.JsonUtils;
+import org.genshinimpact.webserver.utils.JsonUtils;
 import org.genshinimpact.webserver.models.ABTestExperimentsListModel;
 import org.genshinimpact.webserver.responses.ABTestExperimentsListResponse;
 import org.springframework.http.ResponseEntity;

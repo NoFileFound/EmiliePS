@@ -1,19 +1,31 @@
 package org.genshinimpact.webserver.routes.combo;
 
 // Imports
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.genshinimpact.database.DBUtils;
+import org.genshinimpact.database.collections.Account;
+import org.genshinimpact.utils.CryptoUtils;
 import org.genshinimpact.utils.GeoIP;
-import org.genshinimpact.utils.JsonUtils;
+import org.genshinimpact.webserver.models.GranterLoginModel;
+import org.genshinimpact.webserver.responses.GranterLoginResponse;
+import org.genshinimpact.webserver.responses.MdkGetConfigResponse;
+import org.genshinimpact.webserver.responses.MdkGetDynamicConfigResponse;
+import org.genshinimpact.webserver.utils.JsonUtils;
 import org.genshinimpact.webserver.SpringBootApp;
 import org.genshinimpact.webserver.enums.*;
 import org.genshinimpact.webserver.models.GetProtocolModel;
 import org.genshinimpact.webserver.responses.GetProtocolResponse;
 import org.genshinimpact.webserver.responses.Response;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = {"hk4e_global/combo/granter", "hk4e_cn/combo/granter", "combo/granter", "takumi/hk4e_global/combo/granter", "takumi/hk4e_cn/combo/granter", "takumi/combo/granter"}, produces = "application/json")
@@ -47,7 +59,7 @@ public final class ComboGranterController {
      *        </ul>
      */
     @GetMapping(value = "api/getConfig")
-    public ResponseEntity<Response<?>> SendMDKConfig(String app_id, String channel_id, String client_type) {
+    public ResponseEntity<Response<?>> SendComboConfig(String app_id, String channel_id, String client_type) {
         try {
             AppId appId = AppId.fromValue(app_id);
             ChannelType channelType = ChannelType.fromValue(channel_id);
@@ -56,38 +68,27 @@ public final class ComboGranterController {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SYSTEM_ERROR, "参数错误"));
             }
 
-            LinkedHashMap<String, Object> data = new LinkedHashMap<>();
-            data.put("protocol", channelType == ChannelType.CHANNEL_DEFAULT);
-            data.put("qr_enabled", SpringBootApp.getWebConfig().mdkConfig.enable_qrcode_login);
-            data.put("log_level", "DEBUG");
-            data.put("announce_url", SpringBootApp.getWebConfig().mdkConfig.announce_url);
-            data.put("push_alias_type", SpringBootApp.getWebConfig().mdkConfig.push_alias_type);
-            data.put("disable_ysdk_guard", !SpringBootApp.getWebConfig().mdkConfig.enable_ysdk_guard);
-            data.put("enable_announce_pic_popup", SpringBootApp.getWebConfig().mdkConfig.enable_announce_pic_popup);
-            data.put("app_name", "原神");
+            MdkGetConfigResponse response = new MdkGetConfigResponse();
+            response.setProtocol(channelType == ChannelType.CHANNEL_DEFAULT);
+            response.setQrEnabled(SpringBootApp.getWebConfig().mdkConfig.enable_qrcode_login);
+            response.setLogLevel("DEBUG");
+            response.setAnnounceUrl(SpringBootApp.getWebConfig().mdkConfig.announce_url);
+            response.setPushAliasType(SpringBootApp.getWebConfig().mdkConfig.push_alias_type);
+            response.setDisableYsdkGuard(!SpringBootApp.getWebConfig().mdkConfig.enable_ysdk_guard);
+            response.setEnableAnnouncePicPopup(SpringBootApp.getWebConfig().mdkConfig.enable_announce_pic_popup);
+            response.setAppName("原神");
             if(clientType == ClientType.PLATFORM_PC || clientType == ClientType.PLATFORM_PC_CLOUD) {
-                data.put("qr_enabled_apps", new LinkedHashMap<>() {{
-                    put("bbs", true);
-                    put("cloud", true);
-                }});
-                data.put("qr_app_icons", new LinkedHashMap<>() {{
-                    put("app", "");
-                    put("bbs", "");
-                    put("cloud", "https://webstatic.mihoyo.com/upload/operation_location/2022/12/07/ec0f2514f044ac43754440241ab0b838_3962973103776517937.png");
-                }});
+                response.setQrEnabledApps(new MdkGetConfigResponse.QrApps(true, true));
+                response.setQrAppIcons(new MdkGetConfigResponse.QrAppIcons("", "", "https://webstatic.mihoyo.com/upload/operation_location/2022/12/07/ec0f2514f044ac43754440241ab0b838_3962973103776517937.png"));
             }
 
-            data.put("qr_cloud_display_name", "云·原神");
-            data.put("qr_app_display_name", "");
-            data.put("qr_bbs_display_name", "");
-            data.put("enable_user_center", SpringBootApp.getWebConfig().mdkConfig.enable_user_center);
-            data.put("functional_switch_configs", new LinkedHashMap<>() {{
-                put("jpush", SpringBootApp.getWebConfig().mdkConfig.enable_jpush);
-                put("initialize_appsflyer", SpringBootApp.getWebConfig().mdkConfig.enable_appsflyer);
-                put("allow_notification", false);
-            }});
-            data.put("ugc_protocol", SpringBootApp.getWebConfig().mdkConfig.enable_ugc_protocol);
-            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", data));
+            response.setQrCloudDisplayName("云·原神");
+            response.setQrAppDisplayName("");
+            response.setQrBbsDisplayName("");
+            response.setEnableUserCenter(SpringBootApp.getWebConfig().mdkConfig.enable_user_center);
+            response.setFunctionalSwitchConfigs(new MdkGetConfigResponse.FunctionalSwitchConfigs(SpringBootApp.getWebConfig().mdkConfig.enable_jpush, SpringBootApp.getWebConfig().mdkConfig.enable_appsflyer, false));
+            response.setUgcProtocol(SpringBootApp.getWebConfig().mdkConfig.enable_ugc_protocol);
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", response));
         } catch(Exception ignored) {
             return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SYSTEM_ERROR, "参数错误"));
         }
@@ -105,7 +106,7 @@ public final class ComboGranterController {
      *        </ul>
      */
     @PostMapping(value = "api/getDynamicClientConfig")
-    public ResponseEntity<Response<?>> SendDynamicConfig(@RequestHeader(value = "x-rpc-game_biz", required = false) String game_biz, @RequestHeader(value = "x-rpc-client_type", required = false) String client_type, HttpServletRequest request) {
+    public ResponseEntity<Response<?>> SendComboDynamicConfig(@RequestHeader(value = "x-rpc-game_biz", required = false) String game_biz, @RequestHeader(value = "x-rpc-client_type", required = false) String client_type, HttpServletRequest request) {
         try {
             ClientType clientType = ClientType.fromValue(client_type);
             AppName appName = AppName.fromValue(game_biz);
@@ -113,10 +114,7 @@ public final class ComboGranterController {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "未知错误"));
             }
 
-            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new LinkedHashMap<>() {{
-                put("enable_consent_banner", false);
-                put("region_code", GeoIP.getCountryCode(request.getRemoteAddr()));
-            }}));
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new MdkGetDynamicConfigResponse(false, GeoIP.getCountryCode(request.getRemoteAddr()))));
         } catch(Exception ignored) {
             return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "未知错误"));
         }
@@ -133,14 +131,14 @@ public final class ComboGranterController {
      *        </ul>
      */
     @GetMapping(value = "api/getFont")
-    public ResponseEntity<Response<?>> SendFonts(String app_id) {
+    public ResponseEntity<Response<?>> SendComboFonts(String app_id) {
         try {
             AppId appName = AppId.fromValue(app_id);
             if(appName == null || appName == AppId.APP_UNKNOWN) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "AppID错误"));
             }
 
-            if(appName == AppId.APP_GENSHIN) {
+            if(appName == AppId.APP_GENSHIN || appName == AppId.APP_CLOUDPLATFORM) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", Map.of(
                         "fonts", List.of(
                                 Map.of(
@@ -160,10 +158,8 @@ public final class ComboGranterController {
                         )
                 )));
             }
-            else
-            {
-                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", Map.of("fonts", List.of())));
-            }
+
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", Map.of("fonts", List.of())));
         } catch(Exception ignored) {
             return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "AppID错误"));
         }
@@ -184,7 +180,7 @@ public final class ComboGranterController {
      *        </ul>
      */
     @PostMapping(value = {"api/compareProtocolVersion", "api/getProtocol"})
-    public ResponseEntity<Response<?>> SendProtocolVersion(HttpServletRequest request) {
+    public ResponseEntity<Response<?>> SendComboProtocolVersion(HttpServletRequest request) {
         GetProtocolModel body;
         try {
             body = JsonUtils.read(request.getInputStream(), GetProtocolModel.class);
@@ -222,7 +218,7 @@ public final class ComboGranterController {
      *        </ul>
      */
     @GetMapping(value = {"api/compareProtocolVersion", "api/getProtocol"})
-    public ResponseEntity<Response<?>> SendProtocolVersion(@RequestParam(value = "app_id", required = false) String app_id, @RequestParam(value = "channel_id", required = false) String channel_id, @RequestParam(value = "language", required = false) String language, @RequestParam(value = "major", required = false) String major, @RequestParam(value = "minimum", required = false) String minimum) {
+    public ResponseEntity<Response<?>> SendComboProtocolVersion(@RequestParam(value = "app_id", required = false) String app_id, @RequestParam(value = "channel_id", required = false) String channel_id, @RequestParam(value = "language", required = false) String language, @RequestParam(value = "major", required = false) String major, @RequestParam(value = "minimum", required = false) String minimum) {
         try {
             AppId appId = AppId.fromValue(app_id);
             ChannelType channelType = ChannelType.fromValue(channel_id);
@@ -244,6 +240,58 @@ public final class ComboGranterController {
             return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new GetProtocolResponse(true, 0, appId, language, version[0], version[1])));
         } catch(Exception ignored) {
             return ResponseEntity.ok(new Response<>(Retcode.RETCODE_REQUEST_FAILED, "协议加载失败"));
+        }
+    }
+
+    /**
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/combo/granter/login/v2/login">https://devapi-takumi.mihoyo.com/combo/granter/login/v2/login</a><br><br>
+     *  Description: Generates the game session.<br><br>
+     *  Method: POST<br>
+     *  Content-Type: application/json<br><br>
+     *  Parameters:<br>
+     *        <ul>
+     *          <li>{@code app_id} — The application id.</li>
+     *          <li>{@code channel_id} — The client's channel id.</li>
+     *          <li>{@code data} — The provided information needed for verification, like user id and variable to check if its guest.</li>
+     *          <li>{@code device} — The client's device id.</li>
+     *          <li>{@code sign} — The signature to check if the provided data is correct.</li>
+     *        </ul>
+     *  Headers:<br>
+     *        <ul>
+     *          <li>{@code x-rpc-game_biz} — Game business identifier ({@code hk4e_global}, {@code hk4e_cn}).</li>
+     */
+    @PostMapping(value = {"login/login", "login/v2/login"})
+    public ResponseEntity<Response<?>> SendComboLogin(HttpServletRequest request, @RequestHeader(value = "x-rpc-game_biz", required = false) String game_biz) {
+        GranterLoginModel body;
+        try {
+            body = JsonUtils.read(request.getInputStream(), GranterLoginModel.class);
+            AppName appName = AppName.fromValue(game_biz);
+            if(body.app_id == null || body.app_id == AppId.APP_UNKNOWN || body.channel_id == null || body.channel_id == ChannelType.CHANNEL_UNKNOWN || body.data == null || body.data.isBlank() || body.sign == null || body.sign.isBlank() || body.device == null || body.device.isBlank() || (appName != AppName.APP_GENSHIN && appName != AppName.APP_GENSHIN_OVERSEAS)) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
+            }
+
+            String hmacSign = CryptoUtils.getHMAC256(String.format("app_id=%s&channel_id=%s&data=%s&device=%s", body.app_id.getValue(), body.channel_id.getValue(), body.data, body.device), (appName == AppName.APP_GENSHIN ? CryptoUtils.getComboKeys().get(1) : CryptoUtils.getComboKeys().get(3)));
+            if(!hmacSign.equals(body.sign)) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_CONFIGURATION_ERROR, "签名错误"));
+            }
+
+            JsonNode data = JsonUtils.read(body.data);
+            if(data == null || !data.has("uid")) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
+            }
+
+            Long userId = data.get("uid").asLong();
+            String userToken = data.get("token").asText();
+            Account myAccount = DBUtils.findAccountById(userId);
+            ///  TODO: GUEST AND HEARTBEAT SUPPORT
+            if(myAccount.getSessionToken() == null || !myAccount.getSessionToken().equals(userToken))
+            {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_NETWORK_AT_RISK, "请求失败，当前网络环境存在风险"));
+            }
+
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new GranterLoginResponse(String.valueOf(userId), userToken, true, AccountType.ACCOUNT_NORMAL)));
+        } catch(Exception ignored) {
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
         }
     }
 }

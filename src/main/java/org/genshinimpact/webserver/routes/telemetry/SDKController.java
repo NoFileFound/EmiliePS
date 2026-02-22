@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
 import org.genshinimpact.database.DBUtils;
 import org.genshinimpact.utils.CryptoUtils;
-import org.genshinimpact.utils.JsonUtils;
+import org.genshinimpact.webserver.utils.JsonUtils;
 import org.genshinimpact.webserver.models.telemetry.AndroidSdkDataUploadModel;
 import org.genshinimpact.webserver.models.telemetry.SdkDataUploadModel;
 import org.genshinimpact.webserver.responses.Response;

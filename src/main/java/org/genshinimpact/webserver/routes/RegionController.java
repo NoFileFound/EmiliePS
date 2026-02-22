@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 import javax.crypto.Cipher;
 import org.genshinimpact.bootstrap.AppBootstrap;
 import org.genshinimpact.utils.CryptoUtils;
-import org.genshinimpact.utils.JsonUtils;
+import org.genshinimpact.webserver.utils.JsonUtils;
 import org.genshinimpact.webserver.SpringBootApp;
 import org.genshinimpact.webserver.WebConfig;
 import org.genshinimpact.webserver.enums.AccountType;

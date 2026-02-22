@@ -3,26 +3,66 @@ package org.genshinimpact.utils;
 // Imports
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Getter;
-import org.genshinimpact.bootstrap.AppBootstrap;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.*;
+import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import javax.crypto.Cipher;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import org.genshinimpact.bootstrap.AppBootstrap;
+import org.genshinimpact.webserver.utils.JsonUtils;
 
 public final class CryptoUtils {
     private static final String h5logKey = "F#ju0q8I9HbmH8PMpJzzBee&p0b5h@Yb";
+    private static byte[] passwordDecryptionKey;
     @Getter private static byte[] dispatchSeed;
     @Getter private static byte[] dispatchKey;
+    @Getter private static byte[] clientSecretKey;
+    @Getter private static final long clientSecretKeySeed = Long.parseUnsignedLong("11468049314633205968");
     @Getter private static final Map<Integer, PublicKey> dispatchEncryptionKeys = new HashMap<>();
     @Getter private static PrivateKey dispatchSignatureKey;
+    @Getter private static final Map<Integer, String> mdkKeys = Map.ofEntries(
+            Map.entry(0, "6bdc3982c25f3f3c38668a32d287d16b"),
+            Map.entry(1, "54c88f02dedb5fdfe997b40d325788ba"),
+            Map.entry(2, "5ba7ef2079a4f72815b8df3edb0b5156"),
+            Map.entry(3, "8e8a13e081aec9619ef8647bbc37da59"),
+            Map.entry(4, "6bdc3982c25f3f3c38668a32d287d16b"),
+            Map.entry(5, "5ba7ef2079a4f72815b8df3edb0b5156"),
+            Map.entry(6, "54c88f02dedb5fdfe997b40d325788ba"),
+            Map.entry(7, "8e8a13e081aec9619ef8647bbc37da59"),
+            Map.entry(8, "54c88f02dedb5fdfe997b40d325788ba"),
+            Map.entry(9, "6bdc3982c25f3f3c38668a32d287d16b"),
+            Map.entry(11, "5ba7ef2079a4f72815b8df3edb0b5156"),
+            Map.entry(12, "8e8a13e081aec9619ef8647bbc37da59"),
+            Map.entry(19, "6bdc3982c25f3f3c38668a32d287d16b"),
+            Map.entry(20, "5ba7ef2079a4f72815b8df3edb0b5156"),
+            Map.entry(21, "5ba7ef2079a4f72815b8df3edb0b5156"),
+            Map.entry(22, "184e37403a5f5281193da53a6c35236d"));
+    @Getter private static final Map<Integer, String> comboKeys = Map.ofEntries(
+            Map.entry(0, "d0d3a7342df2026a70f650b907800111"),
+            Map.entry(1, "71f35d945cf97f8f202cef35ae6aa7ed"),
+            Map.entry(2, "6a4c78fe0356ba4673b8071127b28123"),
+            Map.entry(3, "7320c0c14ad8ce0e82fd8483f7d98435"),
+            Map.entry(4, "d0d3a7342df2026a70f650b907800111"),
+            Map.entry(5, "6a4c78fe0356ba4673b8071127b28123"),
+            Map.entry(6, "71f35d945cf97f8f202cef35ae6aa7ed"),
+            Map.entry(7, "7320c0c14ad8ce0e82fd8483f7d98435"),
+            Map.entry(8, "71f35d945cf97f8f202cef35ae6aa7ed"),
+            Map.entry(9, "d0d3a7342df2026a70f650b907800111"),
+            Map.entry(11, "6a4c78fe0356ba4673b8071127b28123"),
+            Map.entry(12, "7320c0c14ad8ce0e82fd8483f7d98435"),
+            Map.entry(19, "d0d3a7342df2026a70f650b907800111"),
+            Map.entry(20, "6a4c78fe0356ba4673b8071127b28123"),
+            Map.entry(21, "6a4c78fe0356ba4673b8071127b28123"),
+            Map.entry(22, "5b79c89e2decf7309d21673652beb893"));
 
     /**
      * Encodes the given string into a Base64-encoded string.
@@ -81,6 +121,23 @@ public final class CryptoUtils {
     }
 
     /**
+     * Decrypts the login password.
+     * @param password The provided encrypted password.
+     * @return The decrypted password if its successfully or else empty string.
+     */
+    public static String decryptPassword(String password) {
+        try {
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(passwordDecryptionKey);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            cipher.init(Cipher.DECRYPT_MODE, (RSAPrivateKey)keyFactory.generatePrivate(keySpec));
+            return new String(cipher.doFinal(decodeBase64(password)), java.nio.charset.StandardCharsets.UTF_8);
+        } catch(Exception ignored) {
+            return "";
+        }
+    }
+
+    /**
      * Computes the HMAC-SHA1 of the given data using the specified key.
      * @param data The given string to compute.
      * @param key The given key.
@@ -96,6 +153,30 @@ public final class CryptoUtils {
             for(byte b : rawHmac) {
                 sb.append(String.format("%02x", b & 0xff));
             }
+
+            return sb.toString();
+        } catch(Exception ignored) {
+            return "";
+        }
+    }
+
+    /**
+     * Computes the HMAC-SHA256 of the given data using the specified key.
+     * @param data The given string to compute.
+     * @param key The given key.
+     * @return The HMAC-SHA1 as a lowercase hex string.
+     */
+    public static String getHMAC256(String data, String key) {
+        try {
+            SecretKeySpec signingKey = new SecretKeySpec(key.getBytes(java.nio.charset.StandardCharsets.UTF_8), "HmacSHA256");
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(signingKey);
+            byte[] rawHmac = mac.doFinal(data.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder();
+            for(byte b : rawHmac) {
+                sb.append(String.format("%02x", b & 0xff));
+            }
+
             return sb.toString();
         } catch(Exception ignored) {
             return "";
@@ -153,24 +234,35 @@ public final class CryptoUtils {
     }
 
     /**
+     * @param state The application state type.
      * Loads dispatch-related cryptographic resources.
      */
-    public static void loadDispatchFiles(boolean dispatch) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-        if(dispatch) {
+    public static void loadDispatchFiles(int state) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+        if(state == 1 || state == 2) {
             try(InputStream seedStream = CryptoUtils.class.getClassLoader().getResourceAsStream("webserver/dispatch/dispatchSeed.bin");
-                InputStream keyStream = CryptoUtils.class.getClassLoader().getResourceAsStream("webserver/dispatch/dispatchKey.bin");
-                InputStream signingStream = CryptoUtils.class.getClassLoader().getResourceAsStream("webserver/dispatch/dispatchSignatureKey.der"))
-            {
-                if(seedStream == null || keyStream == null || signingStream == null) {
+                 InputStream keyStream = CryptoUtils.class.getClassLoader().getResourceAsStream("webserver/dispatch/dispatchKey.bin");
+                 InputStream signingStream = CryptoUtils.class.getClassLoader().getResourceAsStream("webserver/dispatch/dispatchSignatureKey.der");
+                 InputStream passwordStream = CryptoUtils.class.getClassLoader().getResourceAsStream("webserver/dispatch/passwordKey.der")) {
+
+                if(seedStream == null || keyStream == null || signingStream == null || passwordStream == null) {
                     throw new FileNotFoundException("One or more dispatch resources could not be found.");
                 }
 
                 dispatchSeed = seedStream.readAllBytes();
                 dispatchKey = keyStream.readAllBytes();
                 dispatchSignatureKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(signingStream.readAllBytes()));
+                passwordDecryptionKey = passwordStream.readAllBytes();
             }
-        } else {
-            /// TODO: Client files.
+        }
+
+        if(state == 1 || state == 3) {
+            try(InputStream secretSeedStream = CryptoUtils.class.getClassLoader().getResourceAsStream("webserver/dispatch/secretKey.bin")) {
+                if(secretSeedStream == null) {
+                    throw new FileNotFoundException("One or more dispatch resources could not be found #2.");
+                }
+
+                clientSecretKey = secretSeedStream.readAllBytes();
+            }
         }
 
         for(int i = 1; i <= 5; i++) {

@@ -14,6 +14,7 @@
       <w>flycloak</w>
       <w>forgotpwd</w>
       <w>gameserver</w>
+      <w>geetest</w>
       <w>hachi</w>
       <w>hcoin</w>
       <w>honkai</w>
@@ -21,22 +22,29 @@
       <w>honkairpg</w>
       <w>hoyolab</w>
       <w>hoyoplay</w>
+      <w>hoyoverse</w>
       <w>httpdns</w>
       <w>ioscloud</w>
       <w>irodori</w>
       <w>jinli</w>
+      <w>jpush</w>
       <w>macoscloud</w>
       <w>mcoin</w>
       <w>mechanicus</w>
       <w>meizu</w>
+      <w>mihoyo</w>
       <w>mihoyosdk</w>
       <w>millits</w>
+      <w>moblie</w>
       <w>openstate</w>
       <w>pjsh</w>
+      <w>priv</w>
       <w>regist</w>
       <w>retcode</w>
       <w>samachurl</w>
       <w>scoin</w>
+      <w>sdkenv</w>
+      <w>seccode</w>
       <w>starrailscloud</w>
       <w>starrysky</w>
       <w>succ</w>

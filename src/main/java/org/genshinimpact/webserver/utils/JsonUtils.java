@@ -1,4 +1,4 @@
-package org.genshinimpact.utils;
+package org.genshinimpact.webserver.utils;
 
 // Imports
 import com.fasterxml.jackson.core.JsonProcessingException;

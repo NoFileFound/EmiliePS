@@ -6,10 +6,10 @@ import static org.genshinimpact.webserver.enums.Retcode.RETCODE_SUCC;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
 import org.genshinimpact.utils.CryptoUtils;
-import org.genshinimpact.utils.JsonUtils;
+import org.genshinimpact.webserver.SpringBootApp;
+import org.genshinimpact.webserver.utils.JsonUtils;
 import org.genshinimpact.webserver.models.telemetry.CrashDataUploadModel;
 import org.genshinimpact.webserver.responses.Response;
-import org.genshinimpact.webserver.stores.CrashLogStore;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -19,16 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "crash/", produces = "application/json")
 public final class CrashController {
-    private final CrashLogStore crashLogStore;
-
-    /**
-     * Creates a new {@code CrashDataUploadController}.
-     * @param crashLogStore The crash log storage component used to persist incoming crash reports.
-     */
-    public CrashController(CrashLogStore crashLogStore) {
-        this.crashLogStore = crashLogStore;
-    }
-
     /**
      * Source: <a href="https://devlog-upload.mihoyo.com/crash/dataUpload">https://devlog-upload.mihoyo.com/crash/dataUpload</a><br><br>
      * Description: Collects information about an incident.<br><br>
@@ -101,7 +91,7 @@ public final class CrashController {
             return ResponseEntity.ok(new Response<>(RETCODE_FAIL, "请求格式错误"));
         }
 
-        this.crashLogStore.insert(body);
+        SpringBootApp.getCrashLogStore().insert(body);
         return ResponseEntity.ok(new Response<>(RETCODE_SUCC, "OK"));
     }
 }

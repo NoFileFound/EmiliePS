@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.servlet.http.HttpServletRequest;
 import org.genshinimpact.bootstrap.AppBootstrap;
 import org.genshinimpact.utils.CryptoUtils;
-import org.genshinimpact.utils.JsonUtils;
+import org.genshinimpact.webserver.utils.JsonUtils;
 import org.genshinimpact.webserver.models.telemetry.H5LogModel;
 import org.genshinimpact.webserver.responses.Response;
 import org.springframework.http.ResponseEntity;

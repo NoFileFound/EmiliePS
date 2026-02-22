@@ -1,9 +1,11 @@
 package org.genshinimpact.webserver.routes.combo;
 
 // Imports
+import com.github.benmanes.caffeine.cache.Cache;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
-import org.genshinimpact.utils.JsonUtils;
+import java.util.concurrent.atomic.AtomicInteger;
+import org.genshinimpact.webserver.utils.JsonUtils;
 import org.genshinimpact.webserver.SpringBootApp;
 import org.genshinimpact.webserver.enums.AppId;
 import org.genshinimpact.webserver.enums.AppName;
@@ -22,13 +24,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = {"hk4e_global/combo/panda/qrcode", "hk4e_cn/combo/panda/qrcode", "combo/panda/qrcode"}, produces = "application/json")
 public final class ComboPandaController {
     private final PandaQRCodesStore pandaQRCodesStore;
+    private final Cache<String, AtomicInteger> requestRateCache;
 
     /**
      * Creates a new {@code ComboPandaController}.
      * @param pandaQRCodesStore The qrcode storage component used to persist incoming QRCode requests.
+     * @param requestRateCache The rate limit cache.
      */
-    public ComboPandaController(PandaQRCodesStore pandaQRCodesStore) {
+    public ComboPandaController(PandaQRCodesStore pandaQRCodesStore, Cache<String, AtomicInteger> requestRateCache) {
         this.pandaQRCodesStore = pandaQRCodesStore;
+        this.requestRateCache = requestRateCache;
     }
 
     /**
@@ -67,6 +72,11 @@ public final class ComboPandaController {
      */
     @PostMapping(value = "fetch")
     public ResponseEntity<Response<?>> SendPandaFetch(HttpServletRequest request, @RequestHeader(value = "x-rpc-game_biz", required = false) String game_biz) {
+        AtomicInteger counter = this.requestRateCache.get(request.getRemoteAddr(), k -> new AtomicInteger(0));
+        if(counter.incrementAndGet() > 10) {
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_RATE_LIMIT_EXCEEDED, "操作次數過多，請稍後再試"));
+        }
+
         PandaFetchModel body;
         try {
             body = JsonUtils.read(request.getInputStream(), PandaFetchModel.class);

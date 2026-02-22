@@ -4,7 +4,7 @@ package org.genshinimpact.webserver.responses;
 import org.genshinimpact.webserver.enums.AppId;
 
 public class GetProtocolResponse {
-    public boolean modified;
+    public Boolean modified;
     public Protocol protocol;
 
     public GetProtocolResponse() {

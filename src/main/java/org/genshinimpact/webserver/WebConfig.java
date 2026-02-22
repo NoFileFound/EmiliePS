@@ -11,7 +11,7 @@ import org.genshinimpact.webserver.enums.ClientType;
 @SuppressWarnings("unused")
 public class WebConfig {
     public SpringBootConfig springBootConfig;
-    public boolean mongodbEnableSdkLogs = true;
+    public GeetestConfig geetestConfig;
     public MDKConfig mdkConfig;
     public BoxConfig boxConfig;
     public List<RegionConfig> regionConfig = List.of();
@@ -23,6 +23,13 @@ public class WebConfig {
         public boolean mongodbEnableSdkLogs = true;
         public String springbootLogLevel = "INFO";
         public boolean springbootEnableCompression = false;
+        public boolean springbootEnableSSL = false;
+        public String springbootEnableSSLPassword = "";
+    }
+
+    public static class GeetestConfig {
+        public String gt = "";
+        public String gtPrivateKey = "";
     }
 
     public static class MDKConfig {

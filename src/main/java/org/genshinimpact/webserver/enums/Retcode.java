@@ -4,11 +4,14 @@ package org.genshinimpact.webserver.enums;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
-@SuppressWarnings("unused")
 public enum Retcode {
     RETCODE_SEND_PHONE_CODE_FREQUENTLY(-3101),
+    RETCODE_RATE_LIMIT_EXCEEDED(-503),
+    RETCODE_INVALID_ACCOUNT(-216),
     RETCODE_NEED_GUARDIAN(-119),
     RETCODE_NEED_REALNAME(-118),
+    RETCODE_NETWORK_AT_RISK(-115),
+    RETCODE_ACCOUNT_INVALID_FORMAT(-107),
     RETCODE_REQUEST_FAILED(-106),
     RETCODE_CONFIGURATION_ERROR(-104),
     RETCODE_PARAMETER_ERROR2(-103),

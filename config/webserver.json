@@ -3,7 +3,13 @@
 		"springbootPort": 8881,
 		"mongodbEnableSdkLogs": true,
 		"springbootLogLevel": "INFO",
-		"springbootEnableCompression": true
+		"springbootEnableCompression": true,
+		"springbootEnableSSL": false,
+		"springbootEnableSSLPassword": "genshinimpact"
+	},
+	"geetestConfig": {
+		"gt": "16bddce04c7385dbb7282778c29bba3e",
+		"gtPrivateKey": ""
 	},
 	"mdkConfig": {
 		"announce_url": "https://sdk.hoyoverse.com/hk4e/announcement/index.html?sdk_presentation_style=fullscreen&announcement_version=2.43&sdk_screen_transparent=true&game_biz=hk4e_global&auth_appid=announcement&game=hk4e#/",
@@ -156,38 +162,18 @@
 			"maintenanceConfig": null,
 			"encryptedConfig": {
 				"downloadMode": "0",
-				"debuglog": true,
+				"debugmenu": true,
+				"debuglog": false,
 				"loadPatch": true,
 				"enableDownload": false,
 				"regionConfig": "pm|fk|add",
 				"checkdevice": false,
-				"showexception": true,
-				"useLoadingBlockChecker": "true",
-				"checkEntityPreloadOverTime": true,
-				"coverSwitch": [1, 2, 20, 18, 21, 22, 35, 40],
-				"codeSwitch": [2, 5],
-				"il2cppCodeSwitches":[],
-				"mtrConfig": {
-					"isOpen": true
-				},
-				"urlCheckConfig": {
-					"isOpen": true
-				},
-				"googlePromotionInterval": 120,
-				"perf_report_servertype": "1",
-				"perf_report_percent": "200",
-				"homeItemFilter": 20,
-				"reportNetDelayConfig": {
-					"openGateserver": true
-				},
-				"SDKServerLog": "true",
-				"post_client_data_url": "https://sg-public-api.hoyoverse.com/common/csc/client/addCliTempInfo?sign_type=2&auth_appid=csc&authkey_ver=1",
-				"skipLuaEnvReload": true
+				"showexception": true
 			}
 		}
 	],
 	"regionGlobalConfig": {
-		
+		"sdkenv": 0
 	},
 	"extensionList": {
 		"1": [],

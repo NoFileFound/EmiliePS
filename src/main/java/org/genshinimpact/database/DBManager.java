@@ -6,32 +6,44 @@ import dev.morphia.Datastore;
 import dev.morphia.Morphia;
 import dev.morphia.mapping.MapperOptions;
 import dev.morphia.query.experimental.filters.Filters;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import lombok.Getter;
 import org.genshinimpact.bootstrap.AppBootstrap;
+import org.genshinimpact.database.collections.Account;
 import org.genshinimpact.database.collections.Counter;
+import org.genshinimpact.database.collections.Ticket;
 
 public final class DBManager {
     @Getter private static Datastore dataStore;
     private static final ExecutorService eventExecutor = new ThreadPoolExecutor(6, 6, 60, TimeUnit.SECONDS,new LinkedBlockingDeque<>(), new ThreadPoolExecutor.AbortPolicy());
     private static final boolean applyChanges = true;
+    private static boolean initialized = false;
+
+    // Cache
+    @Getter private static final ConcurrentHashMap<Long, Account> cachedAccounts = new ConcurrentHashMap<>();
+    @Getter private static final ConcurrentHashMap<String, Ticket> cachedTickets = new ConcurrentHashMap<>();
 
     /**
      * Starts the mongodb database.
      */
     public static void initializeDatabase() {
+        if(initialized) {
+            return;
+        }
+
         String dbUrl = AppBootstrap.getMainConfig().mongodbUrl;
         String dbName = AppBootstrap.getMainConfig().mongodbName;
-
         MapperOptions mapperOptions = MapperOptions.builder().storeEmpties(true).storeNulls(false).build();
         dataStore = Morphia.createDatastore(MongoClients.create(dbUrl), dbName, mapperOptions);
         dataStore.ensureIndexes();
 
         createCounters();
         AppBootstrap.getLogger().info("The database was loaded successfully.");
+        initialized = true;
     }
 
     /**
@@ -41,12 +53,17 @@ public final class DBManager {
      * @return The value of the counter if its found or else null.
      */
     public static long getCounterValue(String counterId) {
+        if(!initialized) {
+            return -1;
+        }
+
         Counter document = getDataStore().find(Counter.class).filter(Filters.eq("_id", counterId)).first();
-        if (document != null) {
+        if(document != null) {
             document.setValue(document.getValue() + 1);
             saveInstance(document);
             return document.getValue();
         }
+
         return 0;
     }
 
@@ -55,6 +72,10 @@ public final class DBManager {
      * @param object The object to delete.
      */
     public static void deleteInstance(Object object) {
+        if(!initialized) {
+            return;
+        }
+
         if(applyChanges) {
             eventExecutor.submit(() -> getDataStore().delete(object));
         }
@@ -65,6 +86,10 @@ public final class DBManager {
      * @param object The object to save.
      */
     public static void saveInstance(Object object) {
+        if(!initialized) {
+            return;
+        }
+
         if(applyChanges) {
             eventExecutor.submit(() -> getDataStore().save(object));
         }
@@ -74,13 +99,36 @@ public final class DBManager {
      * Creates the counters collection if needed.
      */
     private static void createCounters() {
-        String[] counters = {"lastAccountId", "lastPlayerId"};
+        String[] counters = {"lastAccountId", "lastTicketId"};
         for (String counter : counters) {
             Counter document = getDataStore().find(Counter.class).filter(Filters.eq("_id", counter)).first();
             if(document != null) continue;
 
             Counter newCounter = new Counter(counter, 0L);
             saveInstance(newCounter);
+        }
+    }
+
+    /**
+     * Shutdowns the database.
+     */
+    public static void shutdownDatabase() {
+        for(Account account : cachedAccounts.values()) {
+            account.save();
+        }
+
+        for(Ticket ticket : cachedTickets.values()) {
+            ticket.save();
+        }
+
+        eventExecutor.shutdown();
+        try {
+            if(!eventExecutor.awaitTermination(10, TimeUnit.SECONDS)) {
+                eventExecutor.shutdownNow();
+            }
+        } catch(InterruptedException e) {
+            eventExecutor.shutdownNow();
+            Thread.currentThread().interrupt();
         }
     }
 }

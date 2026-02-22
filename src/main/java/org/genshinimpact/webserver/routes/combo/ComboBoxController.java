@@ -8,7 +8,7 @@ import static org.genshinimpact.webserver.enums.Retcode.RETCODE_COMBO_NO_CONFIG;
 import static org.genshinimpact.webserver.enums.Retcode.RETCODE_COMBO_INVALID_MODULE;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.genshinimpact.utils.JsonUtils;
+import org.genshinimpact.webserver.utils.JsonUtils;
 import org.genshinimpact.webserver.SpringBootApp;
 import org.genshinimpact.webserver.enums.AppName;
 import org.genshinimpact.webserver.enums.ClientType;
@@ -34,7 +34,7 @@ public final class ComboBoxController {
      *        </ul>
      */
     @GetMapping(value = "porte-os/kibana_box")
-    public ResponseEntity<Response<?>> SendPorteOsKibanaBox(String appId, String platform) {
+    public ResponseEntity<Response<?>> SendBoxPorteOsKibanaBox(String appId, String platform) {
         if(platform == null || platform.isBlank()) {
             return ResponseEntity.ok(new Response<>(RETCODE_COMBO_INVALID_KEY, "RetCode_InvalidKey"));
         }
@@ -58,7 +58,7 @@ public final class ComboBoxController {
      *        </ul>
      */
     @GetMapping(value = "porte-cn/porte")
-    public ResponseEntity<Response<?>> SendPorte(String app_id, String client_type) {
+    public ResponseEntity<Response<?>> SendBoxPorte(String app_id, String client_type) {
         if(client_type == null || client_type.isBlank()) {
             return ResponseEntity.ok(new Response<>(RETCODE_COMBO_INVALID_KEY, "RetCode_InvalidKey"));
         }
@@ -83,7 +83,7 @@ public final class ComboBoxController {
      */
     @GetMapping(value = "sdk/drmSwitch")
     @Deprecated(forRemoval = true)
-    public ResponseEntity<Response<?>> SendDrmSwitch(String biz_key, String client_type) {
+    public ResponseEntity<Response<?>> SendBoxDrmSwitch(String biz_key, String client_type) {
         return ResponseEntity.ok(new Response<>(RETCODE_COMBO_INVALID_MODULE, "RetCode_InvalidModule"));
     }
 
@@ -99,7 +99,7 @@ public final class ComboBoxController {
      *        </ul>
      */
     @GetMapping(value = "sdk/combo")
-    public ResponseEntity<Response<?>> SendCombo(String biz_key, String client_type) {
+    public ResponseEntity<Response<?>> SendBoxCombo(String biz_key, String client_type) {
         try {
             ClientType clientType = ClientType.fromValue(client_type);
             AppName appName = AppName.fromValue(biz_key);
@@ -209,7 +209,7 @@ public final class ComboBoxController {
      *        </ul>
      */
     @GetMapping(value = "sw/precache")
-    public ResponseEntity<Response<?>> SendPreCache(String biz, String client) {
+    public ResponseEntity<Response<?>> SendBoxPreCache(String biz, String client) {
         try {
             ClientType clientType = ClientType.fromValue(client);
             AppName appName = AppName.fromValue(biz);

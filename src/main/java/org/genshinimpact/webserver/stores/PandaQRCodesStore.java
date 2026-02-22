@@ -76,6 +76,7 @@ public class PandaQRCodesStore {
         return "";
     }
 
+
     public static class PandaQRCode {
         @Getter private final String id;
         @Getter private final String deviceId;

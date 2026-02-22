@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-import org.genshinimpact.utils.JsonUtils;
+import org.genshinimpact.webserver.utils.JsonUtils;
 import org.genshinimpact.webserver.SpringBootApp;
 import org.genshinimpact.webserver.enums.AppName;
 import org.genshinimpact.webserver.enums.ClientType;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "device-fp/api", produces = "application/json")
-public final class DeviceFingerprintController {
+public final class DeviceFpController {
     /**
      *  Source: <a href="https://devop-data-takumi.mihoyo.com/device-fp/api/getExtList">https://devop-data-takumi.mihoyo.com/device-fp/api/getExtList</a><br><br>
      *  Description: Fetches information about the device extensions and package string.<br><br>
