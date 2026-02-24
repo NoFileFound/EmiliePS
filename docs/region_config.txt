@@ -362,3 +362,12 @@ muteCameraShot
 muteCameraRadialBlur
 mutePostProcessEffectMixin
 muteDungeonFogEffect
+downloadEnablePatchedAsb
+downloadEnableXXhash
+downloadEnableUltraVerify
+checkdevice
+debuglog
+loadPatchAtGlobalDispatch
+forceDisableMTR
+debuglogswitch
+WatchDogMS

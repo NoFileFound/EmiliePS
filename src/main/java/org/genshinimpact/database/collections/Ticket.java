@@ -3,7 +3,9 @@ package org.genshinimpact.database.collections;
 // Imports
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
+import dev.morphia.annotations.Transient;
 import lombok.Getter;
+import lombok.Setter;
 import org.genshinimpact.database.DBManager;
 import org.genshinimpact.utils.CryptoUtils;
 
@@ -14,6 +16,8 @@ public final class Ticket {
     private final Long accountId;
     private final TicketType type;
     private final Long timestamp;
+    @Transient @Setter private String verCode;
+    @Transient @Setter private Object data;
 
     /**
      * Creates a new ticket.

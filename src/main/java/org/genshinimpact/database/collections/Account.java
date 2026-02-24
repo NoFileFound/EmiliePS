@@ -3,12 +3,15 @@ package org.genshinimpact.database.collections;
 // Imports
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
+import dev.morphia.annotations.Transient;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import org.genshinimpact.database.DBManager;
 import org.genshinimpact.database.embeds.DeviceInfo;
+import org.genshinimpact.database.embeds.FatigueRemind;
+import org.genshinimpact.webserver.models.device.DeviceInfoModel;
 
 @Getter
 @Entity(value = "accounts", useDiscriminator = false)
@@ -19,7 +22,8 @@ public final class Account {
     private final String password;
     @Setter private String mobileNumber;
     @Setter private String safeMobileNumber;
-    @Setter private String sessionToken;
+    @Setter @Transient private String sessionToken;
+    @Setter private String comboToken;
     @Setter private String identityName;
     @Setter private String identityCard;
     private String googleName;
@@ -40,23 +44,32 @@ public final class Account {
     private Boolean requireRealPerson;
     private String requireRealPersonTicket;
     private String requireRealPersonOperation;
+    @Setter private Boolean requireHeartbeat;
+    @Setter private Boolean isPendingDeletion;
+    @Setter private FatigueRemind fatigueRemind;
 
     /**
      * Creates a new account.
      */
-    public Account(String emailAddress, String password, String ipAddress, String deviceInfo) {
+    public Account(String emailAddress, String password, DeviceInfoModel deviceInfo) {
         this.id = DBManager.getCounterValue("lastAccountId");
         this.emailAddress = emailAddress;
         this.password = password;
         this.deviceInfo = new HashMap<>();
-        this.deviceInfo.put(deviceInfo, new DeviceInfo(ipAddress));
+        this.deviceInfo.put(deviceInfo.device_id, new DeviceInfo(deviceInfo));
+        this.fatigueRemind = null;
+        this.requireHeartbeat = false;
+        this.isPendingDeletion = false;
     }
 
     /**
      * Saves the account instance.
      */
-    public void save() {
-        DBManager.saveInstance(this);
+    public void save(boolean updateDb) {
+        if(updateDb) {
+            DBManager.saveInstance(this);
+        }
+
         DBManager.getCachedAccounts().put(this.id, this);
     }
 

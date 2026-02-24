@@ -56,7 +56,7 @@ public final class AccountRiskyController {
     public ResponseEntity<Response<?>> SendRiskyCheck(HttpServletRequest request, @RequestHeader(value = "x-rpc-game_biz", required = false) String game_biz, @RequestHeader(value = "x-rpc-client_type", required = false) String client_type) {
         String ipAddress = request.getRemoteAddr();
         AtomicInteger counter = this.requestRateCache.get(ipAddress, k -> new AtomicInteger(0));
-        if(counter.incrementAndGet() > 5) {
+        if(counter.incrementAndGet() > 15) {
             return ResponseEntity.ok(new Response<>(RETCODE_RATE_LIMIT_EXCEEDED, "操作次數過多，請稍後再試"));
         }
 
@@ -65,7 +65,7 @@ public final class AccountRiskyController {
             body = JsonUtils.read(request.getInputStream(), RiskyCheckModel.class);
             AppName appName = AppName.fromValue(game_biz);
             ClientType clientType = ClientType.fromValue(client_type);
-            if(body.action_type == null || body.action_type == ClientApiActionType.CLIENT_API_ACTION_TYPE_UNKNOWN || body.api_name == null || body.api_name.isBlank() || (body.username.isBlank() && body.mobile.isBlank()) || appName == AppName.APP_UNKNOWN || clientType == ClientType.PLATFORM_UNKNOWN) {
+            if(body.action_type == null || body.action_type == ClientApiActionType.CLIENT_API_ACTION_TYPE_UNKNOWN || body.api_name == null || body.api_name.isBlank() || (body.username.isBlank() && body.mobile.isBlank() && body.action_type == ClientApiActionType.CLIENT_API_ACTION_TYPE_LOGIN) || appName == AppName.APP_UNKNOWN || clientType == ClientType.PLATFORM_UNKNOWN) {
                 return ResponseEntity.ok(new Response<>(RETCODE_PARAMETER_ERROR, "您的请求存在安全风险"));
             }
         } catch(Exception ignored) {

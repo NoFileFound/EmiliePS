@@ -4,6 +4,7 @@ package org.genshinimpact.webserver.models;
 import org.genshinimpact.webserver.enums.AppId;
 import org.genshinimpact.webserver.enums.ChannelType;
 
+@SuppressWarnings("unused")
 public class GranterLoginModel {
     public AppId app_id;
     public ChannelType channel_id;

@@ -1,16 +1,18 @@
 package org.genshinimpact.webserver.routes.mdk;
 
 // Imports
+import static org.genshinimpact.database.collections.Ticket.TicketType.TICKET_DEVICE_GRANT;
+import static org.genshinimpact.database.collections.Ticket.TicketType.TICKET_REACTIVATE_ACCOUNT;
 import com.github.benmanes.caffeine.cache.Cache;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.LinkedHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.genshinimpact.database.DBUtils;
-import org.genshinimpact.database.collections.Account;
-import org.genshinimpact.database.collections.Ticket;
 import org.genshinimpact.utils.CryptoUtils;
-import org.genshinimpact.webserver.models.LoginModel;
-import org.genshinimpact.webserver.responses.LoginResponse;
+import org.genshinimpact.webserver.models.MdkLoginModel;
+import org.genshinimpact.webserver.models.MdkReactivateAccount;
+import org.genshinimpact.webserver.models.MdkVerifyModel;
+import org.genshinimpact.webserver.responses.MdkLoginResponse;
 import org.genshinimpact.webserver.utils.JsonUtils;
 import org.genshinimpact.webserver.SpringBootApp;
 import org.genshinimpact.webserver.enums.AppName;
@@ -156,21 +158,23 @@ public final class MDKShieldController {
     public ResponseEntity<Response<?>> SendMdkLogin(HttpServletRequest request, @RequestHeader(value = "x-rpc-device_id", required = false) String device_id, @RequestHeader(value = "x-rpc-risky", required = false) String risky) {
         String ipAddress = request.getRemoteAddr();
         AtomicInteger counter = this.requestRateCache.get(ipAddress, k -> new AtomicInteger(0));
-        if(counter.incrementAndGet() > 15) {
+        if(counter.incrementAndGet() > 19) {
             return ResponseEntity.ok(new Response<>(Retcode.RETCODE_RATE_LIMIT_EXCEEDED, "操作次數過多，請稍後再試"));
         }
 
-        LoginModel body;
+        MdkLoginModel body;
         try {
-            body = JsonUtils.read(request.getInputStream(), LoginModel.class);
+            body = JsonUtils.read(request.getInputStream(), MdkLoginModel.class);
             if(body.account == null || body.account.isBlank() || body.password == null || body.password.isBlank() || body.is_crypto == null || device_id == null || device_id.isBlank() || risky == null || risky.isBlank()) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
             }
 
             if(SpringBootApp.getWebConfig().mdkConfig.enable_mtt) {
-                if(!SpringBootApp.getCaptchaStore().checkCaptchaStatus(risky)) {
+                if(SpringBootApp.getCaptchaStore().checkCaptchaStatus(risky)) {
                     return ResponseEntity.ok(new Response<>(Retcode.RETCODE_NETWORK_AT_RISK, "请求失败，当前网络环境存在风险"));
                 }
+
+                SpringBootApp.getCaptchaStore().deleteCaptcha(ipAddress);
             }
 
             if(!body.account.matches("^(?:[A-Za-z0-9][A-Za-z0-9._]{2,19}|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,})$")) {
@@ -188,21 +192,119 @@ public final class MDKShieldController {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "密碼格式為8-30位，並且至少包含數字、大小寫字母、英文特殊符號其中兩種"));
             }
 
-            Account myAccount = (body.account.contains("@") ? DBUtils.findAccountByEmailAddress(body.account) : DBUtils.findAccountByUsername(body.account));
+            var myAccount = (body.account.contains("@") ? DBUtils.findAccountByEmailAddress(body.account) : DBUtils.findAccountByUsername(body.account));
             if(myAccount == null || !myAccount.getPassword().equals(CryptoUtils.getMd5(body.password.getBytes()))) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_INVALID_ACCOUNT, "未找到账户"));
             }
 
-            ///  TODO: HEARTBEAT SUPPORT.
+            myAccount.setSessionToken(CryptoUtils.generateStringKey(32));
             if(myAccount.getDeviceInfo().get(device_id) == null) {
-                myAccount.setSessionToken(CryptoUtils.generateStringKey(32));
-                SpringBootApp.getTicketStore().createTicket(myAccount, Ticket.TicketType.TICKET_DEVICE_GRANT);
+                SpringBootApp.getTicketStore().getOrCreateTicket(myAccount, TICKET_DEVICE_GRANT);
             } else {
-                myAccount.setSessionToken(CryptoUtils.generateStringKey(32));
-                myAccount.save();
+                if(myAccount.getIsPendingDeletion()) {
+                    SpringBootApp.getTicketStore().getOrCreateTicket(myAccount, TICKET_REACTIVATE_ACCOUNT);
+                } else {
+                    myAccount.save(false);
+                }
             }
 
-            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new LoginResponse(myAccount, request.getRemoteAddr())));
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new MdkLoginResponse(myAccount, ipAddress)));
+        } catch(Exception ignored) {
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
+        }
+    }
+
+    /**
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/mdk/shield/api/reactivateAccount">https://devapi-takumi.mihoyo.com/mdk/shield/api/reactivateAccount</a><br><br>
+     *  Description: Reactivates the account by given ticket id.<br><br>
+     *  Method: POST<br>
+     *  Content-Type: application/json<br><br>
+     *  Parameters:<br>
+     *        <ul>
+     *          <li>{@code action_ticket} — The ticket id for reactivation.</li>
+     *        </ul>
+     */
+    @PostMapping(value = "reactivateAccount")
+    public ResponseEntity<Response<?>> SendMdkReactivateAccount(HttpServletRequest request) {
+        String ipAddress = request.getRemoteAddr();
+        AtomicInteger counter = this.requestRateCache.get(ipAddress, k -> new AtomicInteger(0));
+        if(counter.incrementAndGet() > 19) {
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_RATE_LIMIT_EXCEEDED, "操作次數過多，請稍後再試"));
+        }
+
+        MdkReactivateAccount body;
+        try {
+            body = JsonUtils.read(request.getInputStream(), MdkReactivateAccount.class);
+            if(body.action_ticket == null || body.action_ticket.isBlank()) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
+            }
+
+            var myTicket = DBUtils.getTicketById(body.action_ticket);
+            if(myTicket == null || !myTicket.getType().equals(TICKET_REACTIVATE_ACCOUNT)) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_NETWORK_AT_RISK, "请求失败，当前网络环境存在风险"));
+            }
+
+            if(myTicket.isExpired()) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_REQUEST_FAILED, "票据已过期，请重新登录"));
+            }
+
+            var myAccount = DBUtils.findAccountById(myTicket.getAccountId());
+            if(myAccount == null || !myAccount.getRequireAccountReactivationTicket().equals(body.action_ticket)) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_NETWORK_AT_RISK, "请求失败，当前网络环境存在风险"));
+            }
+
+            myAccount.setSessionToken(CryptoUtils.generateStringKey(32));
+            myAccount.setIsPendingDeletion(false);
+            SpringBootApp.getTicketStore().removeTicket(myTicket, myAccount);
+            myAccount.save(true);
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new MdkLoginResponse(myAccount, ipAddress)));
+        } catch(Exception ignored) {
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
+        }
+    }
+
+    /**
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/mdk/shield/api/verify">https://devapi-takumi.mihoyo.com/mdk/shield/api/verify</a><br><br>
+     *  Description: Verifies the account login by using token.<br><br>
+     *  Method: POST<br>
+     *  Content-Type: application/json<br><br>
+     *  Parameters:<br>
+     *        <ul>
+     *          <li>{@code uid} — The account's id.</li>
+     *          <li>{@code token} — The account's session token</li>
+     *        </ul>
+     *  Headers:
+     *        <ul>
+     *          <li>{@code x-rpc-device_id} — The client's device id.</li>
+     *        </ul>
+     */
+    @PostMapping(value = "verify")
+    public ResponseEntity<Response<?>> SendMdkVerify(HttpServletRequest request, @RequestHeader(value = "x-rpc-device_id", required = false) String device_id) {
+        String ipAddress = request.getRemoteAddr();
+        AtomicInteger counter = this.requestRateCache.get(ipAddress, k -> new AtomicInteger(0));
+        if(counter.incrementAndGet() > 19) {
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_RATE_LIMIT_EXCEEDED, "操作次數過多，請稍後再試"));
+        }
+
+        MdkVerifyModel body;
+        try {
+            body = JsonUtils.read(request.getInputStream(), MdkVerifyModel.class);
+            if(body.token == null || body.token.isBlank() || body.uid == null || body.uid.isBlank()) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
+            }
+
+            var myAccount = DBUtils.findAccountById(Long.parseLong(body.uid));
+            if(myAccount == null || !myAccount.getSessionToken().equals(body.token)) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_INVALID_ACCOUNT_LOGIN_STATUS, "登录态失效，请重新登录"));
+            }
+
+            if(myAccount.getDeviceInfo().get(device_id) == null || myAccount.getIsPendingDeletion()) {
+                return ResponseEntity.ok(new Response<>(Retcode.RET_LOGIN_NEW_LOCATION_FOUND, "请重新登录"));
+            }
+
+            myAccount.setSessionToken(CryptoUtils.generateStringKey(32));
+            myAccount.save(false);
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new MdkLoginResponse(myAccount, ipAddress)));
         } catch(Exception ignored) {
             return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
         }

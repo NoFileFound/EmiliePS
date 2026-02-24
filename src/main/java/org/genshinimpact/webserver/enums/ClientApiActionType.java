@@ -9,7 +9,8 @@ import java.util.stream.Collectors;
 
 public enum ClientApiActionType {
     CLIENT_API_ACTION_TYPE_UNKNOWN(""),
-    CLIENT_API_ACTION_TYPE_LOGIN("login");
+    CLIENT_API_ACTION_TYPE_LOGIN("login"),
+    CLIENT_API_ACTION_TYPE_DEVICE_GRANT("device_grant");
 
     @JsonValue
     @Getter

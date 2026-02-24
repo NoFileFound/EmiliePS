@@ -5,6 +5,8 @@ import com.maxmind.geoip2.DatabaseReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
+import java.util.Currency;
+import java.util.Locale;
 import org.genshinimpact.bootstrap.AppBootstrap;
 
 public final class GeoIP {
@@ -47,6 +49,24 @@ public final class GeoIP {
             return reader.country(InetAddress.getByName(ipAddress)).getCountry().getIsoCode();
         } catch (Exception ignored) {
             return "JP";
+        }
+    }
+
+    /**
+     * Gets the currency of given ip address.
+     * @param ipAddress The given ip address.
+     * @return The currency.
+     */
+    public static String getCountryCurrency(String ipAddress) {
+        if(!initialized) {
+            return "JPY";
+        }
+
+        try {
+            Currency currency = Currency.getInstance(new Locale("", getCountryCode(ipAddress)));
+            return currency != null ? currency.getCurrencyCode() : "JPY";
+        } catch(Exception e) {
+            return "JPY";
         }
     }
 }

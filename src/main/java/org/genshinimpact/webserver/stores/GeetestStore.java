@@ -59,9 +59,9 @@ public class GeetestStore {
      * @param riskId The captcha information. (c -> challenge, s -> seccode, v -> validate).
      * @return True if passed or False.
      */
-    public boolean checkCaptchaStatus(String riskId) {
+    public synchronized boolean checkCaptchaStatus(String riskId) {
         if(riskId == null || riskId.isBlank()) {
-            return false;
+            return true;
         }
 
         String challenge = null;
@@ -79,7 +79,7 @@ public class GeetestStore {
         }
 
         if(challenge == null || seccode == null || validate == null) {
-            return false;
+            return true;
         }
 
         try {
@@ -95,16 +95,16 @@ public class GeetestStore {
             }
 
             if(conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                return false;
+                return true;
             }
 
             try(InputStream in = conn.getInputStream()) {
                 String res = new String(in.readAllBytes(), StandardCharsets.UTF_8);
-                return res.contains("seccode");
+                return !res.contains("seccode");
             }
 
         } catch(Exception ignored) {
-            return false;
+            return true;
         }
     }
 

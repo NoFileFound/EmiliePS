@@ -34,7 +34,6 @@ public class PandaQRCodesStore {
         }
 
         if(qrCode.getTime() - System.currentTimeMillis() <= 0) {
-            System.out.println("#5");
             this.storage.remove(ticketId);
             return -1001;
         }
@@ -54,7 +53,7 @@ public class PandaQRCodesStore {
      * Marks the QR code as scanned.
      * @param ticketId The client's ticket id.
      */
-    public void setScannedQrCode(String ticketId) {
+    public synchronized void setScannedQrCode(String ticketId) {
         this.storage.get(ticketId).state = PandaQRCode.QRCodeState.Scanned;
     }
 
@@ -62,7 +61,7 @@ public class PandaQRCodesStore {
      * Marks the QR code as confirmed.
      * @param ticketId The client's ticket id.
      */
-    public void setConfirmedQrCode(String ticketId) {
+    public synchronized void setConfirmedQrCode(String ticketId) {
         this.storage.get(ticketId).state = PandaQRCode.QRCodeState.Confirmed;
     }
 

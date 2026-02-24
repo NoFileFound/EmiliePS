@@ -2,6 +2,7 @@ package org.genshinimpact.webserver.stores;
 
 // Imports
 import org.genshinimpact.database.DBManager;
+import org.genshinimpact.database.DBUtils;
 import org.genshinimpact.database.collections.Account;
 import org.genshinimpact.database.collections.Ticket;
 
@@ -12,8 +13,8 @@ public class TicketStore {
      * @param myAccount The given account.
      * @param type    The ticket type.
      */
-    public void createTicket(Account myAccount, Ticket.TicketType type) {
-        Ticket myTicket = getTicketByAccountId(myAccount.getId());
+    public synchronized void getOrCreateTicket(Account myAccount, Ticket.TicketType type) {
+        Ticket myTicket = DBUtils.getTicketByAccountId(myAccount.getId(), type);
         if(myTicket != null) {
             if(!myTicket.isExpired()) {
                 return;
@@ -33,7 +34,7 @@ public class TicketStore {
                 break;
         }
 
-        myAccount.save();
+        myAccount.save(true);
     }
 
     /**
@@ -41,21 +42,17 @@ public class TicketStore {
      * @param myTicket The given ticket to remove.
      * @param myAccount The given account to remove the ticket from.
      */
-    public void removeTicket(Ticket myTicket, Account myAccount) {
-        ///  TODO: IMPLEMENT THIS:
-        /*Ticket myTicket = DBManager.getCachedTickets().get(ticketId);
-        if(myTicket != null) {
-            DBManager.deleteInstance(myTicket);
-            DBManager.getCachedTickets().remove(ticketId);
-            return;
-        }*/
+    public synchronized void removeTicket(Ticket myTicket, Account myAccount) {
+        switch(myTicket.getType()) {
+            case TICKET_REACTIVATE_ACCOUNT:
+                myAccount.setRequireActivation(false, myTicket.getId());
+                break;
+            case TICKET_DEVICE_GRANT:
+                myAccount.setDeviceGrant(false, myTicket.getId());
+                break;
+        }
 
-
-    }
-
-
-    public Ticket getTicketByAccountId(Long accountId) {
-        ///  TODO: IMPLEMENT THIS:
-        return null;
+        DBManager.getCachedTickets().remove(myTicket.getId());
+        myTicket.delete();
     }
 }

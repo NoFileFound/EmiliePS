@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.genshinimpact.database.collections.Account;
 import org.genshinimpact.database.collections.Experiment;
+import org.genshinimpact.database.collections.Guest;
+import org.genshinimpact.database.collections.Ticket;
 
 public final class DBUtils {
     /**
@@ -20,6 +22,55 @@ public final class DBUtils {
         }
 
         return experimentList;
+    }
+
+    /**
+     * Gets the guest object or creates a guest by provided device id.
+     * @param deviceId The provided device id.
+     * @return A guest object.
+     */
+    public static Guest getOrCreateGuest(String deviceId) {
+        return DBManager.getCachedGuests().computeIfAbsent(deviceId, id -> {
+            Guest myGuest = DBManager.getDataStore().find(Guest.class).filter(eq("deviceId", id)).first();
+            if(myGuest != null) {
+                myGuest.setIsNew(false);
+                return myGuest;
+            }
+
+            Guest newGuest = new Guest(id);
+            newGuest.setIsNew(true);
+            newGuest.save();
+            return newGuest;
+        });
+    }
+
+    /**
+     * Searches for ticket by account id and ticket type.
+     * @param accountId The account id.
+     * @param type The ticket type.
+     * @return A ticket if exist or else null.
+     */
+    public static Ticket getTicketByAccountId(Long accountId, Ticket.TicketType type) {
+        for(Ticket ticket : DBManager.getCachedTickets().values()) {
+            if(accountId.equals(ticket.getAccountId()) && type.equals(ticket.getType())) {
+                return ticket;
+            }
+        }
+
+        return DBManager.getDataStore().find(Ticket.class).filter(eq("accountId", accountId), eq("type", type)).first();
+    }
+
+    /**
+     * Searches for ticket by id.
+     * @param ticketId The given ticket id.
+     * @return A ticket object if exist or else null.
+     */
+    public static Ticket getTicketById(String ticketId) {
+        if(DBManager.getCachedTickets().get(ticketId) != null) {
+            return DBManager.getCachedTickets().get(ticketId);
+        }
+
+        return DBManager.getDataStore().find(Ticket.class).filter(eq("id", ticketId)).first();
     }
 
     /**

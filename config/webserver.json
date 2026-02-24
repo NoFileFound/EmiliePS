@@ -161,20 +161,21 @@
 			},
 			"maintenanceConfig": null,
 			"encryptedConfig": {
-				"downloadMode": "0",
-				"debugmenu": true,
-				"debuglog": false,
-				"loadPatch": true,
-				"enableDownload": false,
-				"regionConfig": "pm|fk|add",
 				"checkdevice": false,
-				"showexception": true
+				"debuglog": false,
+				"debuglogswitch": [0],
+				"debugmenu": true,
+				"disableRazorChromaInit": true,
+				"downloadMode": "0",
+				"enableDownload": false,
+				"me": false,
+				"regionConfig": "pm|fk|add|ec",
+				"regionDispatchType": "0",
+				"showexception": false
 			}
 		}
 	],
-	"regionGlobalConfig": {
-		"sdkenv": 0
-	},
+	"regionGlobalConfig": {},
 	"extensionList": {
 		"1": [],
 		"2": [],

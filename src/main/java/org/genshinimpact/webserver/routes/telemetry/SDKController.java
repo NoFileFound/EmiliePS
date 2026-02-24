@@ -36,7 +36,7 @@ public final class SDKController {
      *   <li>{@code uploadContent} — The uploaded content containing detailed information about the client's behavior.</li>
      * </ul>
      */
-    @PostMapping(value = {"sdk/dataUpload", "client/event/dataUpload"})
+    @PostMapping(value = {"sdk/dataUpload", "client/event/dataUpload", "log/sdk/upload"})
     public ResponseEntity<Response<?>> ReceiveSDKLog(HttpServletRequest request, @RequestHeader(value = "CONTENT-MD5", required = false) String contentMd5, @RequestHeader(value = "Content-Type", required = false) String contentType, @RequestHeader(value = "DATE", required = false) String date, @RequestHeader(value = "cms-signature", defaultValue = "hmac-sha1") String cmsSignature, @RequestHeader(value = "Authorization", required = false) String authorization) {
         SdkDataUploadModel body;
         try {
@@ -111,7 +111,7 @@ public final class SDKController {
      *   <li>{@code uploadContent} — The uploaded content containing detailed information about the client's behavior.</li>
      * </ul>
      */
-    @PostMapping(value = "adsdk/dataUpload")
+    @PostMapping(value = {"adsdk/dataUpload", "log/adsdk/upload"})
     public ResponseEntity<Response<?>> ReceiveAndroidSDKLog(HttpServletRequest request, @RequestHeader(value = "CONTENT-MD5", required = false) String contentMd5, @RequestHeader(value = "Content-Type", required = false) String contentType, @RequestHeader(value = "DATE", required = false) String date, @RequestHeader(value = "cms-signature", defaultValue = "hmac-sha1") String cmsSignature, @RequestHeader(value = "Authorization", required = false) String authorization) {
         AndroidSdkDataUploadModel body;
         try {

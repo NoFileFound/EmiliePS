@@ -73,7 +73,7 @@ public final class ComboPandaController {
     @PostMapping(value = "fetch")
     public ResponseEntity<Response<?>> SendPandaFetch(HttpServletRequest request, @RequestHeader(value = "x-rpc-game_biz", required = false) String game_biz) {
         AtomicInteger counter = this.requestRateCache.get(request.getRemoteAddr(), k -> new AtomicInteger(0));
-        if(counter.incrementAndGet() > 10) {
+        if(counter.incrementAndGet() > 15) {
             return ResponseEntity.ok(new Response<>(Retcode.RETCODE_RATE_LIMIT_EXCEEDED, "操作次數過多，請稍後再試"));
         }
 
@@ -87,7 +87,7 @@ public final class ComboPandaController {
             if(AppName.fromValue(game_biz) == AppName.APP_UNKNOWN) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SYSTEM_ERROR, "系统请求失败，请返回重试"));
             }
-        } catch (Exception ignored) {
+        } catch(Exception ignored) {
             return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SYSTEM_ERROR, "系统请求失败，请返回重试"));
         }
 
@@ -123,7 +123,7 @@ public final class ComboPandaController {
             if(body == null || body.app_id == null || body.app_id == AppId.APP_UNKNOWN || body.device == null || body.device.isBlank() || body.ticket == null || body.ticket.isBlank()) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SYSTEM_ERROR, "系统请求失败，请返回重试"));
             }
-        }catch (Exception ignored) {
+        } catch(Exception ignored) {
             return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SYSTEM_ERROR, "系统请求失败，请返回重试"));
         }
 
@@ -166,7 +166,7 @@ public final class ComboPandaController {
             if(body == null || body.app_id == null || body.app_id == AppId.APP_UNKNOWN || body.device == null || body.device.isBlank() || body.ticket == null || body.ticket.isBlank()) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SYSTEM_ERROR, "系统请求失败，请返回重试"));
             }
-        }catch (Exception ignored) {
+        } catch(Exception ignored) {
             return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SYSTEM_ERROR, "系统请求失败，请返回重试"));
         }
 

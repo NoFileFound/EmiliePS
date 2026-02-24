@@ -5,7 +5,7 @@ import static org.genshinimpact.webserver.utils.Utils.filterString;
 import org.genshinimpact.database.collections.Account;
 import org.genshinimpact.utils.GeoIP;
 
-public class LoginResponse {
+public class MdkLoginResponse {
     public AccountDetails account;
     public Boolean realperson_required;
     public Boolean safe_moblie_required;
@@ -13,7 +13,7 @@ public class LoginResponse {
     public Boolean device_grant_required;
     public String realname_operation;
 
-    public LoginResponse(Account myAccount, String ipAddress) {
+    public MdkLoginResponse(Account myAccount, String ipAddress) {
         this.account = new AccountDetails(myAccount, ipAddress);
         this.reactivate_required = myAccount.getRequireAccountReactivation();
         this.device_grant_required = myAccount.getRequireDeviceGrant();

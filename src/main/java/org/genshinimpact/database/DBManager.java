@@ -15,6 +15,7 @@ import lombok.Getter;
 import org.genshinimpact.bootstrap.AppBootstrap;
 import org.genshinimpact.database.collections.Account;
 import org.genshinimpact.database.collections.Counter;
+import org.genshinimpact.database.collections.Guest;
 import org.genshinimpact.database.collections.Ticket;
 
 public final class DBManager {
@@ -25,6 +26,7 @@ public final class DBManager {
 
     // Cache
     @Getter private static final ConcurrentHashMap<Long, Account> cachedAccounts = new ConcurrentHashMap<>();
+    @Getter private static final ConcurrentHashMap<String, Guest> cachedGuests = new ConcurrentHashMap<>();
     @Getter private static final ConcurrentHashMap<String, Ticket> cachedTickets = new ConcurrentHashMap<>();
 
     /**
@@ -41,9 +43,9 @@ public final class DBManager {
         dataStore = Morphia.createDatastore(MongoClients.create(dbUrl), dbName, mapperOptions);
         dataStore.ensureIndexes();
 
-        createCounters();
-        AppBootstrap.getLogger().info("The database was loaded successfully.");
         initialized = true;
+        AppBootstrap.getLogger().info("The database was loaded successfully.");
+        createCounters();
     }
 
     /**
@@ -96,29 +98,19 @@ public final class DBManager {
     }
 
     /**
-     * Creates the counters collection if needed.
-     */
-    private static void createCounters() {
-        String[] counters = {"lastAccountId", "lastTicketId"};
-        for (String counter : counters) {
-            Counter document = getDataStore().find(Counter.class).filter(Filters.eq("_id", counter)).first();
-            if(document != null) continue;
-
-            Counter newCounter = new Counter(counter, 0L);
-            saveInstance(newCounter);
-        }
-    }
-
-    /**
      * Shutdowns the database.
      */
     public static void shutdownDatabase() {
         for(Account account : cachedAccounts.values()) {
-            account.save();
+            account.save(true);
         }
 
         for(Ticket ticket : cachedTickets.values()) {
             ticket.save();
+        }
+
+        for(Guest guest : cachedGuests.values()) {
+            guest.save();
         }
 
         eventExecutor.shutdown();
@@ -129,6 +121,20 @@ public final class DBManager {
         } catch(InterruptedException e) {
             eventExecutor.shutdownNow();
             Thread.currentThread().interrupt();
+        }
+    }
+
+    /**
+     * Creates the counters collection if needed.
+     */
+    private static void createCounters() {
+        String[] counters = {"lastAccountId", "lastTicketId", "lastGuestId"};
+        for(String counter : counters) {
+            Counter document = getDataStore().find(Counter.class).filter(Filters.eq("_id", counter)).first();
+            if(document != null) continue;
+
+            Counter newCounter = new Counter(counter, 0L);
+            saveInstance(newCounter);
         }
     }
 }

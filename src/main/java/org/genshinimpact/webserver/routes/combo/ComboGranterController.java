@@ -2,14 +2,16 @@ package org.genshinimpact.webserver.routes.combo;
 
 // Imports
 import com.fasterxml.jackson.databind.JsonNode;
+import com.github.benmanes.caffeine.cache.Cache;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.genshinimpact.database.DBUtils;
-import org.genshinimpact.database.collections.Account;
 import org.genshinimpact.utils.CryptoUtils;
 import org.genshinimpact.utils.GeoIP;
 import org.genshinimpact.webserver.models.GranterLoginModel;
+import org.genshinimpact.webserver.responses.ComboGetFontResponse;
 import org.genshinimpact.webserver.responses.GranterLoginResponse;
 import org.genshinimpact.webserver.responses.MdkGetConfigResponse;
 import org.genshinimpact.webserver.responses.MdkGetDynamicConfigResponse;
@@ -30,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = {"hk4e_global/combo/granter", "hk4e_cn/combo/granter", "combo/granter", "takumi/hk4e_global/combo/granter", "takumi/hk4e_cn/combo/granter", "takumi/combo/granter"}, produces = "application/json")
 public final class ComboGranterController {
+    private final Cache<String, AtomicInteger> requestRateCache;
     private static final Map<String, int[]> PROTOCOL_VERSIONS = Map.ofEntries(
             Map.entry("zh-cn", new int[]{57, 0}),
             Map.entry("zh-tw", new int[]{0, 1}),
@@ -45,6 +48,14 @@ public final class ComboGranterController {
             Map.entry("th", new int[]{17, 0}),
             Map.entry("vi", new int[]{17, 0}),
             Map.entry("tr", new int[]{7, 0}));
+
+    /**
+     * Creates a new {@code ComboGranterController}.
+     * @param requestRateCache The rate limit cache.
+     */
+    public ComboGranterController(Cache<String, AtomicInteger> requestRateCache) {
+        this.requestRateCache = requestRateCache;
+    }
 
     /**
      * Source: <a href="https://devapi-takumi.mihoyo.com/combo/granter/api/getConfig">https://devapi-takumi.mihoyo.com/combo/granter/api/getConfig</a><br><br>
@@ -139,27 +150,25 @@ public final class ComboGranterController {
             }
 
             if(appName == AppId.APP_GENSHIN || appName == AppId.APP_CLOUDPLATFORM) {
-                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", Map.of(
-                        "fonts", List.of(
-                                Map.of(
-                                        "font_id", "0",
-                                        "app_id", 0,
-                                        "name", "zh-cn.ttf",
-                                        "url", "https://sdk.hoyoverse.com/sdk-public/2026/01/13/8a7c2fc13ca8ff4d46aad4e4d2e3b19e_3433964338697589248.ttf",
-                                        "md5", "8a7c2fc13ca8ff4d46aad4e4d2e3b19e"
-                                ),
-                                Map.of(
-                                        "font_id", "0",
-                                        "app_id", 0,
-                                        "name", "ja.ttf",
-                                        "url", "https://sdk.hoyoverse.com/sdk-public/2026/01/13/2751f82ce50ca4ccfc14a0eb0db88a7a_4209864217558836390.ttf",
-                                        "md5", "2751f82ce50ca4ccfc14a0eb0db88a7a"
-                                )
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new ComboGetFontResponse(List.of(
+                        new ComboGetFontResponse.Font(
+                                "0",
+                                0,
+                                "zh-cn.ttf",
+                                "https://sdk.hoyoverse.com/sdk-public/2026/01/13/8a7c2fc13ca8ff4d46aad4e4d2e3b19e_3433964338697589248.ttf",
+                                "8a7c2fc13ca8ff4d46aad4e4d2e3b19e"
+                        ),
+                        new ComboGetFontResponse.Font(
+                                "0",
+                                0,
+                                "ja.ttf",
+                                "https://sdk.hoyoverse.com/sdk-public/2026/01/13/2751f82ce50ca4ccfc14a0eb0db88a7a_4209864217558836390.ttf",
+                                "2751f82ce50ca4ccfc14a0eb0db88a7a"
                         )
-                )));
+                ))));
             }
 
-            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", Map.of("fonts", List.of())));
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new ComboGetFontResponse()));
         } catch(Exception ignored) {
             return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "AppID错误"));
         }
@@ -262,6 +271,13 @@ public final class ComboGranterController {
      */
     @PostMapping(value = {"login/login", "login/v2/login"})
     public ResponseEntity<Response<?>> SendComboLogin(HttpServletRequest request, @RequestHeader(value = "x-rpc-game_biz", required = false) String game_biz) {
+        String ipAddress = request.getRemoteAddr();
+        String countryCode = GeoIP.getCountryCode(ipAddress);
+        AtomicInteger counter = this.requestRateCache.get(ipAddress, k -> new AtomicInteger(0));
+        if(counter.incrementAndGet() > 20) {
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_RATE_LIMIT_EXCEEDED, "操作次數過多，請稍後再試"));
+        }
+
         GranterLoginModel body;
         try {
             body = JsonUtils.read(request.getInputStream(), GranterLoginModel.class);
@@ -281,15 +297,35 @@ public final class ComboGranterController {
             }
 
             Long userId = data.get("uid").asLong();
-            String userToken = data.get("token").asText();
-            Account myAccount = DBUtils.findAccountById(userId);
-            ///  TODO: GUEST AND HEARTBEAT SUPPORT
-            if(myAccount.getSessionToken() == null || !myAccount.getSessionToken().equals(userToken))
-            {
-                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_NETWORK_AT_RISK, "请求失败，当前网络环境存在风险"));
-            }
+            boolean isGuest = data.get("guest").asBoolean();
+            if(isGuest) {
+                var myGuest = DBUtils.getOrCreateGuest(body.device);
+                if(myGuest == null) {
+                    return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SYSTEM_ERROR, "系统请求失败，请返回重试"));
+                }
 
-            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new GranterLoginResponse(String.valueOf(userId), userToken, true, AccountType.ACCOUNT_NORMAL)));
+                if(myGuest.getRequireHeartbeat()) {
+                    ///  TODO: FINISH myGuest.getRequireHeartbeat()
+                }
+
+                myGuest.setComboToken(CryptoUtils.generateStringKey(32));
+                myGuest.save();
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new GranterLoginResponse(String.valueOf(myGuest.getId()), myGuest.getComboToken(), myGuest.getRequireHeartbeat(), AccountType.ACCOUNT_GUEST, countryCode, myGuest.getIsNew(), null)));
+            } else {
+                String token = data.get("token").asText();
+                var myAccount = DBUtils.findAccountById(userId);
+                if(myAccount.getSessionToken() == null || !myAccount.getSessionToken().equals(token)) {
+                    return ResponseEntity.ok(new Response<>(Retcode.RETCODE_NETWORK_AT_RISK, "请求失败，当前网络环境存在风险"));
+                }
+
+                if(myAccount.getRequireHeartbeat()) {
+                    ///  TODO: FINISH myAccount.getRequireHeartbeat()
+                }
+
+                myAccount.setComboToken(CryptoUtils.generateStringKey(32));
+                myAccount.save(true);
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new GranterLoginResponse(String.valueOf(userId), myAccount.getComboToken(), myAccount.getRequireHeartbeat(), AccountType.ACCOUNT_NORMAL, countryCode, false, myAccount.getFatigueRemind())));
+            }
         } catch(Exception ignored) {
             return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
         }

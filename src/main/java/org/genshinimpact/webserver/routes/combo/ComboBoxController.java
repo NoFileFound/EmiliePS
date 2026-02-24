@@ -1,13 +1,14 @@
 package org.genshinimpact.webserver.routes.combo;
 
 // Imports
-import static org.genshinimpact.webserver.enums.ClientType.*;
 import static org.genshinimpact.webserver.enums.Retcode.RETCODE_SUCC;
 import static org.genshinimpact.webserver.enums.Retcode.RETCODE_COMBO_INVALID_KEY;
 import static org.genshinimpact.webserver.enums.Retcode.RETCODE_COMBO_NO_CONFIG;
 import static org.genshinimpact.webserver.enums.Retcode.RETCODE_COMBO_INVALID_MODULE;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.genshinimpact.webserver.responses.ComboBoxKibanaBoxResponse;
+import org.genshinimpact.webserver.responses.ComboBoxPorteCNResponse;
 import org.genshinimpact.webserver.utils.JsonUtils;
 import org.genshinimpact.webserver.SpringBootApp;
 import org.genshinimpact.webserver.enums.AppName;
@@ -43,7 +44,7 @@ public final class ComboBoxController {
             return ResponseEntity.ok(new Response<>(RETCODE_COMBO_NO_CONFIG, "RetCode_NoConfig"));
         }
 
-        return ResponseEntity.ok(new Response<>(RETCODE_SUCC, "OK", Map.of("vals", SpringBootApp.getWebConfig().boxConfig.porte_os_kibana_box)));
+        return ResponseEntity.ok(new Response<>(RETCODE_SUCC, "OK", new ComboBoxKibanaBoxResponse(SpringBootApp.getWebConfig().boxConfig.porte_os_kibana_box)));
     }
 
     /**
@@ -67,7 +68,7 @@ public final class ComboBoxController {
             return ResponseEntity.ok(new Response<>(RETCODE_COMBO_NO_CONFIG, "RetCode_NoConfig"));
         }
 
-        return ResponseEntity.ok(new Response<>(RETCODE_SUCC, "OK", Map.of("vals", Map.of("cryptoConfig", SpringBootApp.getWebConfig().boxConfig.porte_cn_config))));
+        return ResponseEntity.ok(new Response<>(RETCODE_SUCC, "OK", new ComboBoxPorteCNResponse(SpringBootApp.getWebConfig().boxConfig.porte_cn_config)));
     }
 
     /**
@@ -217,7 +218,7 @@ public final class ComboBoxController {
                 return ResponseEntity.ok(new Response<>(RETCODE_COMBO_INVALID_KEY, "RetCode_InvalidKey"));
             }
 
-            if((clientType != ClientType.PLATFORM_IOS && clientType != PLATFORM_ANDROID && clientType != ClientType.PLATFORM_PC)) {
+            if((clientType != ClientType.PLATFORM_IOS && clientType != ClientType.PLATFORM_ANDROID && clientType != ClientType.PLATFORM_PC)) {
                 return ResponseEntity.ok(new Response<>(RETCODE_COMBO_NO_CONFIG, "RetCode_NoConfig"));
             }
 
