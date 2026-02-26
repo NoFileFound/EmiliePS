@@ -2,7 +2,7 @@ package org.genshinimpact.webserver.routes.mdk;
 
 // Imports
 import org.genshinimpact.webserver.enums.Retcode;
-import org.genshinimpact.webserver.responses.MdkTallyListPayPlatformResponse;
+import org.genshinimpact.webserver.responses.mdk.tally.*;
 import org.genshinimpact.webserver.responses.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;

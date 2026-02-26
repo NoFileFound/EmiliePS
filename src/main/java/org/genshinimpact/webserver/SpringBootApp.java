@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.Getter;
+import org.genshinimpact.webserver.services.HeartbeatService;
 import org.genshinimpact.webserver.stores.CrashLogStore;
 import org.genshinimpact.webserver.stores.GeetestStore;
 import org.genshinimpact.webserver.stores.TicketStore;
@@ -19,6 +20,7 @@ public class SpringBootApp {
     @Getter private static final GeetestStore captchaStore;
     @Getter private static final CrashLogStore crashLogStore;
     @Getter private static final TicketStore ticketStore;
+    @Getter private static final HeartbeatService heartbeatService;
 
     static {
         try {
@@ -26,6 +28,7 @@ public class SpringBootApp {
             captchaStore = new GeetestStore();
             crashLogStore = new CrashLogStore();
             ticketStore = new TicketStore();
+            heartbeatService = new HeartbeatService();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.genshinimpact.utils.CryptoUtils;
 import org.genshinimpact.webserver.SpringBootApp;
-import org.genshinimpact.webserver.models.risky.GeetestModel;
 import org.genshinimpact.webserver.utils.JsonUtils;
 
 public class GeetestStore {
@@ -156,6 +155,20 @@ public class GeetestStore {
             this.riskId = riskId;
             this.model = model;
             this.timestamp = System.currentTimeMillis() + 300000;
+        }
+    }
+
+    public static class GeetestModel {
+        public Integer success;
+        public String gt;
+        public String challenge;
+        public Integer is_new_captcha;
+
+        public GeetestModel(String gt, String challenge) {
+            this.success = (challenge.isEmpty() ? 0 : 1);
+            this.gt = gt;
+            this.challenge = challenge;
+            this.is_new_captcha = 1;
         }
     }
 }

@@ -11,13 +11,13 @@ public class TicketStore {
      * Creates a new ticket on the given account.
      *
      * @param myAccount The given account.
-     * @param type    The ticket type.
+     * @param type      The ticket type.
      */
-    public synchronized void getOrCreateTicket(Account myAccount, Ticket.TicketType type) {
+    public synchronized Ticket getOrCreateTicket(Account myAccount, Ticket.TicketType type) {
         Ticket myTicket = DBUtils.getTicketByAccountId(myAccount.getId(), type);
         if(myTicket != null) {
             if(!myTicket.isExpired()) {
-                return;
+                return myTicket;
             }
 
             this.removeTicket(myTicket, myAccount);
@@ -28,13 +28,15 @@ public class TicketStore {
         switch(type) {
             case TICKET_REACTIVATE_ACCOUNT:
                 myAccount.setRequireActivation(true, myTicket.getId());
+                myAccount.save(true);
                 break;
             case TICKET_DEVICE_GRANT:
                 myAccount.setDeviceGrant(true, myTicket.getId());
+                myAccount.save(true);
                 break;
         }
 
-        myAccount.save(true);
+        return myTicket;
     }
 
     /**

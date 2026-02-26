@@ -2,22 +2,15 @@ package org.genshinimpact;
 
 // Imports
 import org.genshinimpact.bootstrap.AppBootstrap;
-import org.genshinimpact.webserver.SpringBootApp;
-import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class Application {
+    /**
+     * Entry point of the application.
+     * @param args the command-line arguments passed to the application.
+     */
     public static void main(String[] args) {
-        SLF4JBridgeHandler.removeHandlersForRootLogger();
-        SLF4JBridgeHandler.install();
-
-        int startType = 2;
-        AppBootstrap.init(startType);
-        if(startType == 2) {
-            SpringBootApp.main(args);
-        }
-
-        Runtime.getRuntime().addShutdownHook(new Thread(AppBootstrap::stopServer));
+        AppBootstrap.init(2, args);
     }
 }

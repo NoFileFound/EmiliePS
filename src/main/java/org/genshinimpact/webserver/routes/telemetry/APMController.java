@@ -5,6 +5,7 @@ import static org.genshinimpact.webserver.enums.Retcode.RETCODE_FAIL;
 import static org.genshinimpact.webserver.enums.Retcode.RETCODE_SUCC;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
+import org.genshinimpact.bootstrap.AppBootstrap;
 import org.genshinimpact.database.DBUtils;
 import org.genshinimpact.utils.CryptoUtils;
 import org.genshinimpact.webserver.utils.JsonUtils;
@@ -121,6 +122,7 @@ public final class APMController {
         }
 
         DBUtils.saveLogCache(body, "apm_logs");
+        AppBootstrap.getLogger().info("[H5Log] Application Performance Management (APM) log collection completed.");
         return ResponseEntity.ok(new Response<>(RETCODE_SUCC, "OK"));
     }
 }

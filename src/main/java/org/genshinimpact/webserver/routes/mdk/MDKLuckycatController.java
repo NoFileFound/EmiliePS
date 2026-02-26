@@ -4,8 +4,7 @@ package org.genshinimpact.webserver.routes.mdk;
 import jakarta.servlet.http.HttpServletRequest;
 import org.genshinimpact.utils.GeoIP;
 import org.genshinimpact.webserver.enums.Retcode;
-import org.genshinimpact.webserver.responses.MdkLuckycatListPayPlatformResponse;
-import org.genshinimpact.webserver.responses.MdkLuckycatListPriceTierResponse;
+import org.genshinimpact.webserver.responses.mdk.luckycat.*;
 import org.genshinimpact.webserver.responses.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,7 +24,7 @@ public final class MDKLuckycatController {
      */
     @RequestMapping(value = "listPayPlat", method = {RequestMethod.GET, RequestMethod.POST})
     public ResponseEntity<Response<?>> SendLuckycatListPayPlatforms() {
-        return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new MdkLuckycatListPayPlatformResponse()));
+        return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new LuckycatListPayPlatformResponse()));
     }
 
     /**
@@ -40,6 +39,6 @@ public final class MDKLuckycatController {
      */
     @PostMapping(value = "listPriceTier")
     public ResponseEntity<Response<?>> SendLuckycatListPriceTiers(HttpServletRequest request, @RequestParam(value = "currency", required = false) String currency) {
-        return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new MdkLuckycatListPriceTierResponse((currency != null ? currency : GeoIP.getCountryCurrency(request.getRemoteAddr())))));
+        return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new LuckycatListPriceTierResponse((currency != null ? currency : GeoIP.getCountryCurrency(request.getRemoteAddr())))));
     }
 }

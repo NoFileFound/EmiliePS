@@ -58,5 +58,10 @@ public final class Ticket {
     public enum TicketType {
         TICKET_REACTIVATE_ACCOUNT,
         TICKET_DEVICE_GRANT,
+        TICKET_BIND_EMAIL,
+        TICKET_BIND_REALNAME,
+        TICKET_MODIFY_REALNAME,
+        TICKET_BIND_MOBILE,
+        TICKET_MOBILE_LOGIN,
     }
 }

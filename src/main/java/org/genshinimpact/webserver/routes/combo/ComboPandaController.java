@@ -1,17 +1,19 @@
 package org.genshinimpact.webserver.routes.combo;
 
 // Imports
+import com.fasterxml.jackson.databind.JsonNode;
 import com.github.benmanes.caffeine.cache.Cache;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.genshinimpact.database.DBUtils;
+import org.genshinimpact.webserver.models.combo.panda.*;
 import org.genshinimpact.webserver.utils.JsonUtils;
 import org.genshinimpact.webserver.SpringBootApp;
 import org.genshinimpact.webserver.enums.AppId;
 import org.genshinimpact.webserver.enums.AppName;
 import org.genshinimpact.webserver.enums.Retcode;
-import org.genshinimpact.webserver.models.panda.*;
-import org.genshinimpact.webserver.responses.PandaQRCodeResponse;
+import org.genshinimpact.webserver.responses.combo.panda.*;
 import org.genshinimpact.webserver.responses.Response;
 import org.genshinimpact.webserver.stores.PandaQRCodesStore;
 import org.springframework.http.ResponseEntity;
@@ -50,9 +52,43 @@ public final class ComboPandaController {
      *        </ul>
      */
     @PostMapping(value = "confirm")
-    public ResponseEntity<Response<?>> SendPandaConfirm() {
-        ///  TODO: IMPLEMENT THIS ENDPOINT: https://devapi-takumi.mihoyo.com/combo/panda/qrcode/confirm
-        return null;
+    public ResponseEntity<Response<?>> SendPandaConfirm(HttpServletRequest request) {
+        PandaConfirmModel body;
+        try {
+            body = JsonUtils.read(request.getInputStream(), PandaConfirmModel.class);
+            if(body == null || body.app_id == null || body.app_id == AppId.APP_UNKNOWN || body.device == null || body.device.isBlank() || body.ticket == null || body.ticket.isBlank() || body.payload == null || body.payload.isBlank()) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SYSTEM_ERROR, "系统请求失败，请返回重试"));
+            }
+
+            JsonNode jsonNode = JsonUtils.read(body.payload);
+            if(jsonNode == null || !jsonNode.has("proto") || !jsonNode.has("raw") || !jsonNode.get("proto").asText().equals("Account")) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SYSTEM_ERROR, "系统请求失败，请返回重试"));
+            }
+
+            jsonNode = JsonUtils.read(jsonNode.get("raw").asText());
+            if(jsonNode == null || !jsonNode.has("uid") || jsonNode.get("uid").asText().isEmpty() || !jsonNode.has("token") || jsonNode.get("token").asText().isEmpty()) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SYSTEM_ERROR, "系统请求失败，请返回重试"));
+            }
+
+            int status = this.pandaQRCodesStore.getQrCodeStatus(body.ticket);
+            if(status == -1000) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SYSTEM_ERROR, "系统请求失败，请返回重试"));
+            }
+
+            if(status == -1001) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_REQUEST_FAILED, "二维码已过期，请重新生成二维码"));
+            }
+
+            var myAccount = DBUtils.findAccountById(jsonNode.get("uid").asLong());
+            if(myAccount == null || !myAccount.getSessionToken().equals(jsonNode.get("token").asText())) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SYSTEM_ERROR, "系统请求失败，请返回重试"));
+            }
+
+            this.pandaQRCodesStore.setConfirmedQrCode(body.ticket, body.payload);
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK"));
+        }catch(Exception ignored) {
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SYSTEM_ERROR, "系统请求失败，请返回重试"));
+        }
     }
 
     /**

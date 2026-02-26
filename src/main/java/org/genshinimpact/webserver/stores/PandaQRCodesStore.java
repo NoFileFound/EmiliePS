@@ -1,9 +1,11 @@
 package org.genshinimpact.webserver.stores;
 
 // Imports
+import dev.morphia.annotations.Transient;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.Getter;
+import lombok.Setter;
 import org.genshinimpact.utils.CryptoUtils;
 import org.springframework.stereotype.Component;
 
@@ -61,8 +63,9 @@ public class PandaQRCodesStore {
      * Marks the QR code as confirmed.
      * @param ticketId The client's ticket id.
      */
-    public synchronized void setConfirmedQrCode(String ticketId) {
+    public synchronized void setConfirmedQrCode(String ticketId, String payload) {
         this.storage.get(ticketId).state = PandaQRCode.QRCodeState.Confirmed;
+        this.storage.get(ticketId).setData(payload);
     }
 
     /**
@@ -71,8 +74,7 @@ public class PandaQRCodesStore {
      * @return The JSON payload as a string.
      */
     public String getRawPayload(String ticketId) {
-        /// TODO: Implement getRawPayload() in PandaQRCodesStore
-        return "";
+        return this.storage.get(ticketId).data;
     }
 
 
@@ -81,6 +83,7 @@ public class PandaQRCodesStore {
         @Getter private final String deviceId;
         @Getter private final long time;
         private QRCodeState state;
+        @Getter @Setter @Transient private String data;
 
         public PandaQRCode(String id, String deviceId) {
             this.id = id;

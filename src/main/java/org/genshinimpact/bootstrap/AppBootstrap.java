@@ -6,7 +6,10 @@ import org.genshinimpact.MainConfig;
 import org.genshinimpact.database.DBManager;
 import org.genshinimpact.utils.CryptoUtils;
 import org.genshinimpact.utils.GeoIP;
+import org.genshinimpact.webserver.SpringBootApp;
 import org.genshinimpact.webserver.utils.JsonUtils;
+import org.genshinimpact.webserver.utils.SMTPUtils;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 public final class AppBootstrap {
     @Getter private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AppBootstrap.class);
@@ -17,15 +20,24 @@ public final class AppBootstrap {
      * Initializes the server and its pre-required files.
      * @param state The application startup type.
      */
-    public static synchronized void init(int state) {
+    public static synchronized void init(int state, String[] args) {
         if(initialized) return;
+
+        SLF4JBridgeHandler.removeHandlersForRootLogger();
+        SLF4JBridgeHandler.install();
 
         try {
             mainConfig = JsonUtils.readFile("config/config.json", MainConfig.class);
             CryptoUtils.loadDispatchFiles(state);
             DBManager.initializeDatabase();
             GeoIP.loadGeoDatabase();
+            if(state == 0 || state == 2) {
+                SMTPUtils.initSmtpConfig();
+                SpringBootApp.main(args);
+            }
+
             initialized = true;
+            Runtime.getRuntime().addShutdownHook(new Thread(AppBootstrap::stopServer));
         } catch(Exception e) {
             throw new RuntimeException(e);
         }

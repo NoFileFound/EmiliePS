@@ -11,6 +11,12 @@
 		"gt": "16bddce04c7385dbb7282778c29bba3e",
 		"gtPrivateKey": ""
 	},
+	"SMTP": {
+		"smtpHost": "",
+		"smtpPort": 0,
+		"smtpUsername": "",
+		"smtpPassword": ""
+	},
 	"mdkConfig": {
 		"announce_url": "https://sdk.hoyoverse.com/hk4e/announcement/index.html?sdk_presentation_style=fullscreen&announcement_version=2.43&sdk_screen_transparent=true&game_biz=hk4e_global&auth_appid=announcement&game=hk4e#/",
 		"enable_qrcode_login": true,
@@ -190,5 +196,6 @@
 		"11": [],
 		"12": [],
 		"13": []
-	}
+	},
+	"marketing_agreements": []
 }

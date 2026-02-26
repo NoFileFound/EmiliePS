@@ -4,23 +4,19 @@ package org.genshinimpact.webserver.routes.combo;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.benmanes.caffeine.cache.Cache;
 import jakarta.servlet.http.HttpServletRequest;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.genshinimpact.database.DBUtils;
 import org.genshinimpact.utils.CryptoUtils;
 import org.genshinimpact.utils.GeoIP;
-import org.genshinimpact.webserver.models.GranterLoginModel;
-import org.genshinimpact.webserver.responses.ComboGetFontResponse;
-import org.genshinimpact.webserver.responses.GranterLoginResponse;
-import org.genshinimpact.webserver.responses.MdkGetConfigResponse;
-import org.genshinimpact.webserver.responses.MdkGetDynamicConfigResponse;
+import org.genshinimpact.webserver.enums.*;
+import org.genshinimpact.webserver.models.combo.granter.*;
+import org.genshinimpact.webserver.responses.combo.granter.*;
+import org.genshinimpact.webserver.responses.Response;
 import org.genshinimpact.webserver.utils.JsonUtils;
 import org.genshinimpact.webserver.SpringBootApp;
-import org.genshinimpact.webserver.enums.*;
-import org.genshinimpact.webserver.models.GetProtocolModel;
-import org.genshinimpact.webserver.responses.GetProtocolResponse;
-import org.genshinimpact.webserver.responses.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -79,7 +75,7 @@ public final class ComboGranterController {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SYSTEM_ERROR, "参数错误"));
             }
 
-            MdkGetConfigResponse response = new MdkGetConfigResponse();
+            GranterGetConfigResponse response = new GranterGetConfigResponse();
             response.setProtocol(channelType == ChannelType.CHANNEL_DEFAULT);
             response.setQrEnabled(SpringBootApp.getWebConfig().mdkConfig.enable_qrcode_login);
             response.setLogLevel("DEBUG");
@@ -89,15 +85,15 @@ public final class ComboGranterController {
             response.setEnableAnnouncePicPopup(SpringBootApp.getWebConfig().mdkConfig.enable_announce_pic_popup);
             response.setAppName("原神");
             if(clientType == ClientType.PLATFORM_PC || clientType == ClientType.PLATFORM_PC_CLOUD) {
-                response.setQrEnabledApps(new MdkGetConfigResponse.QrApps(true, true));
-                response.setQrAppIcons(new MdkGetConfigResponse.QrAppIcons("", "", "https://webstatic.mihoyo.com/upload/operation_location/2022/12/07/ec0f2514f044ac43754440241ab0b838_3962973103776517937.png"));
+                response.setQrEnabledApps(new GranterGetConfigResponse.QrApps(true, true));
+                response.setQrAppIcons(new GranterGetConfigResponse.QrAppIcons("", "", "https://webstatic.mihoyo.com/upload/operation_location/2022/12/07/ec0f2514f044ac43754440241ab0b838_3962973103776517937.png"));
             }
 
             response.setQrCloudDisplayName("云·原神");
             response.setQrAppDisplayName("");
             response.setQrBbsDisplayName("");
             response.setEnableUserCenter(SpringBootApp.getWebConfig().mdkConfig.enable_user_center);
-            response.setFunctionalSwitchConfigs(new MdkGetConfigResponse.FunctionalSwitchConfigs(SpringBootApp.getWebConfig().mdkConfig.enable_jpush, SpringBootApp.getWebConfig().mdkConfig.enable_appsflyer, false));
+            response.setFunctionalSwitchConfigs(new GranterGetConfigResponse.FunctionalSwitchConfigs(SpringBootApp.getWebConfig().mdkConfig.enable_jpush, SpringBootApp.getWebConfig().mdkConfig.enable_appsflyer, false));
             response.setUgcProtocol(SpringBootApp.getWebConfig().mdkConfig.enable_ugc_protocol);
             return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", response));
         } catch(Exception ignored) {
@@ -125,7 +121,7 @@ public final class ComboGranterController {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "未知错误"));
             }
 
-            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new MdkGetDynamicConfigResponse(false, GeoIP.getCountryCode(request.getRemoteAddr()))));
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new GranterGetDynamicConfigResponse(false, GeoIP.getCountryCode(request.getRemoteAddr()))));
         } catch(Exception ignored) {
             return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "未知错误"));
         }
@@ -150,15 +146,15 @@ public final class ComboGranterController {
             }
 
             if(appName == AppId.APP_GENSHIN || appName == AppId.APP_CLOUDPLATFORM) {
-                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new ComboGetFontResponse(List.of(
-                        new ComboGetFontResponse.Font(
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new GranterGetFontResponse(List.of(
+                        new GranterGetFontResponse.Font(
                                 "0",
                                 0,
                                 "zh-cn.ttf",
                                 "https://sdk.hoyoverse.com/sdk-public/2026/01/13/8a7c2fc13ca8ff4d46aad4e4d2e3b19e_3433964338697589248.ttf",
                                 "8a7c2fc13ca8ff4d46aad4e4d2e3b19e"
                         ),
-                        new ComboGetFontResponse.Font(
+                        new GranterGetFontResponse.Font(
                                 "0",
                                 0,
                                 "ja.ttf",
@@ -168,7 +164,7 @@ public final class ComboGranterController {
                 ))));
             }
 
-            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new ComboGetFontResponse()));
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new GranterGetFontResponse()));
         } catch(Exception ignored) {
             return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "AppID错误"));
         }
@@ -190,9 +186,9 @@ public final class ComboGranterController {
      */
     @PostMapping(value = {"api/compareProtocolVersion", "api/getProtocol"})
     public ResponseEntity<Response<?>> SendComboProtocolVersion(HttpServletRequest request) {
-        GetProtocolModel body;
+        GranterCompareProtocolVersionModel body;
         try {
-            body = JsonUtils.read(request.getInputStream(), GetProtocolModel.class);
+            body = JsonUtils.read(request.getInputStream(), GranterCompareProtocolVersionModel.class);
             if(body.app_id == null || body.app_id == AppId.APP_UNKNOWN || body.channel_id == null || body.channel_id == ChannelType.CHANNEL_UNKNOWN || body.language == null || body.language.isBlank()) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_REQUEST_FAILED, "协议加载失败"));
             }
@@ -203,10 +199,10 @@ public final class ComboGranterController {
             }
 
             if((version[0] == body.major && version[1] == body.minimum)) {
-                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new GetProtocolResponse()));
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new GranterCompareProtocolVersionResponse()));
             }
 
-            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new GetProtocolResponse(true, 0, body.app_id, body.language, version[0], version[1])));
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new GranterCompareProtocolVersionResponse(true, 0, body.app_id, body.language, version[0], version[1])));
         }catch(Exception ignored) {
             return ResponseEntity.ok(new Response<>(Retcode.RETCODE_REQUEST_FAILED, "协议加载失败"));
         }
@@ -243,12 +239,53 @@ public final class ComboGranterController {
             }
 
             if((version[0] == myMajor && version[1] == myMinimum)) {
-                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new GetProtocolResponse()));
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new GranterCompareProtocolVersionResponse()));
             }
 
-            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new GetProtocolResponse(true, 0, appId, language, version[0], version[1])));
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new GranterCompareProtocolVersionResponse(true, 0, appId, language, version[0], version[1])));
         } catch(Exception ignored) {
             return ResponseEntity.ok(new Response<>(Retcode.RETCODE_REQUEST_FAILED, "协议加载失败"));
+        }
+    }
+
+    /**
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/combo/granter/login/beforeVerify">https://devapi-takumi.mihoyo.com/combo/granter/login/beforeVerify</a><br><br>
+     *  Description: Fetches the account's settings about additional verification.<br><br>
+     *  Method: POST<br>
+     *  Content-Type: application/json<br><br>
+     *  Parameters:<br>
+     *        <ul>
+     *          <li>{@code open_id} — The account id.</li>
+     *          <li>{@code channel_id} — The client's channel id.</li>
+     *          <li>{@code app_id} — The application id.</li>
+     *          <li>{@code role} — The client's game region info.</li>
+     *          <li>{@code time} — Time since last request.</li>
+     *          <li>{@code combo_token} — The account session key.</li>
+     *        </ul>
+     */
+    @PostMapping(value = "login/beforeVerify")
+    public ResponseEntity<Response<?>> SendComboBeforeVerify(HttpServletRequest request) {
+        String ipAddress = request.getRemoteAddr();
+        AtomicInteger counter = this.requestRateCache.get(ipAddress, k -> new AtomicInteger(0));
+        if(counter.incrementAndGet() > 20) {
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_RATE_LIMIT_EXCEEDED, "操作次數過多，請稍後再試"));
+        }
+
+        GranterBeforeVerifyModel body;
+        try {
+            body = JsonUtils.read(request.getInputStream(), GranterBeforeVerifyModel.class);
+            if(body.open_id == null || body.open_id.isBlank() || body.combo_token == null || body.combo_token.isBlank() || body.app_id == null || body.channel_id == null) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
+            }
+
+            var myAccount = DBUtils.findAccountById(Long.parseLong(body.open_id));
+            if(myAccount == null || !myAccount.getComboToken().equals(body.combo_token)) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_CONFIGURATION_ERROR, "账号错误"));
+            }
+
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new GranterBeforeVerifyResponse(myAccount.getRequireHeartbeat(), myAccount.getRequireRealPerson())));
+        } catch(Exception ignored) {
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
         }
     }
 
@@ -305,7 +342,12 @@ public final class ComboGranterController {
                 }
 
                 if(myGuest.getRequireHeartbeat()) {
-                    ///  TODO: FINISH myGuest.getRequireHeartbeat()
+                    Instant now = Instant.now();
+                    Instant start = SpringBootApp.getHeartbeatService().getHeartBeatCache().get(ipAddress, k -> now);
+                    long elapsed = now.getEpochSecond() - start.getEpochSecond();
+                    if(elapsed >= 5400) {
+                        return ResponseEntity.ok(new Response<>(Retcode.RETCODE_ACCOUNT_ANTIADDICT_LOGIN, "已达到防沉迷限制"));
+                    }
                 }
 
                 myGuest.setComboToken(CryptoUtils.generateStringKey(32));
@@ -314,12 +356,17 @@ public final class ComboGranterController {
             } else {
                 String token = data.get("token").asText();
                 var myAccount = DBUtils.findAccountById(userId);
-                if(myAccount.getSessionToken() == null || !myAccount.getSessionToken().equals(token)) {
+                if(myAccount == null || myAccount.getSessionToken() == null || !myAccount.getSessionToken().equals(token) || myAccount.getRequireRealPerson() || myAccount.getRequireDeviceGrant() || myAccount.getRequireAccountReactivation() || myAccount.getRequireSafeMobile() || myAccount.getEmailBindTicket() != null) {
                     return ResponseEntity.ok(new Response<>(Retcode.RETCODE_NETWORK_AT_RISK, "请求失败，当前网络环境存在风险"));
                 }
 
                 if(myAccount.getRequireHeartbeat()) {
-                    ///  TODO: FINISH myAccount.getRequireHeartbeat()
+                    Instant now = Instant.now();
+                    Instant start = SpringBootApp.getHeartbeatService().getHeartBeatCache().get(ipAddress, k -> now);
+                    long elapsed = now.getEpochSecond() - start.getEpochSecond();
+                    if(elapsed >= 5400) {
+                        return ResponseEntity.ok(new Response<>(Retcode.RETCODE_ACCOUNT_ANTIADDICT_LOGIN, "已达到防沉迷限制"));
+                    }
                 }
 
                 myAccount.setComboToken(CryptoUtils.generateStringKey(32));

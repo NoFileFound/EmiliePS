@@ -12,5 +12,5 @@ import lombok.Setter;
 public final class FatigueRemind {
     private List<Integer> durations;
     private String nickname;
-    private int resetPoint;
+    private int reset_point;
 }

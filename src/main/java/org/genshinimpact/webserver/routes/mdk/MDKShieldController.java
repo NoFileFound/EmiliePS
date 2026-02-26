@@ -1,24 +1,25 @@
 package org.genshinimpact.webserver.routes.mdk;
 
 // Imports
-import static org.genshinimpact.database.collections.Ticket.TicketType.TICKET_DEVICE_GRANT;
-import static org.genshinimpact.database.collections.Ticket.TicketType.TICKET_REACTIVATE_ACCOUNT;
 import com.github.benmanes.caffeine.cache.Cache;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.LinkedHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.genshinimpact.bootstrap.AppBootstrap;
 import org.genshinimpact.database.DBUtils;
+import org.genshinimpact.database.collections.Ticket;
 import org.genshinimpact.utils.CryptoUtils;
-import org.genshinimpact.webserver.models.MdkLoginModel;
-import org.genshinimpact.webserver.models.MdkReactivateAccount;
-import org.genshinimpact.webserver.models.MdkVerifyModel;
-import org.genshinimpact.webserver.responses.MdkLoginResponse;
+import org.genshinimpact.webserver.enums.ClientApiActionType;
+import org.genshinimpact.webserver.models.mdk.shield.*;
+import org.genshinimpact.webserver.responses.mdk.shield.*;
 import org.genshinimpact.webserver.utils.JsonUtils;
 import org.genshinimpact.webserver.SpringBootApp;
 import org.genshinimpact.webserver.enums.AppName;
 import org.genshinimpact.webserver.enums.ClientType;
 import org.genshinimpact.webserver.enums.Retcode;
 import org.genshinimpact.webserver.responses.Response;
+import org.genshinimpact.webserver.utils.SMSUtils;
+import org.genshinimpact.webserver.utils.SMTPUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,6 +38,252 @@ public final class MDKShieldController {
      */
     public MDKShieldController(Cache<String, AtomicInteger> requestRateCache) {
         this.requestRateCache = requestRateCache;
+    }
+
+    /**
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/mdk/shield/api/actionTicket">https://devapi-takumi.mihoyo.com/mdk/shield/api/actionTicket</a><br><br>
+     *  Description: Fetches the ticket id for client's action.<br><br>
+     *  Method: POST<br>
+     *  Content-Type: application/json<br><br>
+     *  Parameters:<br>
+     *        <ul>
+     *          <li>{@code account_id} — The client's account id.</li>
+     *          <li>{@code game_token} — The client's game token.</li>
+     *          <li>{@code action_type} — The client's action type.</li>
+     *        </ul>
+     */
+    @PostMapping(value = "actionTicket")
+    public ResponseEntity<Response<?>> SendMdkActionTicket(HttpServletRequest request) {
+        String ipAddress = request.getRemoteAddr();
+        AtomicInteger counter = this.requestRateCache.get(ipAddress, k -> new AtomicInteger(0));
+        if(counter.incrementAndGet() > 20) {
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_RATE_LIMIT_EXCEEDED, "操作次數過多，請稍後再試"));
+        }
+
+        ShieldActionTicketModel body;
+        try {
+            body = JsonUtils.read(request.getInputStream(), ShieldActionTicketModel.class);
+            if(body.action_type == null || body.action_type == ClientApiActionType.CLIENT_API_ACTION_TYPE_UNKNOWN || body.account_id == null || body.account_id.isBlank() || body.game_token == null || body.game_token.isBlank()) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
+            }
+
+            var myAccount = DBUtils.findAccountById(Long.parseLong(body.account_id));
+            if(myAccount == null || !myAccount.getSessionToken().equals(body.game_token)) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_NETWORK_AT_RISK, "请求失败，当前网络环境存在风险"));
+            }
+
+            Ticket myTicket;
+            String bindingType;
+            switch(body.action_type) {
+                case CLIENT_API_ACTION_TYPE_BIND_EMAIL:
+                    myTicket = DBUtils.getTicketByAccountId(myAccount.getId(), Ticket.TicketType.TICKET_BIND_EMAIL);
+                    bindingType = "Email";
+                    break;
+                case CLIENT_API_ACTION_TYPE_BIND_REALNAME:
+                    myTicket = SpringBootApp.getTicketStore().getOrCreateTicket(myAccount, Ticket.TicketType.TICKET_BIND_REALNAME);
+                    bindingType = "Real name";
+                    break;
+                case CLIENT_API_ACTION_TYPE_MODIFY_REALNAME:
+                    myTicket = SpringBootApp.getTicketStore().getOrCreateTicket(myAccount, Ticket.TicketType.TICKET_MODIFY_REALNAME);
+                    bindingType = "Real name";
+                    break;
+                case CLIENT_API_ACTION_TYPE_BIND_MOBILE:
+                    myTicket = SpringBootApp.getTicketStore().getOrCreateTicket(myAccount, Ticket.TicketType.TICKET_BIND_MOBILE);
+                    myTicket.setData(myAccount.getEmailAddress());
+                    bindingType = "Mobile";
+                    break;
+                default:
+                    return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
+            }
+
+            if(myTicket == null) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SYSTEM_ERROR, "系统请求失败，请返回重试"));
+            }
+
+            if(myTicket.isExpired()) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_REQUEST_FAILED, "票据已过期，请重新登录"));
+            }
+
+            AppBootstrap.getLogger().info("[{} Binding] The {} binding started on account: {} | with verification code: {}.", bindingType, bindingType, myAccount.getId(), myTicket.getVerCode());
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new ShieldActionTicketResponse(myTicket.getId())));
+        } catch(Exception ignored) {
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
+        }
+    }
+
+    /**
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/mdk/shield/api/bindEmail">https://devapi-takumi.mihoyo.com/mdk/shield/api/bindEmail</a><br><br>
+     *  Description: Binds the client's email address.<br><br>
+     *  Method: POST<br>
+     *  Content-Type: application/json<br><br>
+     *  Parameters:<br>
+     *        <ul>
+     *          <li>{@code email} — The client's new email address.</li>
+     *          <li>{@code action_ticket} — The ticket id.</li>
+     *          <li>{@code captcha} — The verification code.</li>
+     *        </ul>
+     */
+    @PostMapping(value = "bindEmail")
+    public ResponseEntity<Response<?>> SendMdkBindEmail(HttpServletRequest request) {
+        String ipAddress = request.getRemoteAddr();
+        AtomicInteger counter = this.requestRateCache.get(ipAddress, k -> new AtomicInteger(0));
+        if(counter.incrementAndGet() > 20) {
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_RATE_LIMIT_EXCEEDED, "操作次數過多，請稍後再試"));
+        }
+
+        ShieldBindEmailModel body;
+        try {
+            body = JsonUtils.read(request.getInputStream(), ShieldBindEmailModel.class);
+            if(body.action_ticket == null || body.action_ticket.isBlank() || body.email == null || body.email.isBlank() || body.captcha == null || body.captcha.isBlank()) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
+            }
+
+            if(!body.email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$")) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "邮箱地址无效"));
+            }
+
+            var myTicket = DBUtils.getTicketById(body.action_ticket);
+            if(myTicket == null || !myTicket.getType().equals(Ticket.TicketType.TICKET_BIND_EMAIL)) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_NETWORK_AT_RISK, "请求失败，当前网络环境存在风险"));
+            }
+
+            if(myTicket.isExpired()) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_REQUEST_FAILED, "票据已过期，请重新登录"));
+            }
+
+            var myAccount = DBUtils.findAccountById(myTicket.getAccountId());
+            if(myAccount == null || !myAccount.getEmailBindTicket().equals(body.action_ticket)) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_NETWORK_AT_RISK, "请求失败，当前网络环境存在风险"));
+            }
+
+            if(!myTicket.getVerCode().equals(body.captcha)) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_CONFIGURATION_ERROR, "验证码错误"));
+            }
+
+            myAccount.setEmailAddress(body.email);
+            myAccount.setEmailBindTicket(null);
+            SpringBootApp.getTicketStore().removeTicket(myTicket, myAccount);
+            myAccount.save(true);
+            AppBootstrap.getLogger().info("[Email Binding] The email binding ended successfully on account: {}.", myAccount.getId());
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK"));
+        } catch(Exception ignored) {
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
+        }
+    }
+
+    /**
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/mdk/shield/api/emailCaptcha">https://devapi-takumi.mihoyo.com/mdk/shield/api/emailCaptcha</a><br><br>
+     *  Description: Verifies the new email address of the client.<br><br>
+     *  Method: POST<br>
+     *  Content-Type: application/json<br><br>
+     *  Parameters:<br>
+     *        <ul>
+     *          <li>{@code action_type} — The action type.</li>
+     *          <li>{@code email} — The client's email address to bind.</li>
+     *        </ul>
+     *  Headers:
+     *        <ul>
+     *          <li>{@code x-rpc-risky} — The verification token after captcha.</li>
+     *        </ul>
+     */
+    @PostMapping(value = "emailCaptcha")
+    public ResponseEntity<Response<?>> SendMdkEmailCaptcha(HttpServletRequest request, @RequestHeader(value = "x-rpc-risky", required = false) String risky) {
+        String ipAddress = request.getRemoteAddr();
+        AtomicInteger counter = this.requestRateCache.get(ipAddress, k -> new AtomicInteger(0));
+        if(counter.incrementAndGet() > 20) {
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_RATE_LIMIT_EXCEEDED, "操作次數過多，請稍後再試"));
+        }
+
+        ShieldEmailCaptchaModel body;
+        try {
+            body = JsonUtils.read(request.getInputStream(), ShieldEmailCaptchaModel.class);
+            if(body.email == null || body.email.isBlank() || body.action_type == null || body.action_type == ClientApiActionType.CLIENT_API_ACTION_TYPE_UNKNOWN) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
+            }
+
+            if(SpringBootApp.getWebConfig().mdkConfig.enable_mtt) {
+                if(SpringBootApp.getCaptchaStore().checkCaptchaStatus(risky)) {
+                    return ResponseEntity.ok(new Response<>(Retcode.RETCODE_NETWORK_AT_RISK, "请求失败，当前网络环境存在风险"));
+                }
+
+                SpringBootApp.getCaptchaStore().deleteCaptcha(ipAddress);
+            }
+
+            if(!body.email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$")) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "邮箱地址无效"));
+            }
+
+            ///  TODO: IMPLEMENT (SETUP TICKET AND SEND EMAIL ADDRESS A VERIFICATION CODE.)
+
+        /*
+                    String verCode = "%06d".formatted(new java.security.SecureRandom().nextInt(1000000));
+            myTicket.setVerCode(verCode);
+            myAccount.setEmailBindTicket(myTicket.getId());
+            myAccount.save(true);
+            AppBootstrap.getLogger().info("[{} Binding] The {} binding started on account: {} | with verification code: {}.", "Test", "Test", myAccount.getId(), myTicket.getVerCode());
+         */
+
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK"));
+        } catch(Exception ignored) {
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
+        }
+    }
+
+    /**
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/mdk/shield/api/emailCaptchaByActionTicket">https://devapi-takumi.mihoyo.com/mdk/shield/api/emailCaptchaByActionTicket</a><br><br>
+     *  Description: Sends captcha to email address from given ticket id.<br><br>
+     *  Method: POST<br>
+     *  Content-Type: application/json<br><br>
+     *  Parameters:<br>
+     *        <ul>
+     *          <li>{@code action_ticket} — The ticket id.</li>
+     *          <li>{@code action_type} — The client's action type.</li>
+     *        </ul>
+     *  Headers:
+     *        <ul>
+     *          <li>{@code x-rpc-risky} — The verification token after captcha.</li>
+     *        </ul>
+     */
+    @PostMapping(value = "emailCaptchaByActionTicket")
+    public ResponseEntity<Response<?>> SendMdkEmailCaptchaByActionTicket(HttpServletRequest request, @RequestHeader(value = "x-rpc-risky", required = false) String risky) {
+        String ipAddress = request.getRemoteAddr();
+        AtomicInteger counter = this.requestRateCache.get(ipAddress, k -> new AtomicInteger(0));
+        if(counter.incrementAndGet() > 20) {
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_RATE_LIMIT_EXCEEDED, "操作次數過多，請稍後再試"));
+        }
+
+        ShieldEmailCaptchaByActionTicketModel body;
+        try {
+            body = JsonUtils.read(request.getInputStream(), ShieldEmailCaptchaByActionTicketModel.class);
+            if(body == null || body.action_ticket == null || body.action_ticket.isBlank() || body.action_type == null) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
+            }
+
+            if(SpringBootApp.getWebConfig().mdkConfig.enable_mtt) {
+                if(SpringBootApp.getCaptchaStore().checkCaptchaStatus(risky)) {
+                    return ResponseEntity.ok(new Response<>(Retcode.RETCODE_NETWORK_AT_RISK, "请求失败，当前网络环境存在风险"));
+                }
+
+                SpringBootApp.getCaptchaStore().deleteCaptcha(ipAddress);
+            }
+
+            var myTicket = DBUtils.getTicketById(body.action_ticket);
+            if(myTicket == null) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_NETWORK_AT_RISK, "请求失败，当前网络环境存在风险"));
+            }
+
+            if(myTicket.isExpired()) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_REQUEST_FAILED, "票据已过期，请重新登录"));
+            }
+
+            String verCode = "%06d".formatted(new java.security.SecureRandom().nextInt(1000000));
+            myTicket.setVerCode(verCode);
+            SMTPUtils.sendDeviceVerificationEmailMessage((String)myTicket.getData(), verCode);
+            AppBootstrap.getLogger().info("[Binding] The mobile binding started on account: {} | with verification code: {}.", myTicket.getData(), verCode);
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK"));
+        } catch(Exception ignored) {
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
+        }
     }
 
     /**
@@ -158,13 +405,13 @@ public final class MDKShieldController {
     public ResponseEntity<Response<?>> SendMdkLogin(HttpServletRequest request, @RequestHeader(value = "x-rpc-device_id", required = false) String device_id, @RequestHeader(value = "x-rpc-risky", required = false) String risky) {
         String ipAddress = request.getRemoteAddr();
         AtomicInteger counter = this.requestRateCache.get(ipAddress, k -> new AtomicInteger(0));
-        if(counter.incrementAndGet() > 19) {
+        if(counter.incrementAndGet() > 20) {
             return ResponseEntity.ok(new Response<>(Retcode.RETCODE_RATE_LIMIT_EXCEEDED, "操作次數過多，請稍後再試"));
         }
 
-        MdkLoginModel body;
+        ShieldLoginModel body;
         try {
-            body = JsonUtils.read(request.getInputStream(), MdkLoginModel.class);
+            body = JsonUtils.read(request.getInputStream(), ShieldLoginModel.class);
             if(body.account == null || body.account.isBlank() || body.password == null || body.password.isBlank() || body.is_crypto == null || device_id == null || device_id.isBlank() || risky == null || risky.isBlank()) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
             }
@@ -199,16 +446,208 @@ public final class MDKShieldController {
 
             myAccount.setSessionToken(CryptoUtils.generateStringKey(32));
             if(myAccount.getDeviceInfo().get(device_id) == null) {
-                SpringBootApp.getTicketStore().getOrCreateTicket(myAccount, TICKET_DEVICE_GRANT);
+                SpringBootApp.getTicketStore().getOrCreateTicket(myAccount, Ticket.TicketType.TICKET_DEVICE_GRANT);
             } else {
                 if(myAccount.getIsPendingDeletion()) {
-                    SpringBootApp.getTicketStore().getOrCreateTicket(myAccount, TICKET_REACTIVATE_ACCOUNT);
+                    SpringBootApp.getTicketStore().getOrCreateTicket(myAccount, Ticket.TicketType.TICKET_REACTIVATE_ACCOUNT);
                 } else {
                     myAccount.save(false);
                 }
             }
 
-            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new MdkLoginResponse(myAccount, ipAddress)));
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new ShieldLoginResponse(myAccount, ipAddress)));
+        } catch(Exception ignored) {
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
+        }
+    }
+
+    /**
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/mdk/shield/api/loginCaptcha">https://devapi-takumi.mihoyo.com/mdk/shield/api/loginCaptcha</a><br><br>
+     *  Description: Generates a captcha for login using a mobile number.<br><br>
+     *  Method: POST<br>
+     *  Content-Type: application/json<br><br>
+     *  Parameters:<br>
+     *        <ul>
+     *          <li>{@code area} — The client's mobile number area.</li>
+     *          <li>{@code mobile} — The client's mobile number.</li>
+     *        </ul>
+     *  Headers:
+     *        <ul>
+     *          <li>{@code x-rpc-risky} — The verification token after captcha.</li>
+     *        </ul>
+     */
+    @PostMapping(value = "loginCaptcha")
+    public ResponseEntity<Response<?>> SendMdkLoginCaptcha(HttpServletRequest request, @RequestHeader(value = "x-rpc-risky", required = false) String risky) {
+        String ipAddress = request.getRemoteAddr();
+        AtomicInteger counter = this.requestRateCache.get(ipAddress, k -> new AtomicInteger(0));
+        if(counter.incrementAndGet() > 20) {
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_RATE_LIMIT_EXCEEDED, "操作次數過多，請稍後再試"));
+        }
+
+        ShieldLoginCaptchaModel body;
+        try {
+            body = JsonUtils.read(request.getInputStream(), ShieldLoginCaptchaModel.class);
+            if(body == null || body.area == null || body.area.isBlank() || body.mobile == null || body.mobile.isEmpty()) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
+            }
+
+            if(!body.area.equals("+86") || !(body.area + body.mobile).matches("^(?:\\+?86)?1(?:3\\d{3}|5[^4\\D]\\d{2}|8\\d{3}|7(?:[0-35-9]\\d{2}|4(?:0\\d|1[0-2]|9\\d))|9[0-35-9]\\d{2}|6[2567]\\d{2}|4(?:(?:10|4[01])\\d{3}|[68]\\d{4}|[579]\\d{2}))\\d{6}$")) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_REQUEST_FAILED, "请输入正确的手机号码"));
+            }
+
+            if(SpringBootApp.getWebConfig().mdkConfig.enable_mtt) {
+                if(SpringBootApp.getCaptchaStore().checkCaptchaStatus(risky)) {
+                    return ResponseEntity.ok(new Response<>(Retcode.RETCODE_NETWORK_AT_RISK, "请求失败，当前网络环境存在风险"));
+                }
+
+                SpringBootApp.getCaptchaStore().deleteCaptcha(ipAddress);
+            }
+
+            var myAccount = DBUtils.findAccountByMobile(body.mobile);
+            if(myAccount == null) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_INVALID_ACCOUNT, "未找到账户"));
+            }
+
+            var myTicket = SpringBootApp.getTicketStore().getOrCreateTicket(myAccount, Ticket.TicketType.TICKET_MOBILE_LOGIN);
+            String verCode = "%06d".formatted(new java.security.SecureRandom().nextInt(1000000));
+            myTicket.setVerCode(verCode);
+            SMSUtils.sendSMS(body.area + body.mobile, verCode);
+            AppBootstrap.getLogger().info("[Binding] The mobile login started on account: {} | with verification code: {}.", myAccount.getId(), myTicket.getVerCode());
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new ShieldLoginCaptchaResponse("Login")));
+        } catch(Exception ignored) {
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
+        }
+    }
+
+    /**
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/mdk/shield/api/loginMobile">https://devapi-takumi.mihoyo.com/mdk/shield/api/loginMobile</a><br><br>
+     *  Description: Logins in the game using mobile.<br><br>
+     *  Method: POST<br>
+     *  Content-Type: application/json<br><br>
+     *  Parameters:<br>
+     *        <ul>
+     *          <li>{@code action} — The action name (It is always Login).</li>
+     *          <li>{@code area} — The client's mobile number area.</li>
+     *          <li>{@code mobile} — The client's mobile number.</li>
+     *          <li>{@code captcha} — The verification code.</li>
+     *        </ul>
+     *  Headers:
+     *        <ul>
+     *          <li>{@code x-rpc-device_id} — The client's device id.</li>
+     *        </ul>
+     */
+    @PostMapping(value = "loginMobile")
+    public ResponseEntity<Response<?>> SendMdkLoginMobile(HttpServletRequest request, @RequestHeader(value = "x-rpc-device_id", required = false) String device_id) {
+        String ipAddress = request.getRemoteAddr();
+        AtomicInteger counter = this.requestRateCache.get(ipAddress, k -> new AtomicInteger(0));
+        if(counter.incrementAndGet() > 20) {
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_RATE_LIMIT_EXCEEDED, "操作次數過多，請稍後再試"));
+        }
+
+        ShieldLoginMobileModel body;
+        try {
+            body = JsonUtils.read(request.getInputStream(), ShieldLoginMobileModel.class);
+            if(body == null || body.mobile == null || body.mobile.isEmpty() || body.area == null || body.area.isBlank() || body.captcha == null || body.captcha.isBlank() || body.action == null || body.action.isBlank() || !body.action.equals("Login")) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
+            }
+
+            var myAccount = DBUtils.findAccountByMobile(body.mobile);
+            if(myAccount == null) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_NETWORK_AT_RISK, "请求失败，当前网络环境存在风险"));
+            }
+
+            var myTicket = DBUtils.getTicketByAccountId(myAccount.getId(), Ticket.TicketType.TICKET_MOBILE_LOGIN);
+            if(myTicket == null) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_NETWORK_AT_RISK, "请求失败，当前网络环境存在风险"));
+            }
+
+            if(myTicket.isExpired()) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_REQUEST_FAILED, "票据已过期，请重新登录"));
+            }
+
+            if(!myTicket.getVerCode().equals(body.captcha)) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_CONFIGURATION_ERROR, "验证码错误"));
+            }
+
+            myAccount.setSessionToken(CryptoUtils.generateStringKey(32));
+            if(myAccount.getDeviceInfo().get(device_id) == null) {
+                SpringBootApp.getTicketStore().getOrCreateTicket(myAccount, Ticket.TicketType.TICKET_DEVICE_GRANT);
+            } else {
+                if(myAccount.getIsPendingDeletion()) {
+                    SpringBootApp.getTicketStore().getOrCreateTicket(myAccount, Ticket.TicketType.TICKET_REACTIVATE_ACCOUNT);
+                } else {
+                    myAccount.save(false);
+                }
+            }
+
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new ShieldLoginResponse(myAccount, ipAddress)));
+        } catch(Exception ignored) {
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
+        }
+    }
+
+    /**
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/mdk/shield/api/mobileCaptcha">https://devapi-takumi.mihoyo.com/mdk/shield/api/mobileCaptcha</a><br><br>
+     *  Description: Sends captcha to the mobile to verify it.<br><br>
+     *  Method: POST<br>
+     *  Content-Type: application/json<br><br>
+     *  Parameters:<br>
+     *        <ul>
+     *          <li>{@code action_type} — The client's action type.</li>
+     *          <li>{@code action_ticket} — The ticket id.</li>
+     *          <li>{@code mobile} — The client's mobile number.</li>
+     *          <li>{@code safe_mobile} — Is safe mobile or a normal mobile.</li>
+     *        </ul>
+     *  Headers:
+     *        <ul>
+     *          <li>{@code x-rpc-risky} — The verification token after captcha.</li>
+     *        </ul>
+     */
+    @PostMapping(value = "mobileCaptcha")
+    public ResponseEntity<Response<?>> SendMdkMobileCaptcha(HttpServletRequest request, @RequestHeader(value = "x-rpc-risky", required = false) String risky) {
+        String ipAddress = request.getRemoteAddr();
+        AtomicInteger counter = this.requestRateCache.get(ipAddress, k -> new AtomicInteger(0));
+        if(counter.incrementAndGet() > 20) {
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_RATE_LIMIT_EXCEEDED, "操作次數過多，請稍後再試"));
+        }
+
+        ShieldMobileCaptchaModel body;
+        try {
+            body = JsonUtils.read(request.getInputStream(), ShieldMobileCaptchaModel.class);
+            if(body.safe_mobile == null || body.mobile == null || body.mobile.isBlank() || body.action_ticket == null || body.action_ticket.isBlank() || body.action_type == null) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
+            }
+
+            if(SpringBootApp.getWebConfig().mdkConfig.enable_mtt) {
+                if(SpringBootApp.getCaptchaStore().checkCaptchaStatus(risky)) {
+                    return ResponseEntity.ok(new Response<>(Retcode.RETCODE_NETWORK_AT_RISK, "请求失败，当前网络环境存在风险"));
+                }
+
+                SpringBootApp.getCaptchaStore().deleteCaptcha(ipAddress);
+            }
+
+            if(("+86" + body.mobile).matches("^(?:\\+?86)?1(?:3\\d{3}|5[^4\\D]\\d{2}|8\\d{3}|7(?:[0-35-9]\\d{2}|4(?:0\\d|1[0-2]|9\\d))|9[0-35-9]\\d{2}|6[2567]\\d{2}|4(?:(?:10|4[01])\\d{3}|[68]\\d{4}|[579]\\d{2}))\\d{6}$")) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_REQUEST_FAILED, "请输入正确的手机号码"));
+            }
+
+            var myTicket = DBUtils.getTicketById(body.action_ticket);
+            if(myTicket == null || !myTicket.getType().equals(Ticket.TicketType.TICKET_BIND_MOBILE)) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_NETWORK_AT_RISK, "请求失败，当前网络环境存在风险"));
+            }
+
+            if(myTicket.isExpired()) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_REQUEST_FAILED, "票据已过期，请重新登录"));
+            }
+
+            if(DBUtils.findAccountByMobile(body.mobile) != null) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_REQUEST_FAILED, "手机号已被使用"));
+            }
+
+            String verCode = "%06d".formatted(new java.security.SecureRandom().nextInt(1000000));
+            myTicket.setVerCode(verCode);
+            SMSUtils.sendSMS("+86" + body.mobile, verCode);
+            AppBootstrap.getLogger().info("[Binding] The mobile bind started on mobile: +86{} | with verification code: {}.", body.mobile, myTicket.getVerCode());
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK"));
         } catch(Exception ignored) {
             return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
         }
@@ -228,19 +667,19 @@ public final class MDKShieldController {
     public ResponseEntity<Response<?>> SendMdkReactivateAccount(HttpServletRequest request) {
         String ipAddress = request.getRemoteAddr();
         AtomicInteger counter = this.requestRateCache.get(ipAddress, k -> new AtomicInteger(0));
-        if(counter.incrementAndGet() > 19) {
+        if(counter.incrementAndGet() > 20) {
             return ResponseEntity.ok(new Response<>(Retcode.RETCODE_RATE_LIMIT_EXCEEDED, "操作次數過多，請稍後再試"));
         }
 
-        MdkReactivateAccount body;
+        ShieldReactivateAccountModel body;
         try {
-            body = JsonUtils.read(request.getInputStream(), MdkReactivateAccount.class);
+            body = JsonUtils.read(request.getInputStream(), ShieldReactivateAccountModel.class);
             if(body.action_ticket == null || body.action_ticket.isBlank()) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
             }
 
             var myTicket = DBUtils.getTicketById(body.action_ticket);
-            if(myTicket == null || !myTicket.getType().equals(TICKET_REACTIVATE_ACCOUNT)) {
+            if(myTicket == null || !myTicket.getType().equals(Ticket.TicketType.TICKET_REACTIVATE_ACCOUNT)) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_NETWORK_AT_RISK, "请求失败，当前网络环境存在风险"));
             }
 
@@ -257,7 +696,7 @@ public final class MDKShieldController {
             myAccount.setIsPendingDeletion(false);
             SpringBootApp.getTicketStore().removeTicket(myTicket, myAccount);
             myAccount.save(true);
-            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new MdkLoginResponse(myAccount, ipAddress)));
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new ShieldLoginResponse(myAccount, ipAddress)));
         } catch(Exception ignored) {
             return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
         }
@@ -282,19 +721,19 @@ public final class MDKShieldController {
     public ResponseEntity<Response<?>> SendMdkVerify(HttpServletRequest request, @RequestHeader(value = "x-rpc-device_id", required = false) String device_id) {
         String ipAddress = request.getRemoteAddr();
         AtomicInteger counter = this.requestRateCache.get(ipAddress, k -> new AtomicInteger(0));
-        if(counter.incrementAndGet() > 19) {
+        if(counter.incrementAndGet() > 20) {
             return ResponseEntity.ok(new Response<>(Retcode.RETCODE_RATE_LIMIT_EXCEEDED, "操作次數過多，請稍後再試"));
         }
 
-        MdkVerifyModel body;
+        ShieldVerifyModel body;
         try {
-            body = JsonUtils.read(request.getInputStream(), MdkVerifyModel.class);
+            body = JsonUtils.read(request.getInputStream(), ShieldVerifyModel.class);
             if(body.token == null || body.token.isBlank() || body.uid == null || body.uid.isBlank()) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
             }
 
             var myAccount = DBUtils.findAccountById(Long.parseLong(body.uid));
-            if(myAccount == null || !myAccount.getSessionToken().equals(body.token)) {
+            if(myAccount == null || !myAccount.getSessionToken().equals(body.token) || myAccount.getRequireRealPerson() || myAccount.getRequireDeviceGrant() || myAccount.getRequireAccountReactivation() || myAccount.getRequireSafeMobile() || myAccount.getEmailBindTicket() != null) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_INVALID_ACCOUNT_LOGIN_STATUS, "登录态失效，请重新登录"));
             }
 
@@ -304,7 +743,53 @@ public final class MDKShieldController {
 
             myAccount.setSessionToken(CryptoUtils.generateStringKey(32));
             myAccount.save(false);
-            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new MdkLoginResponse(myAccount, ipAddress)));
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new ShieldLoginResponse(myAccount, ipAddress)));
+        } catch(Exception ignored) {
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
+        }
+    }
+
+    /**
+     *  Source: <a href="https://devapi-takumi.mihoyo.com/mdk/shield/api/verifyEmailCaptcha">https://devapi-takumi.mihoyo.com/mdk/shield/api/verifyEmailCaptcha</a><br><br>
+     *  Description: Verifies the code (captcha) that was sent by <a href="https://devapi-takumi.mihoyo.com/mdk/shield/api/emailCaptchaByActionTicket">https://devapi-takumi.mihoyo.com/mdk/shield/api/emailCaptchaByActionTicket</a>.<br><br>
+     *  Method: POST<br>
+     *  Content-Type: application/json<br><br>
+     *  Parameters:<br>
+     *        <ul>
+     *          <li>{@code action_ticket} — The ticket id.</li>
+     *          <li>{@code action_type} — The client's action type.</li>
+     *          <li>{@code captcha} — The verification code.</li>
+     *        </ul>
+     */
+    @PostMapping(value = {"verifyEmailCaptcha", "verifyMobileCaptcha"})
+    public ResponseEntity<Response<?>> SendMdkVerifyEmailCaptcha(HttpServletRequest request) {
+        String ipAddress = request.getRemoteAddr();
+        AtomicInteger counter = this.requestRateCache.get(ipAddress, k -> new AtomicInteger(0));
+        if(counter.incrementAndGet() > 20) {
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_RATE_LIMIT_EXCEEDED, "操作次數過多，請稍後再試"));
+        }
+
+        ShieldVerifyEmailCaptchaModel body;
+        try {
+            body = JsonUtils.read(request.getInputStream(), ShieldVerifyEmailCaptchaModel.class);
+            if(body.action_ticket == null || body.action_ticket.isBlank() || body.action_type == null || body.captcha == null || body.captcha.isBlank()) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
+            }
+
+            var myTicket = DBUtils.getTicketById(body.action_ticket);
+            if(myTicket == null) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_NETWORK_AT_RISK, "请求失败，当前网络环境存在风险"));
+            }
+
+            if(myTicket.isExpired()) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_REQUEST_FAILED, "票据已过期，请重新登录"));
+            }
+
+            if(!myTicket.getVerCode().equals(body.captcha)) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_CONFIGURATION_ERROR, "验证码错误"));
+            }
+
+            return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK"));
         } catch(Exception ignored) {
             return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
         }

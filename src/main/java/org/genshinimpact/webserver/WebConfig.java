@@ -12,11 +12,13 @@ import org.genshinimpact.webserver.enums.ClientType;
 public class WebConfig {
     public SpringBootConfig springBootConfig;
     public GeetestConfig geetestConfig;
+    public SMTPConfig SMTP;
     public MDKConfig mdkConfig;
     public BoxConfig boxConfig;
     public List<RegionConfig> regionConfig = List.of();
     public JsonNode regionGlobalConfig;
     public EnumMap<ClientType, List<String>> extensionList;
+    public List<AgreementConfig> marketing_agreements;
 
     public static class SpringBootConfig {
         public int springbootPort = 8881;
@@ -222,5 +224,21 @@ public class WebConfig {
             public Integer endDate;
             public String msg;
         }
+    }
+
+    public static class AgreementConfig {
+        public int agreement_id;
+        public int agreement_version;
+        public String content_url;
+        public String show_dialog_reason;
+        public String title;
+        public String user_status;
+    }
+
+    public static class SMTPConfig {
+        public String smtpHost;
+        public Integer smtpPort;
+        public String smtpUsername;
+        public String smtpPassword;
     }
 }

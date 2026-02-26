@@ -4,10 +4,12 @@ package org.genshinimpact.database;
 import static dev.morphia.query.experimental.filters.Filters.eq;
 import java.util.ArrayList;
 import java.util.List;
+import org.bson.Document;
 import org.genshinimpact.database.collections.Account;
 import org.genshinimpact.database.collections.Experiment;
 import org.genshinimpact.database.collections.Guest;
 import org.genshinimpact.database.collections.Ticket;
+import org.genshinimpact.webserver.utils.JsonUtils;
 
 public final class DBUtils {
     /**
@@ -96,6 +98,15 @@ public final class DBUtils {
     }
 
     /**
+     * Searches for account by given phone number.
+     * @param mobile The phone number.
+     * @return An account if exist or else null.
+     */
+    public static Account findAccountByMobile(String mobile) {
+        return DBManager.getDataStore().find(Account.class).filter(eq("mobileNumber", mobile)).first();
+    }
+
+    /**
      * Searches for account by given username in the database.
      * @param username The given username.
      * @return An account if exist or else null.
@@ -104,8 +115,12 @@ public final class DBUtils {
         return DBManager.getDataStore().find(Account.class).filter(eq("username", username)).first();
     }
 
-
-    public static void saveLogCache(Object cacheBody, String cacheFile) {
-        ///  TODO: IMPLEMENT
+    /**
+     * Saves the log in the database.
+     * @param cacheBody The log content.
+     * @param cacheDbName The log's database name.
+     */
+    public static void saveLogCache(Object cacheBody, String cacheDbName) {
+        DBManager.getDataStore().getDatabase().getCollection(cacheDbName).insertOne(Document.parse(JsonUtils.toJsonString(cacheBody)));
     }
 }

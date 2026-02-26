@@ -11,7 +11,7 @@ import lombok.Setter;
 import org.genshinimpact.database.DBManager;
 import org.genshinimpact.database.embeds.DeviceInfo;
 import org.genshinimpact.database.embeds.FatigueRemind;
-import org.genshinimpact.webserver.models.device.DeviceInfoModel;
+import org.genshinimpact.webserver.models.account.device.DeviceInfoModel;
 
 @Getter
 @Entity(value = "accounts", useDiscriminator = false)
@@ -34,7 +34,7 @@ public final class Account {
     private String sonyName;
     private String tapTapName;
     private String steamName;
-    private final Map<String, DeviceInfo> deviceInfo;
+    @Setter private Map<String, DeviceInfo> deviceInfo;
     private Boolean requireAccountReactivation;
     private String requireAccountReactivationTicket;
     private Boolean requireDeviceGrant;
@@ -44,9 +44,11 @@ public final class Account {
     private Boolean requireRealPerson;
     private String requireRealPersonTicket;
     private String requireRealPersonOperation;
+    @Setter private String emailBindTicket;
     @Setter private Boolean requireHeartbeat;
     @Setter private Boolean isPendingDeletion;
     @Setter private FatigueRemind fatigueRemind;
+    private final Map<Integer, Boolean> agreementInfos;
 
     /**
      * Creates a new account.
@@ -60,6 +62,11 @@ public final class Account {
         this.fatigueRemind = null;
         this.requireHeartbeat = false;
         this.isPendingDeletion = false;
+        this.agreementInfos = new HashMap<>();
+        this.requireAccountReactivation = false;
+        this.requireDeviceGrant = false;
+        this.requireRealPerson = false;
+        this.requireSafeMobile = false;
     }
 
     /**
