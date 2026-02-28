@@ -5,5 +5,5 @@ if %errorlevel% neq 0 (
     exit /b
 )
 
-cd /d "%~dp0/region/rsapatch"
-inject.exe "D:\genshinimpact_dev" "rsapatch.dll" "password_key.txt" "dispatch_key_pub.txt"
+cd /d "%~dp0/rsapatch"
+inject.exe "D:\genshinimpact_dev" "rsapatch.dll"

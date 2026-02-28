@@ -2,8 +2,9 @@ package org.genshinimpact.bootstrap;
 
 // Imports
 import lombok.Getter;
-import org.genshinimpact.MainConfig;
+import org.genshinimpact.configs.MainConfig;
 import org.genshinimpact.database.DBManager;
+import org.genshinimpact.gameserver.ServerApp;
 import org.genshinimpact.utils.CryptoUtils;
 import org.genshinimpact.utils.GeoIP;
 import org.genshinimpact.webserver.SpringBootApp;
@@ -18,9 +19,8 @@ public final class AppBootstrap {
 
     /**
      * Initializes the server and its pre-required files.
-     * @param state The application startup type.
      */
-    public static synchronized void init(int state, String[] args) {
+    public static synchronized void init(String[] args) {
         if(initialized) return;
 
         SLF4JBridgeHandler.removeHandlersForRootLogger();
@@ -28,13 +28,12 @@ public final class AppBootstrap {
 
         try {
             mainConfig = JsonUtils.readFile("config/config.json", MainConfig.class);
-            CryptoUtils.loadDispatchFiles(state);
+            CryptoUtils.loadDispatchFiles();
             DBManager.initializeDatabase();
             GeoIP.loadGeoDatabase();
-            if(state == 0 || state == 2) {
-                SMTPUtils.initSmtpConfig();
-                SpringBootApp.main(args);
-            }
+            SMTPUtils.initSmtpConfig();
+            SpringBootApp.main(args);
+            ServerApp.main(args);
 
             initialized = true;
             Runtime.getRuntime().addShutdownHook(new Thread(AppBootstrap::stopServer));
@@ -48,6 +47,7 @@ public final class AppBootstrap {
      */
     public static synchronized void stopServer() {
         AppBootstrap.getLogger().info("Shutdown-ing the server...");
+        ServerApp.getGameServer().shutdownServer();
         DBManager.shutdownDatabase();
     }
 }

@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import jakarta.servlet.http.HttpServletRequest;
 import org.genshinimpact.database.DBUtils;
 import org.genshinimpact.webserver.SpringBootApp;
-import org.genshinimpact.webserver.WebConfig;
+import org.genshinimpact.configs.WebConfig;
 import org.genshinimpact.webserver.enums.Retcode;
 import org.genshinimpact.webserver.models.mdk.agreement.*;
 import org.genshinimpact.webserver.responses.mdk.agreement.*;
@@ -101,7 +101,7 @@ public final class MDKAgreementController {
         MdkOperateAgreementModel body;
         try {
             body = JsonUtils.read(request.getInputStream(), MdkOperateAgreementModel.class);
-            if(body.agreement_id == null || body.agreement_version == null || body.uid == null || body.uid.isBlank() || body.operation == null || body.operation.isBlank() || body.token == null || body.token.isBlank() || (!body.operation.equals("DENY") && !body.operation.equals("ACCEPT"))) {
+            if(body == null || body.agreement_id == null || body.agreement_version == null || body.uid == null || body.uid.isBlank() || body.operation == null || body.operation.isBlank() || body.token == null || body.token.isBlank() || (!body.operation.equals("DENY") && !body.operation.equals("ACCEPT"))) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
             }
 

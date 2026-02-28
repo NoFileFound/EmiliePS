@@ -63,7 +63,7 @@ public final class MDKShieldController {
         ShieldActionTicketModel body;
         try {
             body = JsonUtils.read(request.getInputStream(), ShieldActionTicketModel.class);
-            if(body.action_type == null || body.action_type == ClientApiActionType.CLIENT_API_ACTION_TYPE_UNKNOWN || body.account_id == null || body.account_id.isBlank() || body.game_token == null || body.game_token.isBlank()) {
+            if(body == null || body.action_type == null || body.action_type == ClientApiActionType.CLIENT_API_ACTION_TYPE_UNKNOWN || body.account_id == null || body.account_id.isBlank() || body.game_token == null || body.game_token.isBlank()) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
             }
 
@@ -81,11 +81,11 @@ public final class MDKShieldController {
                     break;
                 case CLIENT_API_ACTION_TYPE_BIND_REALNAME:
                     myTicket = SpringBootApp.getTicketStore().getOrCreateTicket(myAccount, Ticket.TicketType.TICKET_BIND_REALNAME);
-                    bindingType = "Real name";
+                    bindingType = "Realname";
                     break;
                 case CLIENT_API_ACTION_TYPE_MODIFY_REALNAME:
                     myTicket = SpringBootApp.getTicketStore().getOrCreateTicket(myAccount, Ticket.TicketType.TICKET_MODIFY_REALNAME);
-                    bindingType = "Real name";
+                    bindingType = "Realname";
                     break;
                 case CLIENT_API_ACTION_TYPE_BIND_MOBILE:
                     myTicket = SpringBootApp.getTicketStore().getOrCreateTicket(myAccount, Ticket.TicketType.TICKET_BIND_MOBILE);
@@ -134,7 +134,7 @@ public final class MDKShieldController {
         ShieldBindEmailModel body;
         try {
             body = JsonUtils.read(request.getInputStream(), ShieldBindEmailModel.class);
-            if(body.action_ticket == null || body.action_ticket.isBlank() || body.email == null || body.email.isBlank() || body.captcha == null || body.captcha.isBlank()) {
+            if(body == null || body.action_ticket == null || body.action_ticket.isBlank() || body.email == null || body.email.isBlank() || body.captcha == null || body.captcha.isBlank()) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
             }
 
@@ -197,7 +197,7 @@ public final class MDKShieldController {
         ShieldEmailCaptchaModel body;
         try {
             body = JsonUtils.read(request.getInputStream(), ShieldEmailCaptchaModel.class);
-            if(body.email == null || body.email.isBlank() || body.action_type == null || body.action_type == ClientApiActionType.CLIENT_API_ACTION_TYPE_UNKNOWN) {
+            if(body == null || body.email == null || body.email.isBlank() || body.action_type == null || body.action_type == ClientApiActionType.CLIENT_API_ACTION_TYPE_UNKNOWN) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
             }
 
@@ -412,7 +412,7 @@ public final class MDKShieldController {
         ShieldLoginModel body;
         try {
             body = JsonUtils.read(request.getInputStream(), ShieldLoginModel.class);
-            if(body.account == null || body.account.isBlank() || body.password == null || body.password.isBlank() || body.is_crypto == null || device_id == null || device_id.isBlank() || risky == null || risky.isBlank()) {
+            if(body == null || body.account == null || body.account.isBlank() || body.password == null || body.password.isBlank() || body.is_crypto == null || device_id == null || device_id.isBlank() || risky == null || risky.isBlank()) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
             }
 
@@ -614,7 +614,7 @@ public final class MDKShieldController {
         ShieldMobileCaptchaModel body;
         try {
             body = JsonUtils.read(request.getInputStream(), ShieldMobileCaptchaModel.class);
-            if(body.safe_mobile == null || body.mobile == null || body.mobile.isBlank() || body.action_ticket == null || body.action_ticket.isBlank() || body.action_type == null) {
+            if(body == null || body.safe_mobile == null || body.mobile == null || body.mobile.isBlank() || body.action_ticket == null || body.action_ticket.isBlank() || body.action_type == null) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
             }
 
@@ -674,7 +674,7 @@ public final class MDKShieldController {
         ShieldReactivateAccountModel body;
         try {
             body = JsonUtils.read(request.getInputStream(), ShieldReactivateAccountModel.class);
-            if(body.action_ticket == null || body.action_ticket.isBlank()) {
+            if(body == null || body.action_ticket == null || body.action_ticket.isBlank()) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
             }
 
@@ -728,16 +728,16 @@ public final class MDKShieldController {
         ShieldVerifyModel body;
         try {
             body = JsonUtils.read(request.getInputStream(), ShieldVerifyModel.class);
-            if(body.token == null || body.token.isBlank() || body.uid == null || body.uid.isBlank()) {
+            if(body == null || body.token == null || body.token.isBlank() || body.uid == null || body.uid.isBlank()) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
             }
 
             var myAccount = DBUtils.findAccountById(Long.parseLong(body.uid));
-            if(myAccount == null || !myAccount.getSessionToken().equals(body.token) || myAccount.getRequireRealPerson() || myAccount.getRequireDeviceGrant() || myAccount.getRequireAccountReactivation() || myAccount.getRequireSafeMobile() || myAccount.getEmailBindTicket() != null) {
+            if(myAccount == null || !myAccount.getSessionToken().equals(body.token) || myAccount.getRequireRealPerson() || myAccount.getRequireDeviceGrant() || myAccount.getRequireSafeMobile() || myAccount.getEmailBindTicket() != null) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_INVALID_ACCOUNT_LOGIN_STATUS, "登录态失效，请重新登录"));
             }
 
-            if(myAccount.getDeviceInfo().get(device_id) == null || myAccount.getIsPendingDeletion()) {
+            if(myAccount.getDeviceInfo().get(device_id) == null || myAccount.getIsPendingDeletion() || myAccount.getRequireAccountReactivation()) {
                 return ResponseEntity.ok(new Response<>(Retcode.RET_LOGIN_NEW_LOCATION_FOUND, "请重新登录"));
             }
 
@@ -772,7 +772,7 @@ public final class MDKShieldController {
         ShieldVerifyEmailCaptchaModel body;
         try {
             body = JsonUtils.read(request.getInputStream(), ShieldVerifyEmailCaptchaModel.class);
-            if(body.action_ticket == null || body.action_ticket.isBlank() || body.action_type == null || body.captcha == null || body.captcha.isBlank()) {
+            if(body == null || body.action_ticket == null || body.action_ticket.isBlank() || body.action_type == null || body.captcha == null || body.captcha.isBlank()) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
             }
 

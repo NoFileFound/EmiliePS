@@ -11,6 +11,6 @@ public class Application {
      * @param args the command-line arguments passed to the application.
      */
     public static void main(String[] args) {
-        AppBootstrap.init(2, args);
+        AppBootstrap.init(args);
     }
 }

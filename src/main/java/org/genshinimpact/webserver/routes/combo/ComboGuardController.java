@@ -34,7 +34,7 @@ public final class ComboGuardController {
         GuardPing1Model body;
         try {
             body = JsonUtils.read(request.getInputStream(), GuardPing1Model.class);
-            if(body.combo_token == null || body.combo_token.isBlank() || body.open_id == null || body.open_id.isBlank()) {
+            if(body == null || body.combo_token == null || body.combo_token.isBlank() || body.open_id == null || body.open_id.isBlank()) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new GuardPing1Response()));
             }
 
@@ -77,7 +77,7 @@ public final class ComboGuardController {
         GuardPing1Model body;
         try {
             body = JsonUtils.read(request.getInputStream(), GuardPing1Model.class);
-            if(body.combo_token == null || body.combo_token.isBlank() || body.open_id == null || body.open_id.isBlank()) {
+            if(body == null || body.combo_token == null || body.combo_token.isBlank() || body.open_id == null || body.open_id.isBlank()) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "OK", "参数错误"));
             }
 

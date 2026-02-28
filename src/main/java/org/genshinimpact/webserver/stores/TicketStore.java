@@ -52,6 +52,13 @@ public class TicketStore {
             case TICKET_DEVICE_GRANT:
                 myAccount.setDeviceGrant(false, myTicket.getId());
                 break;
+            case TICKET_BIND_MOBILE:
+                myAccount.setRequireSafeMobile(false);
+                break;
+            case TICKET_BIND_REALNAME:
+                myAccount.setRequireRealPerson(false);
+                myAccount.setRequireRealPersonOperation(null);
+                break;
         }
 
         DBManager.getCachedTickets().remove(myTicket.getId());

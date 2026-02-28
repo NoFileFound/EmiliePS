@@ -1,4 +1,4 @@
-package org.genshinimpact.webserver;
+package org.genshinimpact.configs;
 
 // Imports
 import com.fasterxml.jackson.databind.JsonNode;

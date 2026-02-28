@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.Getter;
+import org.genshinimpact.configs.WebConfig;
 import org.genshinimpact.webserver.services.HeartbeatService;
 import org.genshinimpact.webserver.stores.CrashLogStore;
 import org.genshinimpact.webserver.stores.GeetestStore;
@@ -29,7 +30,7 @@ public class SpringBootApp {
             crashLogStore = new CrashLogStore();
             ticketStore = new TicketStore();
             heartbeatService = new HeartbeatService();
-        } catch (IOException e) {
+        } catch(IOException e) {
             throw new RuntimeException(e);
         }
     }

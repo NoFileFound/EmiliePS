@@ -1,7 +1,7 @@
 package org.genshinimpact.webserver.responses.combo.box;
 
 // Imports
-import org.genshinimpact.webserver.WebConfig;
+import org.genshinimpact.configs.WebConfig;
 
 public class BoxPorteCNResponse {
     public Vals vals;

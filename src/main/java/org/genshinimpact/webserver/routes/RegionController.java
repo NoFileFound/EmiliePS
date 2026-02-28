@@ -3,6 +3,7 @@ package org.genshinimpact.webserver.routes;
 // Imports
 import static org.genshinimpact.gameserver.enums.Retcode.RET_STOP_SERVER;
 import static org.genshinimpact.gameserver.enums.Retcode.RET_CLIENT_FORCE_UPDATE;
+import static org.genshinimpact.webserver.utils.Utils.getDispatchEnvType;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.protobuf.ByteString;
@@ -15,7 +16,7 @@ import org.genshinimpact.bootstrap.AppBootstrap;
 import org.genshinimpact.utils.CryptoUtils;
 import org.genshinimpact.webserver.utils.JsonUtils;
 import org.genshinimpact.webserver.SpringBootApp;
-import org.genshinimpact.webserver.WebConfig;
+import org.genshinimpact.configs.WebConfig;
 import org.genshinimpact.webserver.enums.AccountType;
 import org.genshinimpact.webserver.enums.ChannelType;
 import org.genshinimpact.webserver.enums.ClientType;
@@ -75,8 +76,8 @@ public final class RegionController {
                 root = JsonNodeFactory.instance.objectNode();
             }
 
-            this.queryAllRegionResponse = this.buildRegionList(regions, root, 1, dispatchKey, dispatchSeed);
-            this.queryAllRegionResponseOverseas = this.buildRegionList(regions, root, 3, dispatchKey, dispatchSeed);
+            this.queryAllRegionResponse = this.buildRegionList(regions, root, getDispatchEnvType(false), dispatchKey, dispatchSeed);
+            this.queryAllRegionResponseOverseas = this.buildRegionList(regions, root, getDispatchEnvType(true), dispatchKey, dispatchSeed);
         } catch(Exception ex) {
             AppBootstrap.getLogger().error(ex.getMessage());
             System.exit(1);

@@ -1,6 +1,7 @@
 package org.genshinimpact.webserver.routes.combo;
 
 // Imports
+import static org.genshinimpact.webserver.utils.Utils.getSDKey;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.benmanes.caffeine.cache.Cache;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,6 +9,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.genshinimpact.bootstrap.AppBootstrap;
 import org.genshinimpact.database.DBUtils;
 import org.genshinimpact.utils.CryptoUtils;
 import org.genshinimpact.utils.GeoIP;
@@ -189,7 +191,7 @@ public final class ComboGranterController {
         GranterCompareProtocolVersionModel body;
         try {
             body = JsonUtils.read(request.getInputStream(), GranterCompareProtocolVersionModel.class);
-            if(body.app_id == null || body.app_id == AppId.APP_UNKNOWN || body.channel_id == null || body.channel_id == ChannelType.CHANNEL_UNKNOWN || body.language == null || body.language.isBlank()) {
+            if(body == null || body.app_id == null || body.app_id == AppId.APP_UNKNOWN || body.channel_id == null || body.channel_id == ChannelType.CHANNEL_UNKNOWN || body.language == null || body.language.isBlank()) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_REQUEST_FAILED, "协议加载失败"));
             }
 
@@ -274,7 +276,7 @@ public final class ComboGranterController {
         GranterBeforeVerifyModel body;
         try {
             body = JsonUtils.read(request.getInputStream(), GranterBeforeVerifyModel.class);
-            if(body.open_id == null || body.open_id.isBlank() || body.combo_token == null || body.combo_token.isBlank() || body.app_id == null || body.channel_id == null) {
+            if(body == null || body.open_id == null || body.open_id.isBlank() || body.combo_token == null || body.combo_token.isBlank() || body.app_id == null || body.channel_id == null) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
             }
 
@@ -319,11 +321,11 @@ public final class ComboGranterController {
         try {
             body = JsonUtils.read(request.getInputStream(), GranterLoginModel.class);
             AppName appName = AppName.fromValue(game_biz);
-            if(body.app_id == null || body.app_id == AppId.APP_UNKNOWN || body.channel_id == null || body.channel_id == ChannelType.CHANNEL_UNKNOWN || body.data == null || body.data.isBlank() || body.sign == null || body.sign.isBlank() || body.device == null || body.device.isBlank() || (appName != AppName.APP_GENSHIN && appName != AppName.APP_GENSHIN_OVERSEAS)) {
+            if(body == null || body.app_id == null || body.app_id == AppId.APP_UNKNOWN || body.channel_id == null || body.channel_id == ChannelType.CHANNEL_UNKNOWN || body.data == null || body.data.isBlank() || body.sign == null || body.sign.isBlank() || body.device == null || body.device.isBlank() || (appName != AppName.APP_GENSHIN && appName != AppName.APP_GENSHIN_OVERSEAS)) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));
             }
 
-            String hmacSign = CryptoUtils.getHMAC256(String.format("app_id=%s&channel_id=%s&data=%s&device=%s", body.app_id.getValue(), body.channel_id.getValue(), body.data, body.device), (appName == AppName.APP_GENSHIN ? CryptoUtils.getComboKeys().get(1) : CryptoUtils.getComboKeys().get(3)));
+            String hmacSign = CryptoUtils.getHMAC256(String.format("app_id=%s&channel_id=%s&data=%s&device=%s", body.app_id.getValue(), body.channel_id.getValue(), body.data, body.device), getSDKey(appName == AppName.APP_GENSHIN_OVERSEAS, true));
             if(!hmacSign.equals(body.sign)) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_CONFIGURATION_ERROR, "签名错误"));
             }
@@ -352,6 +354,7 @@ public final class ComboGranterController {
 
                 myGuest.setComboToken(CryptoUtils.generateStringKey(32));
                 myGuest.save();
+                AppBootstrap.getLogger().info("[Combo] A new session token was generated on the guest: {}", myGuest.getId());
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new GranterLoginResponse(String.valueOf(myGuest.getId()), myGuest.getComboToken(), myGuest.getRequireHeartbeat(), AccountType.ACCOUNT_GUEST, countryCode, myGuest.getIsNew(), null)));
             } else {
                 String token = data.get("token").asText();
@@ -371,6 +374,7 @@ public final class ComboGranterController {
 
                 myAccount.setComboToken(CryptoUtils.generateStringKey(32));
                 myAccount.save(true);
+                AppBootstrap.getLogger().info("[Combo] A new session token was generated on the account: {}", myAccount.getId());
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new GranterLoginResponse(String.valueOf(userId), myAccount.getComboToken(), myAccount.getRequireHeartbeat(), AccountType.ACCOUNT_NORMAL, countryCode, false, myAccount.getFatigueRemind())));
             }
         } catch(Exception ignored) {

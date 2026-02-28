@@ -65,7 +65,7 @@ public final class AccountRiskyController {
             body = JsonUtils.read(request.getInputStream(), RiskyCheckModel.class);
             AppName appName = AppName.fromValue(game_biz);
             ClientType clientType = ClientType.fromValue(client_type);
-            if(body.action_type == null || body.action_type == ClientApiActionType.CLIENT_API_ACTION_TYPE_UNKNOWN || body.api_name == null || body.api_name.isBlank() || (body.username.isBlank() && body.mobile.isBlank() && body.action_type == ClientApiActionType.CLIENT_API_ACTION_TYPE_LOGIN) || appName == AppName.APP_UNKNOWN || clientType == ClientType.PLATFORM_UNKNOWN) {
+            if(body == null || body.action_type == null || body.action_type == ClientApiActionType.CLIENT_API_ACTION_TYPE_UNKNOWN || body.api_name == null || body.api_name.isBlank() || (body.username.isBlank() && body.mobile.isBlank() && body.action_type == ClientApiActionType.CLIENT_API_ACTION_TYPE_LOGIN) || appName == AppName.APP_UNKNOWN || clientType == ClientType.PLATFORM_UNKNOWN) {
                 return ResponseEntity.ok(new Response<>(RETCODE_PARAMETER_ERROR, "您的请求存在安全风险"));
             }
         } catch(Exception ignored) {

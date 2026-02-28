@@ -1,6 +1,7 @@
 package org.genshinimpact.webserver.routes.mdk;
 
 // Imports
+import static org.genshinimpact.webserver.utils.Utils.getSDKey;
 import com.github.benmanes.caffeine.cache.Cache;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -59,7 +60,7 @@ public final class MDKGuestController {
         GuestLoginModel body;
         try {
             body = JsonUtils.read(request.getInputStream(),GuestLoginModel.class);
-            if(body.game_key == null || body.game_key == AppName.APP_UNKNOWN) {
+            if(body == null || body.game_key == null || body.game_key == AppName.APP_UNKNOWN) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "游戏不存在"));
             }
 
@@ -75,7 +76,7 @@ public final class MDKGuestController {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_GUEST_LOGIN_ERROR, "快速游戏人数已满"));
             }
 
-            String hmacSign = CryptoUtils.getHMAC256(String.format("%s%s%s", body.client.getValue(), body.device, body.game_key.getValue()), (body.game_key == AppName.APP_GENSHIN ? CryptoUtils.getMdkKeys().get(1) : CryptoUtils.getMdkKeys().get(3)));
+            String hmacSign = CryptoUtils.getHMAC256(String.format("%s%s%s", body.client.getValue(), body.device, body.game_key.getValue()), getSDKey(body.game_key == AppName.APP_GENSHIN_OVERSEAS, false));
             if(!hmacSign.equals(body.sign)) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_CONFIGURATION_ERROR, "签名错误"));
             }

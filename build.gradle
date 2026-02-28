@@ -24,6 +24,11 @@ dependencies {
     implementation('org.slf4j:jul-to-slf4j:2.0.9')
     implementation('com.github.ben-manes.caffeine:caffeine:3.1.8')
     implementation('com.sun.mail:jakarta.mail:2.0.1')
+    implementation('org.reflections:reflections:0.10.2')
+    implementation('io.netty:netty-all:4.1.90.Final')
+    ///implementation('net.openhft:zero-allocation-hashing:0.26ea0')
+    implementation('org.jctools:jctools-core:3.3.0')
+    implementation('it.unimi.dsi:fastutil:8.5.15')
     compileOnly('org.projectlombok:lombok:1.18.30')
     annotationProcessor('org.projectlombok:lombok:1.18.30')
 }

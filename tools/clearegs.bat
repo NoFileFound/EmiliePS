@@ -1,0 +1,1 @@
+reg delete "HKEY_CURRENT_USER\SOFTWARE\miHoYo\原神CTest" /f

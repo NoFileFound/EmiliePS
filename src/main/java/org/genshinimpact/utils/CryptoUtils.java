@@ -234,35 +234,30 @@ public final class CryptoUtils {
     }
 
     /**
-     * @param state The application state type.
      * Loads dispatch-related cryptographic resources.
      */
-    public static void loadDispatchFiles(int state) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-        if(state == 1 || state == 2) {
-            try(InputStream seedStream = CryptoUtils.class.getClassLoader().getResourceAsStream("webserver/dispatch/dispatchSeed.bin");
-                 InputStream keyStream = CryptoUtils.class.getClassLoader().getResourceAsStream("webserver/dispatch/dispatchKey.bin");
-                 InputStream signingStream = CryptoUtils.class.getClassLoader().getResourceAsStream("webserver/dispatch/dispatchSignatureKey.der");
-                 InputStream passwordStream = CryptoUtils.class.getClassLoader().getResourceAsStream("webserver/dispatch/passwordKey.der")) {
+    public static void loadDispatchFiles() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+        try(InputStream seedStream = CryptoUtils.class.getClassLoader().getResourceAsStream("webserver/dispatch/dispatchSeed.bin");
+            InputStream keyStream = CryptoUtils.class.getClassLoader().getResourceAsStream("webserver/dispatch/dispatchKey.bin");
+            InputStream signingStream = CryptoUtils.class.getClassLoader().getResourceAsStream("webserver/dispatch/dispatchSignatureKey.der");
+            InputStream passwordStream = CryptoUtils.class.getClassLoader().getResourceAsStream("webserver/dispatch/passwordKey.der")) {
 
-                if(seedStream == null || keyStream == null || signingStream == null || passwordStream == null) {
-                    throw new FileNotFoundException("One or more dispatch resources could not be found.");
-                }
-
-                dispatchSeed = seedStream.readAllBytes();
-                dispatchKey = keyStream.readAllBytes();
-                dispatchSignatureKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(signingStream.readAllBytes()));
-                passwordDecryptionKey = passwordStream.readAllBytes();
+            if(seedStream == null || keyStream == null || signingStream == null || passwordStream == null) {
+                throw new FileNotFoundException("One or more dispatch resources could not be found.");
             }
+
+            dispatchSeed = seedStream.readAllBytes();
+            dispatchKey = keyStream.readAllBytes();
+            dispatchSignatureKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(signingStream.readAllBytes()));
+            passwordDecryptionKey = passwordStream.readAllBytes();
         }
 
-        if(state == 1 || state == 3) {
-            try(InputStream secretSeedStream = CryptoUtils.class.getClassLoader().getResourceAsStream("webserver/dispatch/secretKey.bin")) {
-                if(secretSeedStream == null) {
-                    throw new FileNotFoundException("One or more dispatch resources could not be found #2.");
-                }
-
-                clientSecretKey = secretSeedStream.readAllBytes();
+        try(InputStream secretSeedStream = CryptoUtils.class.getClassLoader().getResourceAsStream("gameserver/clientSecretKey.bin")) {
+            if(secretSeedStream == null) {
+                throw new FileNotFoundException("One or more dispatch resources could not be found #2.");
             }
+
+            clientSecretKey = secretSeedStream.readAllBytes();
         }
 
         for(int i = 1; i <= 5; i++) {

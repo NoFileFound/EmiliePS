@@ -1,5 +1,9 @@
 package org.genshinimpact.webserver.utils;
 
+// Imports
+import org.genshinimpact.bootstrap.AppBootstrap;
+import org.genshinimpact.utils.CryptoUtils;
+
 public final class Utils {
     /**
      * Filters the given string.
@@ -41,5 +45,58 @@ public final class Utils {
         String end = input.substring(length - visibleEnd);
         int starsCount = length - visibleStart - visibleEnd;
         return start + "*".repeat(Math.max(0, starsCount)) + end;
+    }
+
+    /**
+     * Gets the environment type.
+     * @param isOverseas Is the client located outside of China.
+     * @return The environment id based on the server type and client.
+     */
+    public static Integer getDispatchEnvType(Boolean isOverseas) {
+        switch(AppBootstrap.getMainConfig().serverType) {
+            case SERVER_TYPE_DEV -> {
+                return (isOverseas ? 3 : 1);
+            }
+            case SERVER_TYPE_BETA -> {
+                return (isOverseas ? 11 : 9);
+            }
+            default -> {
+                return (isOverseas ? 2 : 0);
+            }
+        }
+    }
+
+    /**
+     * Gets the sdk key.
+     * @param isOverseas Is the client located outside of China.
+     * @param isCombo Is the key about combo or mdk.
+     * @return The sdk key based on the server type, client and key request type.
+     */
+    public static String getSDKey(Boolean isOverseas, Boolean isCombo) {
+        switch(AppBootstrap.getMainConfig().serverType) {
+            case SERVER_TYPE_DEV -> {
+                if(isCombo) {
+                    return isOverseas ? CryptoUtils.getComboKeys().get(3) : CryptoUtils.getComboKeys().get(1);
+                }
+
+                return isOverseas ? CryptoUtils.getMdkKeys().get(3) : CryptoUtils.getMdkKeys().get(1);
+            }
+
+            case SERVER_TYPE_BETA -> {
+                if(isCombo) {
+                    return isOverseas ? CryptoUtils.getComboKeys().get(11) : CryptoUtils.getComboKeys().get(9);
+                }
+
+                return isOverseas ? CryptoUtils.getMdkKeys().get(11) : CryptoUtils.getMdkKeys().get(9);
+            }
+
+            default -> {
+                if(isCombo) {
+                    return isOverseas ? CryptoUtils.getComboKeys().get(2) : CryptoUtils.getComboKeys().get(0);
+                }
+
+                return isOverseas ? CryptoUtils.getMdkKeys().get(2) : CryptoUtils.getMdkKeys().get(0);
+            }
+        }
     }
 }

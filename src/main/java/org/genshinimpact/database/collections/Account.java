@@ -39,11 +39,9 @@ public final class Account {
     private String requireAccountReactivationTicket;
     private Boolean requireDeviceGrant;
     private String requireDeviceGrantTicket;
-    private Boolean requireSafeMobile;
-    private String requireSafeMobileTicket;
-    private Boolean requireRealPerson;
-    private String requireRealPersonTicket;
-    private String requireRealPersonOperation;
+    @Setter private Boolean requireSafeMobile;
+    @Setter private Boolean requireRealPerson;
+    @Setter private String requireRealPersonOperation;
     @Setter private String emailBindTicket;
     @Setter private Boolean requireHeartbeat;
     @Setter private Boolean isPendingDeletion;
