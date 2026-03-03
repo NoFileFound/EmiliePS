@@ -213,16 +213,13 @@ public final class MDKShieldController {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "邮箱地址无效"));
             }
 
-            ///  TODO: IMPLEMENT (SETUP TICKET AND SEND EMAIL ADDRESS A VERIFICATION CODE.)
-
-        /*
-                    String verCode = "%06d".formatted(new java.security.SecureRandom().nextInt(1000000));
+            var myAccount = DBUtils.findAccountByEmailAddress(body.email);
+            var myTicket = SpringBootApp.getTicketStore().getOrCreateTicket(myAccount, Ticket.TicketType.TICKET_BIND_EMAIL);
+            String verCode = "%06d".formatted(new java.security.SecureRandom().nextInt(1000000));
             myTicket.setVerCode(verCode);
             myAccount.setEmailBindTicket(myTicket.getId());
             myAccount.save(true);
-            AppBootstrap.getLogger().info("[{} Binding] The {} binding started on account: {} | with verification code: {}.", "Test", "Test", myAccount.getId(), myTicket.getVerCode());
-         */
-
+            AppBootstrap.getLogger().info("[Email Binding] The email binding started on account: {} | with verification code: {}.", myAccount.getId(), myTicket.getVerCode());
             return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK"));
         } catch(Exception ignored) {
             return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "参数错误"));

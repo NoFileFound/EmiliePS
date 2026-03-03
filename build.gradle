@@ -29,6 +29,12 @@ dependencies {
     ///implementation('net.openhft:zero-allocation-hashing:0.26ea0')
     implementation('org.jctools:jctools-core:3.3.0')
     implementation('it.unimi.dsi:fastutil:8.5.15')
+    implementation('com.aliyun:aliyun-java-sdk-core:4.5.3') {
+        exclude group: 'commons-logging', module: 'commons-logging'
+    }
+    implementation('com.aliyun:aliyun-java-sdk-dysmsapi:2.1.0') {
+        exclude group: 'commons-logging', module: 'commons-logging'
+    }
     compileOnly('org.projectlombok:lombok:1.18.30')
     annotationProcessor('org.projectlombok:lombok:1.18.30')
 }

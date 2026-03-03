@@ -118,7 +118,6 @@ public final class LogController {
             return ResponseEntity.ok(new Response<>(RETCODE_FAIL, "请求格式错误"));
         }
 
-        /// TODO: [Unfinished #2] Investigate what mihoyo is doing with this.
         return ResponseEntity.ok(new Response<>(RETCODE_SUCC, "success"));
     }
 }

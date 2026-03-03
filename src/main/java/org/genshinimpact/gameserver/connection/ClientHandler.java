@@ -46,7 +46,7 @@ public final class ClientHandler implements KcpListener {
         try {
             this.server.sessionReceiveData(ukcp, byteBuf);
         } catch(BadPacketException ex) {
-            AppBootstrap.getLogger().trace("[Game] Bad packet -> {}", ukcp.user().getRemoteAddress().toString(), ex);
+            AppBootstrap.getLogger().error("[Game] Bad packet -> {}", ukcp.user().getRemoteAddress().toString(), ex);
         }
     }
 

@@ -49,3 +49,6 @@ bin/
 /tools/proto/all-in-one.proto-debug.txt
 /tools/proto/nametranslations.txt
 /tools/bin
+/tools/rsapatch/rsapatch/rsapatch/detours.lib
+/tools/rsapatch/rsapatch/rsapatch/detours_x64.lib
+/tools/rsapatch/rsapatch/rsapatch/detours/

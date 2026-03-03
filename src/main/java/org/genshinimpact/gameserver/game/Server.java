@@ -10,12 +10,15 @@ import org.genshinimpact.gameserver.connection.ClientHandler;
 import org.genshinimpact.gameserver.connection.ClientSession;
 import org.genshinimpact.gameserver.connection.kcp.KcpSession;
 import org.genshinimpact.gameserver.packets.BadPacketException;
+import org.genshinimpact.gameserver.packets.PacketHandler;
+import org.genshinimpact.gameserver.packets.PacketManager;
 import org.kcp.ChannelConfig;
 import org.kcp.KcpServer;
 import org.kcp.Ukcp;
 
 public final class Server extends KcpServer {
     @Getter private final Object2ObjectMap<Long, Player> players;
+    @Getter private final PacketManager packetManager;
     private final Object2ObjectMap<Ukcp, KcpSession> sessions;
 
     /**
@@ -24,6 +27,7 @@ public final class Server extends KcpServer {
     public Server() {
         this.sessions = new Object2ObjectOpenHashMap<>();
         this.players = new Object2ObjectOpenHashMap<>();
+        this.packetManager = new PacketManager(PacketHandler.class);
 
         ChannelConfig channelConfig = new ChannelConfig();
         channelConfig.nodelay(true, 20, 2, true);

@@ -5,5 +5,6 @@ if %errorlevel% neq 0 (
     exit /b
 )
 
-cd /d "%~dp0/rsapatch"
-inject.exe "D:\genshinimpact_dev" "rsapatch.dll"
+D:
+cd D:\genshinimpact_dev\
+injector.exe "rsapatch.dll"

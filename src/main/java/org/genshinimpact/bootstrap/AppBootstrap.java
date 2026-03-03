@@ -10,10 +10,12 @@ import org.genshinimpact.utils.GeoIP;
 import org.genshinimpact.webserver.SpringBootApp;
 import org.genshinimpact.webserver.utils.JsonUtils;
 import org.genshinimpact.webserver.utils.SMTPUtils;
+import org.reflections.Reflections;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 public final class AppBootstrap {
     @Getter private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AppBootstrap.class);
+    @Getter private static final Reflections reflector = new Reflections("org.genshinimpact.gameserver.packets");
     @Getter private static MainConfig mainConfig;
     private static boolean initialized = false;
 

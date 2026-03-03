@@ -13,6 +13,7 @@ public class WebConfig {
     public SpringBootConfig springBootConfig;
     public GeetestConfig geetestConfig;
     public SMTPConfig SMTP;
+    public SMSConfig SMS;
     public MDKConfig mdkConfig;
     public BoxConfig boxConfig;
     public List<RegionConfig> regionConfig = List.of();
@@ -240,5 +241,11 @@ public class WebConfig {
         public Integer smtpPort;
         public String smtpUsername;
         public String smtpPassword;
+    }
+
+    public static class SMSConfig {
+        public String accessId;
+        public String accessSecret;
+        public String signature;
     }
 }

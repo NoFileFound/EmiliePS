@@ -32,7 +32,6 @@ public final class ShaderCollectController {
             return ResponseEntity.ok(new Response<>(RETCODE_FAIL, "请求格式错误"));
         }
 
-        ///  TODO: Find out what mihoyo is doing with this one.
         AppBootstrap.getLogger().info("[H5Log] Shader variants collection completed.");
         return ResponseEntity.ok(new Response<>(RETCODE_SUCC, "OK"));
     }

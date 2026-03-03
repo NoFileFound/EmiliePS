@@ -2,13 +2,18 @@ package org.genshinimpact.gameserver.connection;
 
 // Imports
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
 import lombok.Getter;
 import lombok.Setter;
+import org.genshinimpact.bootstrap.AppBootstrap;
 import org.genshinimpact.gameserver.connection.kcp.KcpSession;
 import org.genshinimpact.gameserver.connection.kcp.KcpTunnel;
 import org.genshinimpact.gameserver.game.Player;
 import org.genshinimpact.gameserver.game.Server;
 import org.genshinimpact.gameserver.packets.BadPacketException;
+import org.genshinimpact.gameserver.packets.InboundPacket;
+import org.genshinimpact.utils.CryptoUtils;
 
 @Getter
 public final class ClientSession implements KcpSession {
@@ -31,7 +36,20 @@ public final class ClientSession implements KcpSession {
 
     @Override
     public void onReceive(ByteBuf data) throws BadPacketException {
-        ///  TODO: IMPLEMENT
+        /// TODO: byte[] encryptionKey = this.state != SessionState.WAITING_FOR_TOKEN ? CryptoUtils.getClientSecretKey() : CryptoUtils.getDispatchKey();
+        byte[] encryptionKey = new byte[] {0};
+        InboundPacket packet = new InboundPacket(Unpooled.wrappedBuffer(CryptoUtils.getXor(ByteBufUtil.getBytes(data), encryptionKey)), this);
+        var handler = this.server.getPacketManager().getHandlers().get(packet.getId());
+        if(handler != null) {
+            try {
+                handler.handle(packet, this);
+                AppBootstrap.getLogger().info("[Game] The IP Address {} received an packet -> {} [{}]", this.tunnel.getAddress().toString(), packet.getId(), "");
+            } catch(Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        } else {
+            AppBootstrap.getLogger().info("[Game] The IP Address {} found unknown packet packet -> {}", this.tunnel.getAddress().toString(), packet.getId());
+        }
     }
 
     @Override

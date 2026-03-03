@@ -32,7 +32,6 @@ public class DeviceListNewerDevicesResponse {
             this.device_model = device_model;
             this.device_id = device_id;
             this.time = time;
-            ///  TODO: INVESTIGATE WHY TIME IS ALWAYS 683 MONTHS
         }
     }
 }

@@ -17,6 +17,11 @@
 		"smtpUsername": "",
 		"smtpPassword": ""
 	},
+	"SMS": {
+		"accessId": "",
+		"accessSecret": "",
+		"signature": ""
+	},
 	"mdkConfig": {
 		"announce_url": "https://sdk.hoyoverse.com/hk4e/announcement/index.html?sdk_presentation_style=fullscreen&announcement_version=2.43&sdk_screen_transparent=true&game_biz=hk4e_global&auth_appid=announcement&game=hk4e#/",
 		"enable_qrcode_login": true,
