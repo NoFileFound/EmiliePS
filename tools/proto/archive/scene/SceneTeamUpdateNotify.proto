@@ -1,0 +1,35 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// Imports
+import "AbilityControlBlock.proto";
+import "SceneAvatarInfo.proto";
+import "AbilitySyncStateInfo.proto";
+import "AvatarInfo.proto";
+import "ServerBuff.proto";
+import "SceneEntityInfo.proto";
+
+// CmdId: 1775
+message SceneTeamUpdateNotify {
+    repeated SceneTeamAvatar scene_team_avatar_list = 11;
+    bool is_in_mp = 15;
+    
+	message SceneTeamAvatar {
+		uint32 scene_id = 1;
+		AbilityControlBlock ability_control_block = 2;
+		SceneAvatarInfo scene_avatar_info = 3;
+		uint64 weapon_guid = 4;
+		AbilitySyncStateInfo avatar_ability_info = 5;
+		bool is_reconnect = 6;
+		uint32 weapon_entity_id = 7;
+		AvatarInfo avatar_info = 8;
+		uint32 entity_id = 9;
+		repeated ServerBuff server_buff_list = 10;
+		AbilitySyncStateInfo weapon_ability_info = 11;
+		SceneEntityInfo scene_entity_info = 12;
+		bool is_player_cur_avatar = 13;
+		uint32 player_uid = 14;
+		uint64 avatar_guid = 15;
+		bool is_on_scene = 152;
+	}
+}

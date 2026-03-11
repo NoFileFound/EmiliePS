@@ -1,0 +1,36 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// Imports
+import "AbilitySyncStateInfo.proto";
+import "EntityRendererChangedInfo.proto";
+import "Vector.proto";
+import "AnimatorParameterValueInfoPair.proto";
+
+message EntityAuthorityInfo {
+    AbilitySyncStateInfo ability_info = 1;
+    EntityRendererChangedInfo renderer_changed_info = 2;
+    SceneEntityAiInfo ai_info = 3;
+    Vector born_pos = 4;
+    repeated AnimatorParameterValueInfoPair pose_para_list = 5;
+    EntityClientExtraInfo client_extra_info = 6;
+	
+	message SceneEntityAiInfo {
+		bool is_ai_open = 1;
+		Vector born_pos = 2;
+		map<uint32, uint32> skill_cd_map = 3;
+		ServantInfo servant_info = 4;
+		map<uint32, uint32> ai_threat_map = 5;
+		map<uint32, uint32> skill_group_cd_map = 6;
+		uint32 cur_tactic = 7;
+		
+		message ServantInfo {
+			uint32 master_entity_id = 1;
+			uint32 born_slot_index = 2;
+		}
+	}
+	
+	message EntityClientExtraInfo {
+		Vector skill_anchor_position = 1;
+	}
+}

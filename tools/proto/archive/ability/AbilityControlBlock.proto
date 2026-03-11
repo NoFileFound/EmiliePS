@@ -1,0 +1,12 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+message AbilityControlBlock {
+    repeated AbilityEmbryo ability_embryo_list = 1;
+	
+	message AbilityEmbryo {
+		uint32 ability_id = 1;
+		fixed32 ability_name_hash = 2;
+		fixed32 ability_override_name_hash = 3;
+	}
+}

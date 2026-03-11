@@ -1,0 +1,252 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// Imports
+import "MotionInfo.proto";
+import "AnimatorParameterValueInfoPair.proto";
+import "EntityClientData.proto";
+import "EntityAuthorityInfo.proto";
+import "ServerBuff.proto";
+import "SceneAvatarInfo.proto";
+import "SceneMonsterInfo.proto";
+import "PropValue.proto";
+import "Item.proto";
+import "WeeklyBossResinDiscountInfo.proto";
+import "BlossomChestInfo.proto";
+import "GadgetGeneralRewardInfo.proto";
+import "FoundationInfo.proto";
+import "CustomGadgetTreeInfo.proto";
+import "PlatformInfo.proto";
+
+message SceneEntityInfo {
+    ProtEntityType entity_type = 1;
+    uint32 entity_id = 2;
+    string name = 3;
+    MotionInfo motion_info = 4;
+    repeated PropPair prop_list = 5;
+    repeated FightPropPair fight_prop_list = 6;
+    uint32 life_state = 7;
+    repeated AnimatorParameterValueInfoPair animator_para_list = 9;
+    uint32 last_move_scene_time_ms = 17;
+    uint32 last_move_reliable_seq = 18;
+    EntityClientData entity_client_data = 19;
+    repeated EntityEnvironmentInfo entity_environment_info_list = 20;
+    EntityAuthorityInfo entity_authority_info = 21;
+    repeated string tag_list = 22;
+    repeated ServerBuff server_buff_list = 23;
+    
+    oneof entity {
+        SceneAvatarInfo avatar = 10;
+        SceneMonsterInfo monster = 11;
+        SceneNpcInfo npc = 12;
+        SceneGadgetInfo gadget = 13;
+    }
+	
+	message SceneNpcInfo {
+		uint32 npc_id = 1;
+		uint32 room_id = 2;
+		uint32 parent_quest_id = 3;
+		uint32 block_id = 4;
+	}
+	
+	message SceneGadgetInfo {
+		uint32 gadget_id = 1;
+		uint32 group_id = 2;
+		uint32 config_id = 3;
+		uint32 owner_entity_id = 4;
+		GadgetBornType born_type = 5;
+		uint32 gadget_state = 6;
+		uint32 gadget_type = 7;
+		bool is_show_cutscene = 8;
+		uint32 authority_peer_id = 9;
+		bool is_enable_interact = 10;
+		uint32 interact_id = 11;
+		uint32 mark_flag = 21;
+		uint32 prop_owner_entity_id = 22;
+		PlatformInfo platform = 23;
+		repeated uint32 interact_uid_list = 24;
+		uint32 draft_id = 25;
+		uint32 gadget_talk_state = 26;
+		GadgetPlayInfo play_info = 100;
+		
+		oneof content {
+			Item trifle_item = 12;
+			GatherGadgetInfo gather_gadget = 13;
+			WorktopInfo worktop = 14;
+			ClientGadgetInfo client_gadget = 15;
+			WeatherInfo weather = 17;
+			AbilityGadgetInfo ability_gadget = 18;
+			StatueGadgetInfo statue_gadget = 19;
+			BossChestInfo boss_chest = 20;
+			BlossomChestInfo blossom_chest = 41;
+			MpPlayRewardInfo mp_play_reward = 42;
+			GadgetGeneralRewardInfo general_reward = 43;
+			OfferingInfo offering_info = 44;
+			FoundationInfo foundation_info = 45;
+			VehicleInfo vehicle_info = 46;
+			EchoShellInfo shell_info = 47;
+			ScreenInfo screen_info = 48;
+			FishPoolInfo fish_pool_info = 59;
+			CustomGadgetTreeInfo custom_gadget_tree_info = 60;
+			RoguelikeGadgetInfo roguelike_gadget_info = 61;
+			NightCrowGadgetInfo night_crow_gadget_info = 62;
+			DeshretObeliskGadgetInfo deshret_obelisk_gadget_info = 63;
+		}
+		
+		enum GadgetBornType {
+			GADGET_BORN_NONE = 0;
+			GADGET_BORN_IN_AIR = 1;
+			GADGET_BORN_PLAYER = 2;
+			GADGET_BORN_MONSTER_HIT = 3;
+			GADGET_BORN_MONSTER_DIE = 4;
+			GADGET_BORN_GADGET = 5;
+			GADGET_BORN_GROUND = 6;
+		}
+		
+		message GadgetPlayInfo {
+			uint32 play_type = 1;
+			uint32 duration = 2;
+			repeated uint32 progress_stage_list = 3;
+			uint32 start_cd = 4;
+			uint32 start_time = 5;
+			uint32 progress = 6;
+			
+			oneof play_info {
+				GadgetCrucibleInfo crucible_info = 21;
+			}
+			
+			message GadgetCrucibleInfo {
+				uint32 mp_play_id = 1;
+				uint32 prepare_end_time = 2;
+			}
+		}
+		
+		message GatherGadgetInfo {
+			uint32 item_id = 1;
+			bool is_forbid_guest = 2;
+		}
+		
+		message WorktopInfo {
+			repeated uint32 option_list = 1;
+			bool is_guest_can_operate = 2;
+		}
+		
+		message ClientGadgetInfo {
+			uint32 camp_id = 1;
+			uint32 camp_type = 2;
+			uint64 guid = 3;
+			uint32 owner_entity_id = 4;
+			uint32 target_entity_id = 5;
+			bool async_load = 6;
+			bool is_peer_id_from_player = 7;
+			repeated uint32 target_entity_id_list = 8;
+		}
+		
+		message WeatherInfo {
+			uint32 weather_area_id = 1;
+		}
+		
+		message AbilityGadgetInfo {
+			uint32 camp_id = 1;
+			uint32 camp_target_type = 2;
+			uint32 target_entity_id = 3;
+		}
+		
+		message StatueGadgetInfo {
+			repeated uint32 opened_statue_uid_list = 1;
+		}
+		
+		message BossChestInfo {
+			uint32 monster_config_id = 1;
+			uint32 resin = 2;
+			repeated uint32 remain_uid_list = 3;
+			repeated uint32 qualify_uid_list = 4;
+			map<uint32, WeeklyBossResinDiscountInfo> uid_discount_map = 5;
+		}
+		
+		message MpPlayRewardInfo {
+			uint32 resin = 1;
+			repeated uint32 remain_uid_list = 2;
+			repeated uint32 qualify_uid_list = 3;
+		}
+		
+		message OfferingInfo {
+			uint32 offering_id = 1;
+		}
+		
+		message VehicleInfo {
+			repeated VehicleMember member_list = 1;
+			uint32 owner_uid = 2;
+			float cur_stamina = 3;
+			
+			message VehicleMember {
+				uint32 uid = 1;
+				uint64 avatar_guid = 2;
+				uint32 pos = 3;
+			}
+		}
+		
+		message EchoShellInfo {
+			uint32 shell_id = 1;
+		}
+		
+		message ScreenInfo {
+			uint32 live_id = 1;
+			uint32 projector_entity_id = 2;
+		}
+		
+		message FishPoolInfo {
+			uint32 pool_id = 1;
+			repeated uint32 fish_area_list = 2;
+			uint32 today_fish_num = 3;
+		}
+		
+		message RoguelikeGadgetInfo {
+			uint32 cell_config_id = 1;
+			uint32 cell_type = 2;
+			uint32 cell_state = 3;
+			uint32 cell_id = 4;
+		}
+		
+		message NightCrowGadgetInfo {
+			repeated uint32 argument_list = 1;
+		}
+		
+		message DeshretObeliskGadgetInfo {
+			repeated uint32 argument_list = 1;
+		}
+	}
+	
+	enum ProtEntityType {
+		PROT_ENTITY_NONE = 0;
+		PROT_ENTITY_AVATAR = 1;
+		PROT_ENTITY_MONSTER = 2;
+		PROT_ENTITY_NPC = 3;
+		PROT_ENTITY_GADGET = 4;
+		PROT_ENTITY_REGION = 5;
+		PROT_ENTITY_WEAPON = 6;
+		PROT_ENTITY_WEATHER = 7;
+		PROT_ENTITY_SCENE = 8;
+		PROT_ENTITY_TEAM = 9;
+		PROT_ENTITY_MASSIVE_ENTITY = 10;
+		PROT_ENTITY_MP_LEVEL = 11;
+		PROT_ENTITY_PLAY_TEAM_ENTITY = 12;
+		PROT_ENTITY_EYE_POINT = 13;
+		PROT_ENTITY_MAX = 14;
+	}
+	
+	message PropPair {
+		uint32 type = 1;
+		PropValue prop_value = 2;
+	}
+
+	message FightPropPair {
+		uint32 prop_type = 1;
+		float prop_value = 2;
+	}
+	
+	message EntityEnvironmentInfo {
+		uint32 json_climate_type = 1;
+		uint32 climate_area_id = 2;
+	}
+}

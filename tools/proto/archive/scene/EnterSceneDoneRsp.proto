@@ -1,0 +1,8 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// CmdId: 237
+message EnterSceneDoneRsp {
+    int32 retcode = 7;
+    uint32 enter_scene_token = 15;
+}

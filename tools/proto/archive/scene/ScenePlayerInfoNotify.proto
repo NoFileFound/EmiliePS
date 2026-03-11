@@ -1,0 +1,19 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// Imports
+import "OnlinePlayerInfo.proto";
+
+// CmdId: 267
+message ScenePlayerInfoNotify {
+    repeated ScenePlayerInfo player_info_list = 5;
+	
+	message ScenePlayerInfo {
+		uint32 scene_id = 10;
+		uint32 peer_id = 6;
+		OnlinePlayerInfo online_player_info = 13;
+		bool is_connected = 2;
+		string name = 15;
+		uint32 uid = 8;
+	}
+}

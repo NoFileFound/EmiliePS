@@ -1,0 +1,39 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// Imports
+import "AbilityControlBlock.proto";
+import "AbilitySyncStateInfo.proto";
+import "ServerBuff.proto";
+
+// CmdId: 214
+message PlayerEnterSceneInfoNotify {
+    MPLevelEntityInfo mp_level_entity_info = 5;
+    uint32 cur_avatar_entity_id = 6;
+    repeated AvatarEnterSceneInfo avatar_enter_info = 7;
+    TeamEnterSceneInfo team_enter_info = 8;
+    uint32 enter_scene_token = 12;
+    
+	message TeamEnterSceneInfo {
+		AbilityControlBlock ability_control_block = 7;
+		AbilitySyncStateInfo team_ability_info = 10;
+		uint32 team_entity_id = 15;
+	}
+	
+	message AvatarEnterSceneInfo {
+		repeated ServerBuff server_buff_list = 14;
+		uint32 avatar_entity_id = 7;
+		AbilitySyncStateInfo weapon_ability_info = 12;
+		uint32 weapon_entity_id = 10;
+		AbilitySyncStateInfo avatar_ability_info = 2;
+		uint64 avatar_guid = 13;
+		uint64 weapon_guid = 9;
+		repeated uint32 buff_id_list = 5;
+	}
+	
+	message MPLevelEntityInfo {
+		AbilitySyncStateInfo ability_info = 2;
+		uint32 entity_id = 11;
+		uint32 authority_peer_id = 3;
+	}
+}

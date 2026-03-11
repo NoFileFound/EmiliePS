@@ -13,6 +13,8 @@ import org.genshinimpact.gameserver.game.Player;
 import org.genshinimpact.gameserver.game.Server;
 import org.genshinimpact.gameserver.packets.BadPacketException;
 import org.genshinimpact.gameserver.packets.InboundPacket;
+import org.genshinimpact.gameserver.packets.OutboundPacket;
+import org.genshinimpact.gameserver.packets.send.player.SendGetPlayerTokenRsp;
 import org.genshinimpact.utils.CryptoUtils;
 
 @Getter
@@ -36,8 +38,7 @@ public final class ClientSession implements KcpSession {
 
     @Override
     public void onReceive(ByteBuf data) throws BadPacketException {
-        /// TODO: byte[] encryptionKey = this.state != SessionState.WAITING_FOR_TOKEN ? CryptoUtils.getClientSecretKey() : CryptoUtils.getDispatchKey();
-        byte[] encryptionKey = new byte[] {0};
+        byte[] encryptionKey = this.state != SessionState.WAITING_FOR_TOKEN ? CryptoUtils.getClientSecretKey() : new byte[] {0};
         InboundPacket packet = new InboundPacket(Unpooled.wrappedBuffer(CryptoUtils.getXor(ByteBufUtil.getBytes(data), encryptionKey)), this);
         var handler = this.server.getPacketManager().getHandlers().get(packet.getId());
         if(handler != null) {
@@ -65,7 +66,21 @@ public final class ClientSession implements KcpSession {
 
     @Override
     public long getUid() {
-        ///  TODO: IMPLEMENT
-        return -1;
+        return this.player.getAccount().getId();
+    }
+
+    /**
+     * Sends a packet from the current session.
+     * @param packet The packet to send.
+     */
+    public void sendPacket(OutboundPacket packet) {
+        if(packet.isShouldBuildHeader()) {
+            packet.buildHeader(this.getNextClientSequence());
+        }
+
+        this.tunnel.writeData(packet.build());
+        AppBootstrap.getLogger().info("[Game] The IP Address {} send an packet -> {} [{}]", this.tunnel.getAddress().toString(), packet.getId(), "");
     }
 }
+
+/// TODO: GET PACKET NAME FROM ID.

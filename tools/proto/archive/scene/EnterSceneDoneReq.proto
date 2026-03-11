@@ -1,0 +1,7 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// CmdId: 277
+message EnterSceneDoneReq {
+    uint32 enter_scene_token = 11;
+}

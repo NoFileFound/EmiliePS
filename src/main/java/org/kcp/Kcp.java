@@ -12,13 +12,14 @@ import java.util.List;
 import java.util.ListIterator;
 import lombok.Getter;
 import lombok.Setter;
-///import net.openhft.hashing.LongHashFunction;
+import net.openhft.hashing.LongHashFunction;
 import org.kcp.erasure.fec.Snmp;
 import org.kcp.internal.ReItrLinkedList;
 import org.kcp.internal.ReusableListIterator;
 
 public class Kcp implements IKcp {
     private static final InternalLogger log = InternalLoggerFactory.getInstance(Kcp.class);
+    public static final boolean enableKcpV2 = false;
     public static final int IKCP_RTO_NDL = 30;
     public static final int IKCP_RTO_MIN = 100;
     public static final int IKCP_RTO_DEF = 200;
@@ -33,7 +34,7 @@ public class Kcp implements IKcp {
     public static final int IKCP_WND_RCV = 256;
     public static final int IKCP_MTU_DEF = 1400;
     public static final int IKCP_INTERVAL = 100;
-    public int IKCP_OVERHEAD = 28; /// 32
+    public int IKCP_OVERHEAD = (enableKcpV2 ? 32 : 28);
     public static final int IKCP_DEADLINK = 20;
     public static final int IKCP_THRESH_INIT = 2;
     public static final int IKCP_THRESH_MIN = 2;
@@ -138,7 +139,7 @@ public class Kcp implements IKcp {
                 break;
         }
 
-        ///buf.writeIntLE(seg.byte_check_code);
+        if(enableKcpV2) buf.writeIntLE(seg.byte_check_code);
         Snmp.snmp.OutSegs.increment();
         return buf.writerIndex() - offset;
     }
@@ -562,7 +563,7 @@ public class Kcp implements IKcp {
             byte cmd;
             short frg;
             Segment seg;
-            ///int byte_check_code;
+            int byte_check_code;
             if(data.readableBytes() < IKCP_OVERHEAD) {
                 break;
             }
@@ -579,7 +580,7 @@ public class Kcp implements IKcp {
             sn = data.readUnsignedIntLE();
             una = data.readUnsignedIntLE();
             len = data.readIntLE();
-            ///byte_check_code = data.readIntLE();
+            if(enableKcpV2) byte_check_code = data.readIntLE();
             ackMask = switch(ackMaskSize) {
                 case 8 -> data.readUnsignedByte();
                 case 16 -> data.readUnsignedShortLE();
@@ -641,7 +642,7 @@ public class Kcp implements IKcp {
                             seg.ts = ts;
                             seg.sn = sn;
                             seg.una = una;
-                            ///seg.byte_check_code = byte_check_code;
+                            if(enableKcpV2) seg.byte_check_code = byte_check_code;
                             repeat = parseData(seg);
                         }
                     }
@@ -872,8 +873,10 @@ public class Kcp implements IKcp {
             newSeg.conv = conv;
             newSeg.cmd = IKCP_CMD_PUSH;
             newSeg.sn = sndNxt;
-            ///LongHashFunction xxh3 = LongHashFunction.xx3();
-            ///newSeg.byte_check_code = (int) xxh3.hashBytes(newSeg.data.nioBuffer());
+            if(enableKcpV2) {
+                LongHashFunction xxh3 = LongHashFunction.xx3();
+                newSeg.byte_check_code = (int) xxh3.hashBytes(newSeg.data.nioBuffer());
+            }
             sndBuf.add(newSeg);
             sndNxt++;
             newSegsCount++;
@@ -1281,7 +1284,7 @@ public class Kcp implements IKcp {
         private int rto;
         private int fastack;
         @Setter @Getter private int xmit;
-        ///private int byte_check_code;
+        private int byte_check_code;
         private long ackMask;
         private ByteBuf data;
         private int ackMaskSize;
@@ -1309,7 +1312,7 @@ public class Kcp implements IKcp {
             fastack = 0;
             xmit = 0;
             ackMask=0;
-            ///byte_check_code = 0;
+            byte_check_code = 0;
             if(releaseBuf&&data!=null) {
                 data.release();
             }

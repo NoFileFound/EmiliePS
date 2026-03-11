@@ -1,0 +1,10 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// Imports
+import "WidgetSlotData.proto";
+
+message PlayerWidgetInfo {
+    repeated WidgetSlotData slot_list = 13;
+    uint32 uid = 14;
+}

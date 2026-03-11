@@ -1,0 +1,13 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// Imports
+import "PlayerWidgetInfo.proto";
+import "OnlinePlayerInfo.proto";
+
+// CmdId: 3116
+message WorldPlayerInfoNotify {
+    repeated PlayerWidgetInfo player_widget_info_list = 8;
+    repeated uint32 player_uid_list = 11;
+    repeated OnlinePlayerInfo player_info_list = 14;
+}

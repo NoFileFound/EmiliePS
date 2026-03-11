@@ -1,0 +1,27 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// Imports
+import "AbilityString.proto";
+
+message AbilityScalarValueEntry {
+    AbilityString key = 1;
+    AbilityScalarType value_type = 2;
+    
+    oneof value {
+        float float_value = 3;
+        string string_value = 4;
+        int32 int_value = 5;
+        uint32 uint_value = 6;
+    }
+	
+	enum AbilityScalarType {
+		ABILITY_SCALAR_TYPE_UNKNOW = 0;
+		ABILITY_SCALAR_TYPE_FLOAT = 1;
+		ABILITY_SCALAR_TYPE_INT = 2;
+		ABILITY_SCALAR_TYPE_BOOL = 3;
+		ABILITY_SCALAR_TYPE_TRIGGER = 4;
+		ABILITY_SCALAR_TYPE_STRING = 5;
+		ABILITY_SCALAR_TYPE_UINT = 6;
+	}
+}

@@ -1,0 +1,14 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+message MassivePropSyncInfo {
+    int64 id = 1;
+    repeated MassivePropParam prop_list = 2;
+	
+	message MassivePropParam {
+		int32 type = 1;
+		repeated uint32 reaction_info_list = 2;
+		repeated float param_list = 3;
+		uint32 sync_flag = 4;
+	}
+}

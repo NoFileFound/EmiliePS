@@ -1,0 +1,80 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// Imports
+import "PropValue.proto";
+import "AvatarFetterInfo.proto";
+import "AvatarEquipAffixInfo.proto";
+import "AvatarExcelInfo.proto";
+import "Item.proto";
+
+message AvatarInfo {
+    uint32 avatar_id = 1;
+    uint64 guid = 2;
+    map<uint32, PropValue> prop_map = 3;
+    uint32 life_state = 4;
+    repeated uint64 equip_guid_list = 5;
+    repeated uint32 talent_id_list = 6;
+    map<uint32, float> fight_prop_map = 7;
+    TrialAvatarInfo trial_avatar_info = 9;
+    map<uint32, AvatarSkillInfo> skill_map = 10;
+    uint32 skill_depot_id = 11;
+    AvatarFetterInfo fetter_info = 12;
+    uint32 core_proud_skill_level = 13;
+    repeated uint32 inherent_proud_skill_list = 14;
+    map<uint32, uint32> skill_level_map = 15;
+    AvatarExpeditionState expedition_state = 16;
+    map<uint32, uint32> proud_skill_extra_level_map = 17;
+    bool is_focus = 18;
+    uint32 avatar_type = 19;
+    repeated uint32 team_resonance_list = 20;
+    uint32 wearing_flycloak_id = 21;
+    repeated AvatarEquipAffixInfo equip_affix_list = 22;
+    uint32 born_time = 23;
+    repeated uint32 pending_promote_reward_list = 24;
+    uint32 costume_id = 25;
+    AvatarExcelInfo excel_info = 26;
+    uint32 anim_hash = 27;
+	
+	message TrialAvatarInfo {
+		uint32 trial_avatar_id = 1;
+		repeated Item trial_equip_list = 2;
+		TrialAvatarGrantRecord grant_record = 3;
+		
+		message TrialAvatarGrantRecord {
+			GrantReason grant_reason = 1;
+			uint32 from_parent_quest_id = 2;
+			
+			enum GrantReason {
+				INVALID = 0;
+				GRANT_BY_QUEST = 1;
+				GRANT_BY_TRIAL_AVATAR_ACTIVITY = 2;
+				GRANT_BY_DUNGEON_ELEMENT_CHALLENGE = 3;
+				GRANT_BY_MIST_TRIAL_ACTIVITY = 4;
+				GRANT_BY_SUMO_ACTIVITY = 5;
+				GRANT_BY_POTION_ACTIVITY = 6;
+				GRANT_BY_CRYSTAL_LINK_ACTIVITY = 7;
+				GRANT_BY_IRODORI_MASTER = 8;
+				GRANT_BY_GM = 9;
+				GRANT_BY_INSTABLE_SPRAY_ACTIVITY = 10;
+				GRANT_BY_MUQADAS_POTION_ACTIVITY = 11;
+				GRANT_BY_VINTAGE_HUNTING = 12;
+				GRANT_BY_CHAR_AMUSEMENT = 13;
+			}
+		}
+	}
+	
+	message AvatarSkillInfo {
+		uint32 pass_cd_time = 1;
+		repeated uint32 full_cd_time_list = 2;
+		uint32 max_charge_count = 3;
+	}
+	
+	enum AvatarExpeditionState {
+		AVATAR_EXPEDITION_NONE = 0;
+		AVATAR_EXPEDITION_DOING = 1;
+		AVATAR_EXPEDITION_FINISH_WAIT_REWARD = 2;
+		AVATAR_EXPEDITION_CALLBACK_WAIT_REWARD = 3;
+		AVATAR_EXPEDITION_LOCKED = 4;
+	}
+}

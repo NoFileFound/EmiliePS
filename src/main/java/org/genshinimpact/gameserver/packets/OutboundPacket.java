@@ -11,7 +11,7 @@ import org.genshinimpact.utils.CryptoUtils;
 import org.generated.protobuf.PacketHeadOuterClass.PacketHead;
 
 @Data
-public final class OutboundPacket {
+public class OutboundPacket {
     /**
      * The ID of the packet
      */
@@ -97,7 +97,11 @@ public final class OutboundPacket {
         baos.writeBytes(this.data);
         baos.write((byte)((PACKET_MAGIC >>> 8) & 0xff));
         baos.write((byte)(PACKET_MAGIC & 0xff));
-        return CryptoUtils.getXor(baos.toByteArray(), (useDispatchKey) ? CryptoUtils.getDispatchKey() : CryptoUtils.getClientSecretKey());
+        //return CryptoUtils.getXor(baos.toByteArray(), (useDispatchKey) ?  : CryptoUtils.getClientSecretKey());
+
+
+        if(useDispatchKey) return baos.toByteArray();
+        return CryptoUtils.getXor(baos.toByteArray(), CryptoUtils.getClientSecretKey());
     }
 
     /**

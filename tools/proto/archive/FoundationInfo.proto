@@ -1,0 +1,16 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+message FoundationInfo {
+    FoundationStatus status = 1;
+    repeated uint32 uid_list = 2;
+    uint32 current_building_id = 3;
+    uint32 locked_by_uid = 4;
+	
+	enum FoundationStatus {
+		FOUNDATION_STATUS_NONE = 0;
+		FOUNDATION_STATUS_INIT = 1;
+		FOUNDATION_STATUS_BUILDING = 2;
+		FOUNDATION_STATUS_BUILT = 3;
+	}
+}

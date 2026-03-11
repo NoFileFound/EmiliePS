@@ -1,8 +1,6 @@
 package org.genshinimpact.webserver.routes.telemetry;
 
 // Imports
-import static org.genshinimpact.webserver.enums.Retcode.RETCODE_FAIL;
-import static org.genshinimpact.webserver.enums.Retcode.RETCODE_SUCC;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
 import org.genshinimpact.bootstrap.AppBootstrap;
@@ -10,7 +8,7 @@ import org.genshinimpact.database.DBUtils;
 import org.genshinimpact.utils.CryptoUtils;
 import org.genshinimpact.webserver.utils.JsonUtils;
 import org.genshinimpact.webserver.models.telemetry.ApmDataUploadModel;
-import org.genshinimpact.webserver.responses.Response;
+import org.genshinimpact.webserver.responses.APMResponse;
 import org.genshinimpact.webserver.responses.TsResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -59,19 +57,19 @@ public final class APMController {
      * </ul>
      */
     @PostMapping("apm/dataUpload")
-    public ResponseEntity<Response<?>> ReceiveAPMLog(HttpServletRequest request, @RequestHeader(value = "CONTENT-MD5", required = false) String contentMd5, @RequestHeader(value = "Content-Type", required = false) String contentType, @RequestHeader(value = "DATE", required = false) String date, @RequestHeader(value = "cms-signature", defaultValue = "hmac-sha1") String cmsSignature, @RequestHeader(value = "Authorization", required = false) String authorization) {
+    public ResponseEntity<APMResponse> ReceiveAPMLog(HttpServletRequest request, @RequestHeader(value = "CONTENT-MD5", required = false) String contentMd5, @RequestHeader(value = "Content-Type", required = false) String contentType, @RequestHeader(value = "DATE", required = false) String date, @RequestHeader(value = "cms-signature", defaultValue = "hmac-sha1") String cmsSignature, @RequestHeader(value = "Authorization", required = false) String authorization) {
         ApmDataUploadModel body;
         try {
             byte[] payload = request.getInputStream().readAllBytes();
             String message = String.join("\n", request.getMethod(), contentMd5 != null ? contentMd5 : "", contentType != null ? contentType : "", date != null ? date : "", cmsSignature);
             String computedHmac = CryptoUtils.getHMAC1(message, "mihoyo2020hk4e");
             if(!computedHmac.equals(authorization)) {
-                return ResponseEntity.ok(new Response<>(RETCODE_FAIL, "请求格式错误"));
+                return ResponseEntity.ok(new APMResponse(-1));
             }
 
             String payloadMd5 = CryptoUtils.getMd5(payload);
             if(!payloadMd5.equalsIgnoreCase(contentMd5)) {
-                return ResponseEntity.ok(new Response<>(RETCODE_FAIL, "请求格式错误"));
+                return ResponseEntity.ok(new APMResponse(-1));
             }
 
             body = JsonUtils.readList(new ByteArrayInputStream(payload), ApmDataUploadModel.class).get(0);
@@ -115,14 +113,14 @@ public final class APMController {
                     || body.uploadContent.DeviceInfo.Platform == null || body.uploadContent.DeviceInfo.Platform.isBlank()
                     || body.uploadContent.DeviceInfo.Rom == null
                     || body.uploadContent.DeviceInfo.SystemVersion == null) {
-                return ResponseEntity.ok(new Response<>(RETCODE_FAIL, "请求格式错误"));
+                return ResponseEntity.ok(new APMResponse(-1));
             }
         } catch(Exception ex) {
-            return ResponseEntity.ok(new Response<>(RETCODE_FAIL, "请求格式错误"));
+            return ResponseEntity.ok(new APMResponse(-1));
         }
 
         DBUtils.saveLogCache(body, "apm_logs");
         AppBootstrap.getLogger().info("[H5Log] Application Performance Management (APM) log collection completed.");
-        return ResponseEntity.ok(new Response<>(RETCODE_SUCC, "OK"));
+        return ResponseEntity.ok(new APMResponse(0));
     }
 }

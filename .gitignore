@@ -43,9 +43,7 @@ bin/
 .DS_Store
 
 ### Custom ###
-/src/main/java/org/generated/protobuf/**
 /tools/proto/out/
-/tools/proto/archive/
 /tools/proto/all-in-one.proto-debug.txt
 /tools/proto/nametranslations.txt
 /tools/bin
