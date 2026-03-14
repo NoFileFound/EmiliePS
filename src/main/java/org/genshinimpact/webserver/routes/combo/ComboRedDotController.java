@@ -2,6 +2,8 @@ package org.genshinimpact.webserver.routes.combo;
 
 // Imports
 import jakarta.servlet.http.HttpServletRequest;
+import org.genshinimpact.gameserver.ServerApp;
+import org.genshinimpact.gameserver.game.player.Player;
 import org.genshinimpact.webserver.enums.AppName;
 import org.genshinimpact.webserver.enums.Retcode;
 import org.genshinimpact.webserver.models.combo.redddot.*;
@@ -38,7 +40,10 @@ public final class ComboRedDotController {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "params error"));
             }
 
-            ///  TODO: Dynamic add red dots
+            var myPlayer = ServerApp.getGameServer().getPlayer(Long.parseLong(body.uid), Player.PlayerType.ACCOUNT);
+            if(myPlayer != null) {
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new RedDotListResponse(myPlayer.getRedDots())));
+            }
 
             return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new RedDotListResponse()));
         } catch(Exception ignored) {

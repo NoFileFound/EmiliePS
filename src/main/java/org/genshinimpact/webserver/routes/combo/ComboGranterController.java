@@ -353,7 +353,7 @@ public final class ComboGranterController {
                 }
 
                 myGuest.setComboToken(CryptoUtils.generateStringKey(32));
-                myGuest.save();
+                myGuest.save(true);
                 AppBootstrap.getLogger().info("[Combo] A new session token was generated on the guest: {}", myGuest.getId());
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new GranterLoginResponse(String.valueOf(myGuest.getId()), myGuest.getComboToken(), myGuest.getRequireHeartbeat(), AccountType.ACCOUNT_GUEST, countryCode, myGuest.getIsNew(), null)));
             } else {

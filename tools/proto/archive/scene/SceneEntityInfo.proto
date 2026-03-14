@@ -2,21 +2,21 @@ syntax = "proto3";
 option java_package = "org.generated.protobuf";
 
 // Imports
-import "MotionInfo.proto";
 import "AnimatorParameterValueInfoPair.proto";
+import "BlossomChestInfo.proto";
+import "CustomGadgetTreeInfo.proto";
 import "EntityClientData.proto";
 import "EntityAuthorityInfo.proto";
-import "ServerBuff.proto";
+import "FoundationInfo.proto";
+import "GadgetGeneralRewardInfo.proto";
+import "Item.proto";
+import "MotionInfo.proto";
+import "PlatformInfo.proto";
+import "PropValue.proto";
 import "SceneAvatarInfo.proto";
 import "SceneMonsterInfo.proto";
-import "PropValue.proto";
-import "Item.proto";
+import "ServerBuff.proto";
 import "WeeklyBossResinDiscountInfo.proto";
-import "BlossomChestInfo.proto";
-import "GadgetGeneralRewardInfo.proto";
-import "FoundationInfo.proto";
-import "CustomGadgetTreeInfo.proto";
-import "PlatformInfo.proto";
 
 message SceneEntityInfo {
     ProtEntityType entity_type = 1;
@@ -92,17 +92,7 @@ message SceneEntityInfo {
 			NightCrowGadgetInfo night_crow_gadget_info = 62;
 			DeshretObeliskGadgetInfo deshret_obelisk_gadget_info = 63;
 		}
-		
-		enum GadgetBornType {
-			GADGET_BORN_NONE = 0;
-			GADGET_BORN_IN_AIR = 1;
-			GADGET_BORN_PLAYER = 2;
-			GADGET_BORN_MONSTER_HIT = 3;
-			GADGET_BORN_MONSTER_DIE = 4;
-			GADGET_BORN_GADGET = 5;
-			GADGET_BORN_GROUND = 6;
-		}
-		
+				
 		message GadgetPlayInfo {
 			uint32 play_type = 1;
 			uint32 duration = 2;
@@ -215,6 +205,31 @@ message SceneEntityInfo {
 		message DeshretObeliskGadgetInfo {
 			repeated uint32 argument_list = 1;
 		}
+		
+		enum GadgetBornType {
+			GADGET_BORN_NONE = 0;
+			GADGET_BORN_IN_AIR = 1;
+			GADGET_BORN_PLAYER = 2;
+			GADGET_BORN_MONSTER_HIT = 3;
+			GADGET_BORN_MONSTER_DIE = 4;
+			GADGET_BORN_GADGET = 5;
+			GADGET_BORN_GROUND = 6;
+		}
+	}
+		
+	message PropPair {
+		uint32 type = 1;
+		PropValue prop_value = 2;
+	}
+
+	message FightPropPair {
+		uint32 prop_type = 1;
+		float prop_value = 2;
+	}
+	
+	message EntityEnvironmentInfo {
+		uint32 json_climate_type = 1;
+		uint32 climate_area_id = 2;
 	}
 	
 	enum ProtEntityType {
@@ -233,20 +248,5 @@ message SceneEntityInfo {
 		PROT_ENTITY_PLAY_TEAM_ENTITY = 12;
 		PROT_ENTITY_EYE_POINT = 13;
 		PROT_ENTITY_MAX = 14;
-	}
-	
-	message PropPair {
-		uint32 type = 1;
-		PropValue prop_value = 2;
-	}
-
-	message FightPropPair {
-		uint32 prop_type = 1;
-		float prop_value = 2;
-	}
-	
-	message EntityEnvironmentInfo {
-		uint32 json_climate_type = 1;
-		uint32 climate_area_id = 2;
 	}
 }

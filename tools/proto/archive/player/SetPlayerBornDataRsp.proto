@@ -1,0 +1,7 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// CmdId: 182
+message SetPlayerBornDataRsp {
+    int32 retcode = 10;
+}

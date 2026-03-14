@@ -2,8 +2,8 @@ syntax = "proto3";
 option java_package = "org.generated.protobuf";
 
 // Imports
-import "SceneWeaponInfo.proto";
 import "RoutePoint.proto";
+import "SceneWeaponInfo.proto";
 import "Vector.proto";
 
 message SceneMonsterInfo {
@@ -35,13 +35,7 @@ message SceneMonsterInfo {
         SceneFishInfo fish_info = 50;
         FishtankFishInfo fishtank_fish_info = 51;
     }
-	
-	enum MonsterBornType {
-		MONSTER_BORN_NONE = 0;
-		MONSTER_BORN_DEFAULT = 1;
-		MONSTER_BORN_RANDOM = 2;
-	}
-	
+		
 	message MonsterRoute {
 		repeated RoutePoint route_points = 1;
 		uint32 speed_level = 2;
@@ -61,5 +55,11 @@ message SceneMonsterInfo {
 		float fish_distance_from_water = 1;
 		float fish_scale = 2;
 		float initial_rotation_y = 3;
+	}
+	
+	enum MonsterBornType {
+		MONSTER_BORN_NONE = 0;
+		MONSTER_BORN_DEFAULT = 1;
+		MONSTER_BORN_RANDOM = 2;
 	}
 }

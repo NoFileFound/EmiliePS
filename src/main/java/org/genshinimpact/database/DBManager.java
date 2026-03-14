@@ -26,7 +26,7 @@ public final class DBManager {
 
     // Cache
     @Getter private static final ConcurrentHashMap<Long, Account> cachedAccounts = new ConcurrentHashMap<>();
-    @Getter private static final ConcurrentHashMap<String, Guest> cachedGuests = new ConcurrentHashMap<>();
+    @Getter private static final ConcurrentHashMap<Long, Guest> cachedGuests = new ConcurrentHashMap<>();
     @Getter private static final ConcurrentHashMap<String, Ticket> cachedTickets = new ConcurrentHashMap<>();
 
     /**
@@ -110,7 +110,7 @@ public final class DBManager {
         }
 
         for(Guest guest : cachedGuests.values()) {
-            guest.save();
+            guest.save(true);
         }
 
         eventExecutor.shutdown();

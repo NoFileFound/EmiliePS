@@ -2,11 +2,11 @@ syntax = "proto3";
 option java_package = "org.generated.protobuf";
 
 // Imports
-import "PropValue.proto";
 import "AvatarFetterInfo.proto";
 import "AvatarEquipAffixInfo.proto";
 import "AvatarExcelInfo.proto";
 import "Item.proto";
+import "PropValue.proto";
 
 message AvatarInfo {
     uint32 avatar_id = 1;

@@ -301,7 +301,6 @@ public final class RegionController {
             return CryptoUtils.encodeBase64(data);
         }
 
-        ///  TODO: INVESTIGATE dispatchSeed
         try {
             var keyId = CryptoUtils.getDispatchEncryptionKeys().get(key_id);
             if(keyId == null) {

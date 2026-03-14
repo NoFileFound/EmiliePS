@@ -1,0 +1,6 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+message ServerDisconnectClientNotify {
+    uint32 data = 10;
+}

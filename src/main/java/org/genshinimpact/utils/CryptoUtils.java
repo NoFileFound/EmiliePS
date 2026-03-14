@@ -26,6 +26,7 @@ public final class CryptoUtils {
     @Getter private static byte[] dispatchSeed;
     @Getter private static byte[] dispatchKey;
     @Getter private static byte[] clientSecretKey;
+    @Getter private static byte[] clientSecretKeyBuffer;
     @Getter private static final long clientSecretKeySeed = Long.parseUnsignedLong("11468049314633205968");
     @Getter private static final Map<Integer, PublicKey> dispatchEncryptionKeys = new HashMap<>();
     @Getter private static PrivateKey dispatchSignatureKey;
@@ -258,6 +259,14 @@ public final class CryptoUtils {
             }
 
             clientSecretKey = secretSeedStream.readAllBytes();
+        }
+
+        try(InputStream secretSeedBufferStream = CryptoUtils.class.getClassLoader().getResourceAsStream("gameserver/clientSecretKeyBuffer.bin")) {
+            if(secretSeedBufferStream == null) {
+                clientSecretKeyBuffer = new byte[0];
+            } else {
+                clientSecretKeyBuffer = secretSeedBufferStream.readAllBytes();
+            }
         }
 
         for(int i = 1; i <= 5; i++) {

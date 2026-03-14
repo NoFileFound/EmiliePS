@@ -9,16 +9,17 @@ import lombok.Getter;
 import org.genshinimpact.gameserver.connection.ClientHandler;
 import org.genshinimpact.gameserver.connection.ClientSession;
 import org.genshinimpact.gameserver.connection.kcp.KcpSession;
+import org.genshinimpact.gameserver.game.player.Player;
 import org.genshinimpact.gameserver.packets.BadPacketException;
-import org.genshinimpact.gameserver.packets.PacketHandler;
+import org.genshinimpact.gameserver.packets.RecvPacket;
 import org.genshinimpact.gameserver.packets.PacketManager;
 import org.kcp.ChannelConfig;
 import org.kcp.KcpServer;
 import org.kcp.Ukcp;
 
 public final class Server extends KcpServer {
-    @Getter private final Object2ObjectMap<Long, Player> players;
     @Getter private final PacketManager packetManager;
+    private final Object2ObjectMap<Player.PlayerKey, Player> players;
     private final Object2ObjectMap<Ukcp, KcpSession> sessions;
 
     /**
@@ -27,7 +28,7 @@ public final class Server extends KcpServer {
     public Server() {
         this.sessions = new Object2ObjectOpenHashMap<>();
         this.players = new Object2ObjectOpenHashMap<>();
-        this.packetManager = new PacketManager(PacketHandler.class);
+        this.packetManager = new PacketManager(RecvPacket.class);
 
         ChannelConfig channelConfig = new ChannelConfig();
         channelConfig.nodelay(true, 20, 2, true);
@@ -47,6 +48,24 @@ public final class Server extends KcpServer {
      */
     public void addSession(Ukcp ukcp, ClientSession session) {
         this.sessions.put(ukcp, session);
+    }
+
+    /**
+     * Gets a player object.
+     * @param id The player's id.
+     * @param type The player's type.
+     * @return A player object.
+     */
+    public Player getPlayer(long id, Player.PlayerType type) {
+        return this.players.get(new Player.PlayerKey(id, type));
+    }
+
+    /**
+     * Gets the total server players.
+     * @return The total number of players in the server.
+     */
+    public int getTotalPlayers() {
+        return this.players.size();
     }
 
     /**
@@ -76,6 +95,10 @@ public final class Server extends KcpServer {
      * Shutdowns the server.
      */
     public void shutdownServer() {
+        ///  TODO: FINISH
 
+        for(var player : this.players.values()) {
+            player.closeConnection();
+        }
     }
 }

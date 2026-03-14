@@ -2,17 +2,12 @@ package org.genshinimpact.gameserver.connection.kcp;
 
 // Imports
 import org.genshinimpact.gameserver.connection.SessionState;
-import org.genshinimpact.gameserver.game.Player;
+import org.genshinimpact.gameserver.game.player.Player;
 import org.genshinimpact.gameserver.game.Server;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface KcpSession extends KcpChannel {
-    /**
-     * @return The next client sequence to use.
-     */
-    int getNextClientSequence();
-
     /**
      * @return The {@link Player} associated with the session, or null if none exists.
      */

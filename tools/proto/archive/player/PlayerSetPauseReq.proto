@@ -1,0 +1,7 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// CmdId: 124
+message PlayerSetPauseReq {
+    bool is_paused = 1;
+}

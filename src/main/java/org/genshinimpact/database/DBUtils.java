@@ -32,18 +32,16 @@ public final class DBUtils {
      * @return A guest object.
      */
     public static Guest getOrCreateGuest(String deviceId) {
-        return DBManager.getCachedGuests().computeIfAbsent(deviceId, id -> {
-            Guest myGuest = DBManager.getDataStore().find(Guest.class).filter(eq("deviceId", id)).first();
-            if(myGuest != null) {
-                myGuest.setIsNew(false);
-                return myGuest;
-            }
+        Guest myGuest = DBManager.getDataStore().find(Guest.class).filter(eq("deviceId", deviceId)).first();
+        if(myGuest != null) {
+            myGuest.setIsNew(false);
+            return myGuest;
+        }
 
-            Guest newGuest = new Guest(id);
-            newGuest.setIsNew(true);
-            newGuest.save();
-            return newGuest;
-        });
+        Guest newGuest = new Guest(deviceId);
+        newGuest.setIsNew(true);
+        newGuest.save(true);
+        return newGuest;
     }
 
     /**
@@ -113,6 +111,19 @@ public final class DBUtils {
      */
     public static Account findAccountByUsername(String username) {
         return DBManager.getDataStore().find(Account.class).filter(eq("username", username)).first();
+    }
+
+    /**
+     * Searches for guest by id.
+     * @param id The given id.
+     * @return A guest if exist or else null.
+     */
+    public static Guest findGuestById(Long id) {
+        if(DBManager.getCachedGuests().get(id) != null) {
+            return DBManager.getCachedGuests().get(id);
+        }
+
+        return DBManager.getDataStore().find(Guest.class).filter(eq("id", id)).first();
     }
 
     /**

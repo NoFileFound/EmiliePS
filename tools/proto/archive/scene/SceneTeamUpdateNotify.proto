@@ -3,11 +3,11 @@ option java_package = "org.generated.protobuf";
 
 // Imports
 import "AbilityControlBlock.proto";
-import "SceneAvatarInfo.proto";
 import "AbilitySyncStateInfo.proto";
 import "AvatarInfo.proto";
-import "ServerBuff.proto";
+import "SceneAvatarInfo.proto";
 import "SceneEntityInfo.proto";
+import "ServerBuff.proto";
 
 // CmdId: 1775
 message SceneTeamUpdateNotify {

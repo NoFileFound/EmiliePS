@@ -1,27 +1,26 @@
 package org.genshinimpact.gameserver.packets.send.scene;
 
+// Imports
+import org.genshinimpact.gameserver.packets.SendPacket;
+
+// Protocol buffers
 import org.generated.protobuf.PlayerEnterSceneNotifyOuterClass.PlayerEnterSceneNotify;
-import org.generated.protobuf.VectorOuterClass;
-import org.genshinimpact.gameserver.packets.OutboundPacket;
 
-public class SendPlayerEnterSceneNotify extends OutboundPacket {
-    public SendPlayerEnterSceneNotify(String uid) {
-        super(272);
+public class SendPlayerEnterSceneNotify implements SendPacket {
+    private final byte[] data;
 
-        PlayerEnterSceneNotify proto = PlayerEnterSceneNotify.newBuilder()
-                .setSceneId(3)
-                .setIsFirstLoginEnterScene(true)
-                .setPos(VectorOuterClass.Vector.newBuilder().setX(2747).setY(194).setZ(-1719).build())
-                .setSceneBeginTime((int)System.currentTimeMillis() / 1000)
-                .setType(PlayerEnterSceneNotify.EnterType.ENTER_SELF)
-                .setTargetUid(Integer.parseInt(uid))
-                .setEnterSceneToken(69)
-                .setEnterReason(PlayerEnterSceneNotify.EnterReason.ENTER_REASON_LOGIN)
-                .setWorldLevel(0)
-                .setWorldType(1)
-                .setSceneTransaction("3-" + uid + "-" + System.currentTimeMillis() / 1000 + "-" + 18402)
-                .build();
+    public SendPlayerEnterSceneNotify() {
+        ///  TODO: FINISH
+        this.data = new byte[0];
+    }
 
-        this.setData(proto.toByteArray());
+    @Override
+    public int getCode() {
+        return org.genshinimpact.gameserver.packets.PacketIdentifiers.Send.PlayerEnterSceneNotify;
+    }
+
+    @Override
+    public byte[] getPacket() {
+        return this.data;
     }
 }

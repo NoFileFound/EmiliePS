@@ -11,13 +11,15 @@ import lombok.Setter;
 import org.genshinimpact.database.DBManager;
 import org.genshinimpact.database.embeds.DeviceInfo;
 import org.genshinimpact.database.embeds.FatigueRemind;
+import org.genshinimpact.gameserver.game.avatar.Avatar;
+import org.genshinimpact.gameserver.game.player.PlayerIdentity;
 import org.genshinimpact.webserver.models.account.device.DeviceInfoModel;
 
 @Getter
 @Entity(value = "accounts", useDiscriminator = false)
-public final class Account {
+public final class Account implements PlayerIdentity {
     @Id private final Long id;
-    private String username;
+    @Setter private String username;
     @Setter private String emailAddress;
     private final String password;
     @Setter private String mobileNumber;
@@ -47,10 +49,9 @@ public final class Account {
     @Setter private Boolean isPendingDeletion;
     @Setter private FatigueRemind fatigueRemind;
     private final Map<Integer, Boolean> agreementInfos;
+    private final Map<Integer, Avatar> avatars;
+    @Setter private Integer currentAvatarId;
 
-    /**
-     * Creates a new account.
-     */
     public Account(String emailAddress, String password, DeviceInfoModel deviceInfo) {
         this.id = DBManager.getCounterValue("lastAccountId");
         this.emailAddress = emailAddress;
@@ -65,6 +66,8 @@ public final class Account {
         this.requireDeviceGrant = false;
         this.requireRealPerson = false;
         this.requireSafeMobile = false;
+        this.avatars = new HashMap<>();
+        this.currentAvatarId = 0;
     }
 
     /**

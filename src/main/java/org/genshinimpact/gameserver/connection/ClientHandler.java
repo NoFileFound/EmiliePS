@@ -15,6 +15,10 @@ import org.kcp.Ukcp;
 public final class ClientHandler implements KcpListener {
     private final Server server;
 
+    /**
+     * Handles when the client connects to the server.
+     * @param ukcp The User's KCP.
+     */
     @Override
     public void onConnected(Ukcp ukcp) {
         KcpTunnel connection = new KcpTunnel() {
@@ -41,6 +45,10 @@ public final class ClientHandler implements KcpListener {
         this.server.addSession(ukcp, session);
     }
 
+    /**
+     * Handles when the client receives data.
+     * @param ukcp The User's KCP.
+     */
     @Override
     public void handleReceive(ByteBuf byteBuf, Ukcp ukcp) {
         try {
@@ -50,11 +58,20 @@ public final class ClientHandler implements KcpListener {
         }
     }
 
+    /**
+     * Handles when the server throws exception.
+     * @param ukcp The User's KCP.
+     * @param ex The throwable exception.
+     */
     @Override
     public void handleException(Throwable ex, Ukcp ukcp) {
-        AppBootstrap.getLogger().trace("[Game] {}", ukcp.user().getRemoteAddress().toString(), ex);
+        AppBootstrap.getLogger().error("[Game] KCP Error -> {}", ukcp.user().getRemoteAddress().getAddress().getHostAddress(), ex);
     }
 
+    /**
+     * Handles when the client closes the connection to the server.
+     * @param ukcp The User's KCP.
+     */
     @Override
     public void handleClose(Ukcp ukcp) {
         this.server.removeSession(ukcp);

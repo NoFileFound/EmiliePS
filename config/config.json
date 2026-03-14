@@ -2,5 +2,7 @@
 	"mongodbUrl": "mongodb://localhost:27017",
 	"mongodbName": "genshin11",
 	"maximumGuests": 100,
-	"serverType": "SERVER_TYPE_DEV"
+	"maximumPlayers": 100,
+	"serverType": "SERVER_TYPE_DEV",
+	"badWords": ["nigga"]
 }

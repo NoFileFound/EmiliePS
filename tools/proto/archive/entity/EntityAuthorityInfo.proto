@@ -3,9 +3,9 @@ option java_package = "org.generated.protobuf";
 
 // Imports
 import "AbilitySyncStateInfo.proto";
+import "AnimatorParameterValueInfoPair.proto";
 import "EntityRendererChangedInfo.proto";
 import "Vector.proto";
-import "AnimatorParameterValueInfoPair.proto";
 
 message EntityAuthorityInfo {
     AbilitySyncStateInfo ability_info = 1;
