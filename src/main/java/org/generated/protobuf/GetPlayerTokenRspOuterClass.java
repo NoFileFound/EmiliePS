@@ -115,10 +115,10 @@ public final class GetPlayerTokenRspOuterClass {
     long getSecretKeySeed();
 
     /**
-     * <code>uint32 black_uid_end_time = 14;</code>
+     * <code>uint64 black_uid_end_time = 14;</code>
      * @return The blackUidEndTime.
      */
-    int getBlackUidEndTime();
+    long getBlackUidEndTime();
 
     /**
      * <code>string secret_key = 15;</code>
@@ -415,7 +415,7 @@ public final class GetPlayerTokenRspOuterClass {
             }
             case 112: {
 
-              blackUidEndTime_ = input.readUInt32();
+              blackUidEndTime_ = input.readUInt64();
               break;
             }
             case 122: {
@@ -789,13 +789,13 @@ public final class GetPlayerTokenRspOuterClass {
     }
 
     public static final int BLACK_UID_END_TIME_FIELD_NUMBER = 14;
-    private int blackUidEndTime_;
+    private long blackUidEndTime_;
     /**
-     * <code>uint32 black_uid_end_time = 14;</code>
+     * <code>uint64 black_uid_end_time = 14;</code>
      * @return The blackUidEndTime.
      */
     @java.lang.Override
-    public int getBlackUidEndTime() {
+    public long getBlackUidEndTime() {
       return blackUidEndTime_;
     }
 
@@ -1273,8 +1273,8 @@ public final class GetPlayerTokenRspOuterClass {
       if (secretKeySeed_ != 0L) {
         output.writeUInt64(13, secretKeySeed_);
       }
-      if (blackUidEndTime_ != 0) {
-        output.writeUInt32(14, blackUidEndTime_);
+      if (blackUidEndTime_ != 0L) {
+        output.writeUInt64(14, blackUidEndTime_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(secretKey_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 15, secretKey_);
@@ -1389,9 +1389,9 @@ public final class GetPlayerTokenRspOuterClass {
         size += com.google.protobuf.CodedOutputStream
           .computeUInt64Size(13, secretKeySeed_);
       }
-      if (blackUidEndTime_ != 0) {
+      if (blackUidEndTime_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(14, blackUidEndTime_);
+          .computeUInt64Size(14, blackUidEndTime_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(secretKey_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(15, secretKey_);
@@ -1581,7 +1581,8 @@ public final class GetPlayerTokenRspOuterClass {
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getSecretKeySeed());
       hash = (37 * hash) + BLACK_UID_END_TIME_FIELD_NUMBER;
-      hash = (53 * hash) + getBlackUidEndTime();
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getBlackUidEndTime());
       hash = (37 * hash) + SECRET_KEY_FIELD_NUMBER;
       hash = (53 * hash) + getSecretKey().hashCode();
       hash = (37 * hash) + IS_LOGIN_WHITE_LIST_FIELD_NUMBER;
@@ -1783,7 +1784,7 @@ public final class GetPlayerTokenRspOuterClass {
 
         secretKeySeed_ = 0L;
 
-        blackUidEndTime_ = 0;
+        blackUidEndTime_ = 0L;
 
         secretKey_ = "";
 
@@ -1971,7 +1972,7 @@ public final class GetPlayerTokenRspOuterClass {
         if (other.getSecretKeySeed() != 0L) {
           setSecretKeySeed(other.getSecretKeySeed());
         }
-        if (other.getBlackUidEndTime() != 0) {
+        if (other.getBlackUidEndTime() != 0L) {
           setBlackUidEndTime(other.getBlackUidEndTime());
         }
         if (!other.getSecretKey().isEmpty()) {
@@ -2614,33 +2615,33 @@ public final class GetPlayerTokenRspOuterClass {
         return this;
       }
 
-      private int blackUidEndTime_ ;
+      private long blackUidEndTime_ ;
       /**
-       * <code>uint32 black_uid_end_time = 14;</code>
+       * <code>uint64 black_uid_end_time = 14;</code>
        * @return The blackUidEndTime.
        */
       @java.lang.Override
-      public int getBlackUidEndTime() {
+      public long getBlackUidEndTime() {
         return blackUidEndTime_;
       }
       /**
-       * <code>uint32 black_uid_end_time = 14;</code>
+       * <code>uint64 black_uid_end_time = 14;</code>
        * @param value The blackUidEndTime to set.
        * @return This builder for chaining.
        */
-      public Builder setBlackUidEndTime(int value) {
+      public Builder setBlackUidEndTime(long value) {
         
         blackUidEndTime_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>uint32 black_uid_end_time = 14;</code>
+       * <code>uint64 black_uid_end_time = 14;</code>
        * @return This builder for chaining.
        */
       public Builder clearBlackUidEndTime() {
         
-        blackUidEndTime_ = 0;
+        blackUidEndTime_ = 0L;
         onChanged();
         return this;
       }
@@ -3654,7 +3655,7 @@ public final class GetPlayerTokenRspOuterClass {
       "\030\010 \001(\r\022\034\n\024is_proficient_player\030\t \001(\010\022\016\n\006" +
       "gm_uid\030\n \001(\r\022\r\n\005token\030\013 \001(\t\022\023\n\013account_u" +
       "id\030\014 \001(\t\022\027\n\017secret_key_seed\030\r \001(\004\022\032\n\022bla" +
-      "ck_uid_end_time\030\016 \001(\r\022\022\n\nsecret_key\030\017 \001(" +
+      "ck_uid_end_time\030\016 \001(\004\022\022\n\nsecret_key\030\017 \001(" +
       "\t\022\034\n\023is_login_white_list\030\275\004 \001(\010\022\026\n\rclien" +
       "t_ip_str\030\334\006 \001(\t\022\023\n\nchannel_id\030\200\007 \001(\r\022\021\n\010" +
       "birthday\030\251\007 \001(\t\022\025\n\014reg_platform\030\330\010 \001(\r\022\r" +

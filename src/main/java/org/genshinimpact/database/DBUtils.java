@@ -8,6 +8,7 @@ import org.bson.Document;
 import org.genshinimpact.database.collections.Account;
 import org.genshinimpact.database.collections.Experiment;
 import org.genshinimpact.database.collections.Guest;
+import org.genshinimpact.database.collections.Sanction;
 import org.genshinimpact.database.collections.Ticket;
 import org.genshinimpact.webserver.utils.JsonUtils;
 
@@ -124,6 +125,15 @@ public final class DBUtils {
         }
 
         return DBManager.getDataStore().find(Guest.class).filter(eq("id", id)).first();
+    }
+
+    /**
+     * Searches for sanctions by account id.
+     * @param id The given account id.
+     * @return The List of sanctions that are currently active.
+     */
+    public static List<Sanction> findSanctionListByAccountId(Long id) {
+        return DBManager.getDataStore().find(Sanction.class).filter(eq("accountId", id), eq("state", "Active")).stream().toList();
     }
 
     /**

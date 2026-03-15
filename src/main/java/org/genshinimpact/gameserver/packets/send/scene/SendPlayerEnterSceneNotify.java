@@ -1,17 +1,32 @@
 package org.genshinimpact.gameserver.packets.send.scene;
 
 // Imports
+import org.genshinimpact.gameserver.game.player.Player;
 import org.genshinimpact.gameserver.packets.SendPacket;
 
 // Protocol buffers
 import org.generated.protobuf.PlayerEnterSceneNotifyOuterClass.PlayerEnterSceneNotify;
 
-public class SendPlayerEnterSceneNotify implements SendPacket {
+public final class SendPlayerEnterSceneNotify implements SendPacket {
     private final byte[] data;
 
-    public SendPlayerEnterSceneNotify() {
-        ///  TODO: FINISH
-        this.data = new byte[0];
+    public SendPlayerEnterSceneNotify(Player player) {
+        var proto =
+            PlayerEnterSceneNotify.newBuilder()
+                .setSceneId(player.getScene().getSceneId())
+                .setPos(player.getPlayerIdentity().getPlayerPosition().toProto())
+                .setSceneBeginTime(System.currentTimeMillis())
+                .setType(PlayerEnterSceneNotify.EnterType.ENTER_SELF)
+                .setTargetUid(player.getPlayerIdentity().getId().intValue())
+                .setEnterSceneToken(player.getScene().getEnterSceneToken())
+                .setWorldLevel(player.getWorld().getWorldLevel())
+                .setEnterReason(PlayerEnterSceneNotify.EnterReason.ENTER_REASON_LOGIN)
+                .setIsFirstLoginEnterScene(player.isFirstLoginEnterScene())
+                .setWorldType(player.getWorld().getWorldType())
+                .setSceneTransaction(String.format("3-%d-%d-%d", player.getPlayerIdentity().getId().intValue(), (int)(System.currentTimeMillis() / 1000), 18402))
+                .build();
+
+        this.data = proto.toByteArray();
     }
 
     @Override

@@ -10,6 +10,11 @@ public class GranterBeforeVerifyModel {
     public ChannelType channel_id;
     public String open_id;
     public String combo_token;
+    public Role role;
     public Integer time;
-    public String role;
+
+    public static class Role {
+        public String region;
+        public String uid;
+    }
 }

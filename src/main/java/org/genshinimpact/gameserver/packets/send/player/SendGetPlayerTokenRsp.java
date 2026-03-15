@@ -31,7 +31,7 @@ public final class SendGetPlayerTokenRsp implements SendPacket {
         this.data = proto.toByteArray();
     }
 
-    public SendGetPlayerTokenRsp(String accountId, String psnId, String accountToken, Integer platformType, Integer regPlatformType, Integer channelId, Integer subChannelId, String message, Integer period) {
+    public SendGetPlayerTokenRsp(String accountId, String psnId, String accountToken, Integer platformType, Integer regPlatformType, Integer channelId, Integer subChannelId, String message, Long period) {
         var proto =
             GetPlayerTokenRsp.newBuilder()
                 .setRetcode(Retcode.RET_BLACK_UID.getValue())

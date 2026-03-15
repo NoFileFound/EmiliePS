@@ -5,6 +5,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
 import org.genshinimpact.database.DBUtils;
 import org.genshinimpact.webserver.SpringBootApp;
+import org.genshinimpact.webserver.enums.AppId;
+import org.genshinimpact.webserver.enums.ClientType;
 import org.genshinimpact.webserver.enums.Retcode;
 import org.genshinimpact.webserver.models.combo.guard.*;
 import org.genshinimpact.webserver.responses.combo.guard.*;
@@ -34,7 +36,7 @@ public final class ComboGuardController {
         GuardPing1Model body;
         try {
             body = JsonUtils.read(request.getInputStream(), GuardPing1Model.class);
-            if(body == null || body.combo_token == null || body.combo_token.isBlank() || body.open_id == null || body.open_id.isBlank()) {
+            if(body == null || body.combo_token == null || body.combo_token.isBlank() || body.open_id == null || body.open_id.isBlank() || body.app_id == AppId.APP_UNKNOWN || body.client_type == ClientType.PLATFORM_UNKNOWN || body.device_id == null || body.device_id.isBlank()) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new GuardPing1Response()));
             }
 
@@ -77,7 +79,7 @@ public final class ComboGuardController {
         GuardPing1Model body;
         try {
             body = JsonUtils.read(request.getInputStream(), GuardPing1Model.class);
-            if(body == null || body.combo_token == null || body.combo_token.isBlank() || body.open_id == null || body.open_id.isBlank()) {
+            if(body == null || body.combo_token == null || body.combo_token.isBlank() || body.open_id == null || body.open_id.isBlank() || body.app_id == AppId.APP_UNKNOWN || body.client_type == ClientType.PLATFORM_UNKNOWN || body.device_id == null || body.device_id.isBlank()) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "OK", "参数错误"));
             }
 

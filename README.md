@@ -1,5 +1,5 @@
 # A private server for the game Genshin Impact (3.2dev).
-- Discord server: [COOMING SOON] (Protobuf and resources are available here).
+- Discord server: https://discord.gg/uWPJ4ywy (Protobuf and resources are available here).
 
 # How to start
 To start the source you need to download Java 22

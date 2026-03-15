@@ -16,7 +16,7 @@ message GetPlayerTokenRsp {
     string token = 11;
     string account_uid = 12;
     uint64 secret_key_seed = 13;
-    uint32 black_uid_end_time = 14;
+    uint64 black_uid_end_time = 14;
     string secret_key = 15;
     bool is_login_white_list = 573;
     string client_ip_str = 860;

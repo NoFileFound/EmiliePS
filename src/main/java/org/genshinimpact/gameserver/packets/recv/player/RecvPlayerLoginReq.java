@@ -2,6 +2,7 @@ package org.genshinimpact.gameserver.packets.recv.player;
 
 // Imports
 import com.google.protobuf.InvalidProtocolBufferException;
+import org.genshinimpact.bootstrap.AppBootstrap;
 import org.genshinimpact.gameserver.connection.ClientSession;
 import org.genshinimpact.gameserver.connection.SessionState;
 import org.genshinimpact.gameserver.enums.Retcode;
@@ -22,9 +23,13 @@ public class RecvPlayerLoginReq implements RecvPacket {
             return;
         }
 
+        if(AppBootstrap.getMainConfig().badIPS.contains(session.getTunnel().getAddress().getAddress().getHostAddress())) {
+            session.sendPacket(new SendPlayerLoginRsp(Retcode.RET_BLACK_LOGIN_IP, req.getBirthday(), req.getCountryCode(), req.getTargetUid(), req.getLoginRand()));
+            return;
+        }
+
         ///  TODO: INVESTIGATE SecurityCmdBuffer
         ///  TODO: INVESTIGATE WHY req.getAccountUid() is empty.
-        ///  TODO: CONNECTION LOGS
 
         if(!req.getSecurityLibraryMd5().equals("063c73b3f9a2a5293cb68cdfdad7c936")) {
             session.sendPacket(new SendPlayerLoginRsp(Retcode.RET_SECURITY_LIBRARY_ERROR, req.getBirthday(), req.getCountryCode(), req.getTargetUid(), req.getLoginRand()));

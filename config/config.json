@@ -4,5 +4,6 @@
 	"maximumGuests": 100,
 	"maximumPlayers": 100,
 	"serverType": "SERVER_TYPE_DEV",
-	"badWords": ["nigga"]
+	"badWords": ["nigga"],
+	"badIPS": []
 }

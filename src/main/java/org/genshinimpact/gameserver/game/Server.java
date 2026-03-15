@@ -19,7 +19,7 @@ import org.kcp.Ukcp;
 
 public final class Server extends KcpServer {
     @Getter private final PacketManager packetManager;
-    private final Object2ObjectMap<Player.PlayerKey, Player> players;
+    @Getter private final Object2ObjectMap<Long, Player> players;
     private final Object2ObjectMap<Ukcp, KcpSession> sessions;
 
     /**
@@ -48,24 +48,6 @@ public final class Server extends KcpServer {
      */
     public void addSession(Ukcp ukcp, ClientSession session) {
         this.sessions.put(ukcp, session);
-    }
-
-    /**
-     * Gets a player object.
-     * @param id The player's id.
-     * @param type The player's type.
-     * @return A player object.
-     */
-    public Player getPlayer(long id, Player.PlayerType type) {
-        return this.players.get(new Player.PlayerKey(id, type));
-    }
-
-    /**
-     * Gets the total server players.
-     * @return The total number of players in the server.
-     */
-    public int getTotalPlayers() {
-        return this.players.size();
     }
 
     /**

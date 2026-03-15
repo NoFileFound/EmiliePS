@@ -16,14 +16,14 @@ public final class RecvPlayerSetPauseReq implements RecvPacket {
     public void handle(ClientSession session, byte[] header, byte[] data) throws InvalidProtocolBufferException {
         var req = PlayerSetPauseReq.parseFrom(data);
         var myPlayer = session.getPlayer();
-        if(myPlayer == null) {
+        if(myPlayer == null || myPlayer.getWorld() == null) {
             return;
         }
 
-        if(myPlayer.isMultiplayer()) {
+        if(myPlayer.getWorld().getPlayers().size() > 1) {
             session.sendPacket(new SendPlayerSetPauseRsp(RET_FAIL));
         } else {
-            myPlayer.setWorldPause(req.getIsPaused());
+            myPlayer.getWorld().setPaused(req.getIsPaused());
             session.sendPacket(new SendPlayerSetPauseRsp(RET_SUCC));
         }
     }

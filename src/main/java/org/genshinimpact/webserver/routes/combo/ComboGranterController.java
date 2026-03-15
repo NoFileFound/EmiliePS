@@ -339,10 +339,6 @@ public final class ComboGranterController {
             boolean isGuest = data.get("guest").asBoolean();
             if(isGuest) {
                 var myGuest = DBUtils.getOrCreateGuest(body.device);
-                if(myGuest == null) {
-                    return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SYSTEM_ERROR, "系统请求失败，请返回重试"));
-                }
-
                 if(myGuest.getRequireHeartbeat()) {
                     Instant now = Instant.now();
                     Instant start = SpringBootApp.getHeartbeatService().getHeartBeatCache().get(ipAddress, k -> now);

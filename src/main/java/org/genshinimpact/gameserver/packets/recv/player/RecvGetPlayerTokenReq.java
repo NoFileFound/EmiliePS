@@ -34,6 +34,11 @@ public final class RecvGetPlayerTokenReq implements RecvPacket {
                 return;
             }
 
+            if(AppBootstrap.getMainConfig().badIPS.contains(session.getTunnel().getAddress().getAddress().getHostAddress())) {
+                session.sendPacket(new SendGetPlayerTokenRsp(Retcode.RET_BLACK_LOGIN_IP, req.getAccountUid(), req.getPsnId(), req.getAccountToken(), req.getIsGuest(), req.getPlatformType(), req.getChannelId(), req.getSubChannelId()));
+                return;
+            }
+
             var myIdentity = isGuest ? DBUtils.findGuestById(Long.parseLong(req.getAccountUid())) : DBUtils.findAccountById(Long.parseLong(req.getAccountUid()));
             if(myIdentity == null) {
                 session.sendPacket(new SendGetPlayerTokenRsp(Retcode.RET_ACCOUNT_NOT_EXIST, req.getAccountUid(), req.getPsnId(), req.getAccountToken(), req.getIsGuest(), req.getPlatformType(), req.getChannelId(), req.getSubChannelId()));
@@ -51,10 +56,22 @@ public final class RecvGetPlayerTokenReq implements RecvPacket {
                     return;
                 }
 
-                ///  TODO: SANCTION LOGS
+                var mySanctions = DBUtils.findSanctionListByAccountId(myIdentity.getId());
+                if(!mySanctions.isEmpty()) {
+                    for(var sanction : mySanctions) {
+                        long hours = (sanction.getExpirationDate() - (System.currentTimeMillis() / 1000)) / 3600;
+                        if(hours <= 0) {
+                            sanction.setState("Expired");
+                            sanction.save();
+                        } else {
+                            session.sendPacket(new SendGetPlayerTokenRsp(req.getAccountUid(), req.getPsnId(), req.getAccountToken(), req.getPlatformType(), 3, req.getChannelId(), req.getSubChannelId(), String.valueOf(sanction.getSanctionType()), sanction.getExpirationDate()));
+                            return;
+                        }
+                    }
+                }
             }
 
-            if(session.getServer().getTotalPlayers() + 1 > AppBootstrap.getMainConfig().maximumPlayers) {
+            if(session.getServer().getPlayers().size() + 1 > AppBootstrap.getMainConfig().maximumPlayers) {
                 session.sendPacket(new SendGetPlayerTokenRsp(Retcode.RET_MAX_PLAYER, req.getAccountUid(), req.getPsnId(), req.getAccountToken(), req.getIsGuest(), req.getPlatformType(), req.getChannelId(), req.getSubChannelId()));
                 return;
             }
@@ -69,7 +86,7 @@ public final class RecvGetPlayerTokenReq implements RecvPacket {
                 }
             }
 
-            var myPlayer = session.getServer().getPlayer(myIdentity.getId(), isGuest ? Player.PlayerType.GUEST : Player.PlayerType.ACCOUNT);
+            var myPlayer = session.getServer().getPlayers().get(myIdentity.getId());
             if(myPlayer != null) {
                 myPlayer.closeConnection();
                 session.sendPacket(new SendGetPlayerTokenRsp(Retcode.RET_ANOTHER_LOGIN, req.getAccountUid(), req.getPsnId(), req.getAccountToken(), req.getIsGuest(), req.getPlatformType(), req.getChannelId(), req.getSubChannelId()));

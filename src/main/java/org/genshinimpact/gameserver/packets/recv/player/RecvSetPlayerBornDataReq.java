@@ -2,10 +2,12 @@ package org.genshinimpact.gameserver.packets.recv.player;
 
 // Imports
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.util.List;
 import org.genshinimpact.bootstrap.AppBootstrap;
 import org.genshinimpact.gameserver.connection.ClientSession;
 import org.genshinimpact.gameserver.enums.Retcode;
 import org.genshinimpact.gameserver.game.avatar.Avatar;
+import org.genshinimpact.gameserver.game.player.PlayerTeam;
 import org.genshinimpact.gameserver.packets.RecvPacket;
 import org.genshinimpact.gameserver.packets.send.player.SendSetPlayerBornDataRsp;
 
@@ -52,6 +54,7 @@ public final class RecvSetPlayerBornDataReq implements RecvPacket {
             }
 
             myPlayer.getPlayerIdentity().getAvatars().put(avatarId, new Avatar(avatarId));
+            myPlayer.getPlayerIdentity().getTeamList().put(0, new PlayerTeam("", List.of(avatarId)));
             myPlayer.getPlayerIdentity().setCurrentAvatarId(avatarId);
             myPlayer.getPlayerIdentity().setUsername(nickname);
             myPlayer.getPlayerIdentity().save(true);

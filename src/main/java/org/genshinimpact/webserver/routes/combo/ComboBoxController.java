@@ -153,12 +153,12 @@ public final class ComboBoxController {
                     vals.put("domain_region_enable", String.valueOf(SpringBootApp.getWebConfig().boxConfig.enable_domain_region));
                     vals.put("enable_spint_prodqa_realname", String.valueOf(SpringBootApp.getWebConfig().boxConfig.enable_spint_prodqa_realname));
                     vals.put("console_login_method", String.valueOf(SpringBootApp.getWebConfig().boxConfig.console_login_method));
-                    vals.put("kibana_pc_config", SpringBootApp.getWebConfig().boxConfig.kibana_pc_config.toString());
+                    vals.put("kibana_pc_config", JsonUtils.toJsonString(SpringBootApp.getWebConfig().boxConfig.kibana_pc_config));
                     vals.put("ps4_bind_mobile_config", SpringBootApp.getWebConfig().boxConfig.ps4_bind_mobile_config.toString());
                 }
                 case PLATFORM_PC, PLATFORM_PC_CLOUD -> {
                     vals.put("domain_region_enable", String.valueOf(SpringBootApp.getWebConfig().boxConfig.enable_domain_region));
-                    vals.put("kibana_pc_config", SpringBootApp.getWebConfig().boxConfig.kibana_pc_config.toString());
+                    vals.put("kibana_pc_config", JsonUtils.toJsonString(SpringBootApp.getWebConfig().boxConfig.kibana_pc_config));
                     vals.put("enable_web_dpi", String.valueOf(SpringBootApp.getWebConfig().boxConfig.enable_web_dpi));
                     vals.put("kcp_enable", String.valueOf(SpringBootApp.getWebConfig().boxConfig.enable_kcp_connection));
                     vals.put("webview_apm_config", String.format("{\"crash_capture_enable\":%s}", SpringBootApp.getWebConfig().boxConfig.enable_web_apmconfig_crash_capture));

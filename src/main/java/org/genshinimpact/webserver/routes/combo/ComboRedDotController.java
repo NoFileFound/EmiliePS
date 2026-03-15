@@ -3,7 +3,6 @@ package org.genshinimpact.webserver.routes.combo;
 // Imports
 import jakarta.servlet.http.HttpServletRequest;
 import org.genshinimpact.gameserver.ServerApp;
-import org.genshinimpact.gameserver.game.player.Player;
 import org.genshinimpact.webserver.enums.AppName;
 import org.genshinimpact.webserver.enums.Retcode;
 import org.genshinimpact.webserver.models.combo.redddot.*;
@@ -16,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value = {"combo/red_dot", "takumi/combo/red_dot"}, produces = "application/json")
+@RequestMapping(value = {"hk4e_global/combo/red_dot", "hk4e_cn/combo/red_dot", "combo/red_dot", "takumi/hk4e_global/combo/red_dot", "takumi/hk4e_cn/combo/red_dot", "takumi/combo/red_dot"}, produces = "application/json")
 public final class ComboRedDotController {
     /**
      *  Source: <a href="https://devapi-takumi.mihoyo.com/combo/red_dot/list">https://devapi-takumi.mihoyo.com/combo/red_dot/list</a><br><br>
@@ -40,7 +39,7 @@ public final class ComboRedDotController {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_PARAMETER_ERROR, "params error"));
             }
 
-            var myPlayer = ServerApp.getGameServer().getPlayer(Long.parseLong(body.uid), Player.PlayerType.ACCOUNT);
+            var myPlayer = ServerApp.getGameServer().getPlayers().get(Long.parseLong(body.uid));
             if(myPlayer != null) {
                 return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new RedDotListResponse(myPlayer.getRedDots())));
             }

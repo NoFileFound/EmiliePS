@@ -1,3 +1,9 @@
 {
-	
+	"inventoryLimit": {
+		"itemLimit": 1000,
+		"weaponInventoryLimit": 100,
+		"reliquaryInventoryLimit": 100,
+		"materialInventoryLimit": 100,
+		"furnitureInventoryLimit": 100
+	}
 }
