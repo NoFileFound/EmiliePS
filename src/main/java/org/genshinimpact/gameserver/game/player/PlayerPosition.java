@@ -7,7 +7,7 @@ import lombok.Getter;
 // Protocol buffers
 import org.generated.protobuf.VectorOuterClass.Vector;
 
-@Entity
+@Entity("PlayerPosition")
 @Getter
 public final class PlayerPosition {
     public int x;

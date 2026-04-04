@@ -13,8 +13,8 @@ public final class SendSceneInitFinishRsp implements SendPacket {
     public SendSceneInitFinishRsp(Retcode retcode, int enterSceneToken) {
         var proto =
             SceneInitFinishRsp.newBuilder()
-                .setRetcode(retcode.getValue())
                 .setEnterSceneToken(enterSceneToken)
+                .setRetcode(retcode.getValue())
                 .build();
 
         this.data = proto.toByteArray();

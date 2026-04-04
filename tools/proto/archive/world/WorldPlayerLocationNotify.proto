@@ -1,0 +1,15 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+import "PlayerLocationInfo.proto";
+
+// CmdId: 258
+message WorldPlayerLocationNotify {
+    repeated PlayerWorldLocationInfo player_world_loc_list = 8;
+    repeated PlayerLocationInfo player_loc_list = 15;
+	
+	message PlayerWorldLocationInfo {
+		uint32 scene_id = 1;
+		PlayerLocationInfo player_loc = 12;
+	}
+}

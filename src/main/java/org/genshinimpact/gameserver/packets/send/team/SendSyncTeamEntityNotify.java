@@ -5,19 +5,33 @@ import org.genshinimpact.gameserver.game.player.Player;
 import org.genshinimpact.gameserver.packets.SendPacket;
 
 // Protocol buffers
+import org.generated.protobuf.AbilitySyncStateInfoOuterClass.AbilitySyncStateInfo;
 import org.generated.protobuf.SyncTeamEntityNotifyOuterClass.SyncTeamEntityNotify;
 
-public class SendSyncTeamEntityNotify implements SendPacket {
+public final class SendSyncTeamEntityNotify implements SendPacket {
     private final byte[] data;
 
     public SendSyncTeamEntityNotify(Player player) {
         var proto =
-                SyncTeamEntityNotify.newBuilder()
-                        .setSceneId(player.getScene().getSceneId())
-                        .build();
+            SyncTeamEntityNotify.newBuilder()
+                .setSceneId(player.getSceneId());
 
-        this.data = proto.toByteArray();
+        if(player.getWorld().isMultiplayer()) {
+            for(var playerEntry : player.getWorld().getPlayers()) {
+                if(playerEntry != player) {
+                    proto.addTeamEntityInfoList(
+                        SyncTeamEntityNotify.TeamEntityInfo.newBuilder()
+                            .setTeamEntityId(playerEntry.getAccount().getPlayerTeam().getEntity().getEntityId())
+                            .setAuthorityPeerId(playerEntry.getPeerId())
+                            .setTeamAbilityInfo(AbilitySyncStateInfo.newBuilder())
+                            .build());
+                }
+            }
+        }
+
+        this.data = proto.build().toByteArray();
     }
+
 
     @Override
     public int getCode() {
@@ -29,5 +43,3 @@ public class SendSyncTeamEntityNotify implements SendPacket {
         return this.data;
     }
 }
-
-/// TODO: FINISH

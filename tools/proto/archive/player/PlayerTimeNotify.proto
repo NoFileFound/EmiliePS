@@ -1,0 +1,9 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// CmdId: 191
+message PlayerTimeNotify {
+    uint64 server_time = 5;
+    uint64 player_time = 11;
+    bool is_paused = 14;
+}

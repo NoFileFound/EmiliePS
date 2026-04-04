@@ -1,11 +1,12 @@
 package org.genshinimpact.gameserver.packets.send.scene;
 
 // Imports
-import org.genshinimpact.gameserver.game.player.Player;
 import org.genshinimpact.gameserver.game.world.World;
 import org.genshinimpact.gameserver.packets.SendPacket;
 
 // Protocol buffers
+import org.generated.protobuf.OnlinePlayerInfoOuterClass.OnlinePlayerInfo;
+import org.generated.protobuf.ProfilePictureOuterClass.ProfilePicture;
 import org.generated.protobuf.ScenePlayerInfoNotifyOuterClass.ScenePlayerInfoNotify;
 
 public class SendScenePlayerInfoNotify implements SendPacket {
@@ -13,17 +14,23 @@ public class SendScenePlayerInfoNotify implements SendPacket {
 
     public SendScenePlayerInfoNotify(World world) {
         var proto = ScenePlayerInfoNotify.newBuilder();
-        for(int i = 0; i < world.getPlayers().size(); i++) {
-            Player player = world.getPlayers().get(i);
+        for(var playerEntry : world.getPlayers()) {
             proto.addPlayerInfoList(
                 ScenePlayerInfoNotify.ScenePlayerInfo.newBuilder()
-                    .setUid(player.getPlayerIdentity().getId().intValue())
-                    .setPeerId(player.getPeerId())
-                    .setName(player.getPlayerIdentity().getUsername())
-                    .setSceneId(player.getScene().getSceneId())
-                    /// TODO: .setOnlinePlayerInfo(p.getOnlinePlayerInfo())
-                    .build()
-            );
+                    .setName(playerEntry.getAccount().getUsername())
+                    .setOnlinePlayerInfo(
+                        OnlinePlayerInfo.newBuilder()
+                            .setMpSettingType(OnlinePlayerInfo.MpSettingType.MP_SETTING_NO_ENTER) ///  TODO: FIX
+                            .setNameCardId(0) ///  TODO: FIX
+                            .setNickname(playerEntry.getAccount().getUsername())
+                            .setPlayerLevel(0) ///  TODO: FIX
+                            .setProfilePicture(ProfilePicture.newBuilder().setAvatarId(playerEntry.getAccount().getProfileAvatarImageId()).build()) ///  TODO: FIX
+                            .setSignature("EmiliePS") ///  TODO: FIX
+                            .setUid(playerEntry.getAccount().getId().intValue())
+                            .build())
+                    .setPeerId(playerEntry.getPeerId())
+                    .setSceneId(playerEntry.getScene().getSceneId())
+                    .setUid(playerEntry.getAccount().getId().intValue()).build());
         }
 
         this.data = proto.build().toByteArray();
@@ -39,3 +46,5 @@ public class SendScenePlayerInfoNotify implements SendPacket {
         return this.data;
     }
 }
+
+/// TODO: FINISH

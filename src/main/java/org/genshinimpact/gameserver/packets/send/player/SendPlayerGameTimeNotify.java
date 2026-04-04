@@ -12,7 +12,7 @@ public final class SendPlayerGameTimeNotify implements SendPacket {
     public SendPlayerGameTimeNotify(long playerId, long playerGameTime) {
         var proto =
             PlayerGameTimeNotify.newBuilder()
-                .setGameTime((int)(playerGameTime * 1000))
+                .setGameTime((int)(playerGameTime / 1000))
                 .setUid((int)playerId)
                 .build();
 

@@ -1,6 +1,7 @@
 package org.genshinimpact.gameserver.packets.send.scene;
 
 // Imports
+import org.genshinimpact.gameserver.connection.SessionState;
 import org.genshinimpact.gameserver.game.player.Player;
 import org.genshinimpact.gameserver.packets.SendPacket;
 
@@ -13,17 +14,18 @@ public final class SendPlayerEnterSceneNotify implements SendPacket {
     public SendPlayerEnterSceneNotify(Player player) {
         var proto =
             PlayerEnterSceneNotify.newBuilder()
-                .setSceneId(player.getScene().getSceneId())
-                .setPos(player.getPlayerIdentity().getPlayerPosition().toProto())
-                .setSceneBeginTime(System.currentTimeMillis())
-                .setType(PlayerEnterSceneNotify.EnterType.ENTER_SELF)
-                .setTargetUid(player.getPlayerIdentity().getId().intValue())
-                .setEnterSceneToken(player.getScene().getEnterSceneToken())
-                .setWorldLevel(player.getWorld().getWorldLevel())
                 .setEnterReason(PlayerEnterSceneNotify.EnterReason.ENTER_REASON_LOGIN)
-                .setIsFirstLoginEnterScene(player.isFirstLoginEnterScene())
+                .setEnterSceneToken(player.getSceneEnterToken())
+                .setIsFirstLoginEnterScene(player.getSessionState() == SessionState.ACTIVE)
+                .setIsSkipUi(false)
+                .setPos(player.getAccount().getPlayerPosition().toProto())
+                .setSceneBeginTime(System.currentTimeMillis())
+                .setSceneId(player.getSceneId())
+                .setSceneTransaction(String.format("3-%d-%d-%d", player.getAccount().getId().intValue(), (int)(System.currentTimeMillis() / 1000), 18402))
+                .setTargetUid(player.getAccount().getId().intValue())
+                .setType(PlayerEnterSceneNotify.EnterType.ENTER_SELF)
+                .setWorldLevel(player.getWorld().getWorldLevel())
                 .setWorldType(player.getWorld().getWorldType())
-                .setSceneTransaction(String.format("3-%d-%d-%d", player.getPlayerIdentity().getId().intValue(), (int)(System.currentTimeMillis() / 1000), 18402))
                 .build();
 
         this.data = proto.toByteArray();

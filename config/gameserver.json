@@ -1,4 +1,5 @@
 {
+	"regionName": "dev01",
 	"inventoryLimit": {
 		"itemLimit": 1000,
 		"weaponInventoryLimit": 100,

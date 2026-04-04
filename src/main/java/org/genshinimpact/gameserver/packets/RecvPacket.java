@@ -2,7 +2,7 @@ package org.genshinimpact.gameserver.packets;
 
 // Imports
 import com.google.protobuf.InvalidProtocolBufferException;
-import org.genshinimpact.gameserver.connection.ClientSession;
+import org.genshinimpact.gameserver.game.player.Player;
 
 public interface RecvPacket {
     /**
@@ -11,7 +11,7 @@ public interface RecvPacket {
      * @param header The packet's header.
      * @param data The packet's data.
      */
-    void handle(ClientSession session, byte[] header, byte[] data) throws InvalidProtocolBufferException;
+    void handle(Player player, byte[] header, byte[] data) throws InvalidProtocolBufferException;
 
     /**
      * Gets the packet id.

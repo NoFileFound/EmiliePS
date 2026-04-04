@@ -1,0 +1,11 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// Imports
+import "Vector.proto";
+
+message PlayerLocationInfo {
+    uint32 uid = 15;
+    Vector pos = 3;
+    Vector rot = 13;
+}

@@ -48,6 +48,7 @@ public final class PacketIdentifiers {
 
     public static final class Send {
         public static final int PingRsp = 21;
+        public static final int ServerTimeNotify = 99;
         public static final int PlayerGameTimeNotify = 131;
         public static final int PlayerLoginRsp = 135;
         public static final int DoSetPlayerBornDataNotify = 147;
@@ -55,19 +56,27 @@ public final class PacketIdentifiers {
         public static final int SetPlayerBornDataRsp = 182;
         public static final int ServerDisconnectClientNotify = 184;
         public static final int PlayerDataNotify = 190;
+        public static final int PlayerTimeNotify = 191;
+        public static final int OpenStateUpdateNotify = 193;
         public static final int GetPlayerTokenRsp = 198;
         public static final int SceneInitFinishRsp = 207;
         public static final int EnterSceneReadyRsp = 209;
         public static final int PlayerEnterSceneInfoNotify = 214;
+        public static final int SceneEntityAppearNotify = 221;
+        public static final int SceneAreaWeatherNotify = 230;
         public static final int EnterSceneDoneRsp = 237;
         public static final int SceneTimeNotify = 245;
+        public static final int ScenePlayerLocationNotify = 248;
         public static final int EnterScenePeerNotify = 252;
+        public static final int WorldPlayerLocationNotify = 258;
         public static final int ScenePlayerInfoNotify = 267;
         public static final int PlayerEnterSceneNotify = 272;
         public static final int SyncTeamEntityNotify = 317;
         public static final int StoreWeightLimitNotify = 698;
         public static final int AvatarDataNotify = 1633;
         public static final int SceneTeamUpdateNotify = 1775;
+        public static final int PlayerWorldSceneInfoListNotify = 3129;
+        public static final int WorldPlayerInfoNotify = 3116;
         public static final int PostEnterSceneRep = 3184;
         public static final int HostPlayerNotify = 3203;
         public static final int WorldDataNotify = 3308;

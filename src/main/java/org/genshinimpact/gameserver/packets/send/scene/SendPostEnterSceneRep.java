@@ -13,8 +13,8 @@ public final class SendPostEnterSceneRep implements SendPacket {
     public SendPostEnterSceneRep(Retcode retcode, int enterSceneToken) {
         var proto =
             PostEnterSceneRsp.newBuilder()
-                .setRetcode(retcode.getValue())
                 .setEnterSceneToken(enterSceneToken)
+                .setRetcode(retcode.getValue())
                 .build();
 
         this.data = proto.toByteArray();

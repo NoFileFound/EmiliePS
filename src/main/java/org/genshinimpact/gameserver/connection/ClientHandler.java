@@ -7,7 +7,6 @@ import java.net.InetSocketAddress;
 import org.genshinimpact.bootstrap.AppBootstrap;
 import org.genshinimpact.gameserver.game.Server;
 import org.genshinimpact.gameserver.connection.kcp.KcpTunnel;
-import org.genshinimpact.gameserver.packets.BadPacketException;
 import org.kcp.KcpListener;
 import org.kcp.Ukcp;
 
@@ -53,8 +52,16 @@ public final class ClientHandler implements KcpListener {
     public void handleReceive(ByteBuf byteBuf, Ukcp ukcp) {
         try {
             this.server.sessionReceiveData(ukcp, byteBuf);
-        } catch(BadPacketException ex) {
+        } catch(Exception ex) {
+            byte[] bytes = new byte[byteBuf.readableBytes()];
+            byteBuf.getBytes(byteBuf.readerIndex(), bytes);
+            StringBuilder hex = new StringBuilder(bytes.length * 2);
+            for(byte b : bytes) {
+                hex.append(String.format("%02X", b));
+            }
+
             AppBootstrap.getLogger().error("[Game] Bad packet -> {}", ukcp.user().getRemoteAddress().toString(), ex);
+            AppBootstrap.getLogger().error("{}", hex);
         }
     }
 

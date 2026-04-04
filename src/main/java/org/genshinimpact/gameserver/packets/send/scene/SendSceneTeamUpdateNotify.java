@@ -5,35 +5,38 @@ import org.genshinimpact.gameserver.game.player.Player;
 import org.genshinimpact.gameserver.packets.SendPacket;
 
 // Protocol buffers
-import org.generated.protobuf.AbilityControlBlockOuterClass.AbilityControlBlock;
 import org.generated.protobuf.AbilitySyncStateInfoOuterClass.AbilitySyncStateInfo;
-import org.generated.protobuf.SceneEntityInfoOuterClass.SceneEntityInfo;
 import org.generated.protobuf.SceneTeamUpdateNotifyOuterClass.SceneTeamUpdateNotify;
 
-public class SendSceneTeamUpdateNotify implements SendPacket {
+public final class SendSceneTeamUpdateNotify implements SendPacket {
     private final byte[] data;
 
     public SendSceneTeamUpdateNotify(Player player) {
-        var proto = SceneTeamUpdateNotify.newBuilder().setIsInMp(player.getWorld().getPlayers().size() > 1);
-        for(var p : player.getWorld().getPlayers().values()) {
-            for(var entityAvatar : p.getPlayerIdentity().getTeamList().get(p.getPlayerIdentity().getCurrentTeamId()).getAvatars()) {
-                var avatarObj = p.getPlayerIdentity().getAvatars().get(entityAvatar);
-                var avatarProto =
-                        SceneTeamUpdateNotify.SceneTeamAvatar.newBuilder()
-                                .setPlayerUid(p.getPlayerIdentity().getId().intValue())
-                                .setAvatarGuid(avatarObj.getGuid())
-                                .setSceneId(p.getScene().getSceneId())
-                                .setEntityId(avatarObj.getAvatarId())
-                                .setSceneEntityInfo(SceneEntityInfo.newBuilder().build())
-                                .setWeaponGuid(0)
-                                .setWeaponEntityId(0)
-                                .setIsPlayerCurAvatar(true) // p.getTeamManager().getCurrentAvatarEntity() == entityAvatar
-                                .setIsOnScene(true) // p.getTeamManager().getCurrentAvatarEntity() == entityAvatar
-                                .setAvatarAbilityInfo(AbilitySyncStateInfo.newBuilder())
-                                .setWeaponAbilityInfo(AbilitySyncStateInfo.newBuilder())
-                                .setAbilityControlBlock(AbilityControlBlock.newBuilder());
+        boolean isMultiplayer = player.getWorld().isMultiplayer();
+        var proto = SceneTeamUpdateNotify.newBuilder().setIsInMp(isMultiplayer);
+        for(var playerEntry : player.getWorld().getPlayers()) {
+            for(var entityAvatarEntry : playerEntry.getAccount().getPlayerTeam().getEntityAvatarList()) {
+                var sceneAvatar = SceneTeamUpdateNotify.SceneTeamAvatar.newBuilder()
+                    .setAbilityControlBlock(entityAvatarEntry.getAbilityControlBlock())
+                    .setAvatarAbilityInfo(AbilitySyncStateInfo.newBuilder().build())
+                    .setAvatarGuid(entityAvatarEntry.getAvatar().getAvatarGuid())
+                    .setEntityId(entityAvatarEntry.getEntityId())
+                    .setIsOnScene(playerEntry.getAccount().getPlayerTeam().getCurrentAvatarEntity() == entityAvatarEntry)
+                    .setIsPlayerCurAvatar(playerEntry.getAccount().getPlayerTeam().getCurrentAvatarEntity() == entityAvatarEntry)
+                    .setIsReconnect(true)
+                    .setPlayerUid(playerEntry.getAccount().getId().intValue())
+                    .setSceneEntityInfo(entityAvatarEntry.toProto())
+                    .setSceneId(playerEntry.getSceneId())
+                    .setWeaponAbilityInfo(AbilitySyncStateInfo.newBuilder().build())
+                    .setWeaponEntityId(entityAvatarEntry.getAvatar().getWeapon() != null ? entityAvatarEntry.getAvatar().getWeapon().getItemEntity().getEntityId() : 0)
+                    .setWeaponGuid(entityAvatarEntry.getAvatar().getWeapon() != null ? entityAvatarEntry.getAvatar().getWeapon().getItemGuid() : 0);
 
-                proto.addSceneTeamAvatarList(avatarProto);
+                if(isMultiplayer) {
+                    sceneAvatar.setAvatarInfo(entityAvatarEntry.getAvatar().toProto());
+                    sceneAvatar.setSceneAvatarInfo(entityAvatarEntry.getSceneAvatarInfo());
+                }
+
+                proto.addSceneTeamAvatarList(sceneAvatar);
             }
         }
 
@@ -50,5 +53,3 @@ public class SendSceneTeamUpdateNotify implements SendPacket {
         return this.data;
     }
 }
-
-/// TODO: FINISH

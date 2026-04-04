@@ -2,6 +2,7 @@ package org.genshinimpact.configs;
 
 @SuppressWarnings("unused")
 public class GameConfig {
+    public String regionName;
     public Limit inventoryLimit = new Limit();
 
     public static class Limit {

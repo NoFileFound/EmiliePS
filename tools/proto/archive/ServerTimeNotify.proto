@@ -1,0 +1,7 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// CmdId: 99
+message ServerTimeNotify {
+    uint64 server_time = 5;
+}

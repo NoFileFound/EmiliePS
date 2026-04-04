@@ -4,35 +4,31 @@ package org.genshinimpact.database.collections;
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
 import dev.morphia.annotations.Transient;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.genshinimpact.database.DBManager;
 import org.genshinimpact.database.embeds.DeviceInfo;
 import org.genshinimpact.database.embeds.FatigueRemind;
-import org.genshinimpact.gameserver.game.avatar.Avatar;
-import org.genshinimpact.gameserver.game.player.PlayerIdentity;
+import org.genshinimpact.gameserver.game.account.AccountBase;
 import org.genshinimpact.gameserver.game.player.PlayerPosition;
-import org.genshinimpact.gameserver.game.player.PlayerTeam;
+import org.genshinimpact.gameserver.game.team.Team;
 import org.genshinimpact.webserver.models.account.device.DeviceInfoModel;
 
 @Getter
 @Entity(value = "accounts", useDiscriminator = false)
-public final class Account implements PlayerIdentity {
+public final class Account extends AccountBase {
     @Id private final Long id;
     @Setter private String username;
     @Setter private String emailAddress;
-    private final String password;
+    @Setter private String password;
     @Setter private String mobileNumber;
     @Setter private String safeMobileNumber;
-    @Setter @Transient private String sessionToken;
+    @Transient @Setter private String sessionToken;
     @Setter private String comboToken;
     @Setter private String identityName;
     @Setter private String identityCard;
+    @Setter private Map<String, DeviceInfo> deviceInfo;
     private String googleName;
     private String twitterName;
     private String appleName;
@@ -41,7 +37,6 @@ public final class Account implements PlayerIdentity {
     private String sonyName;
     private String tapTapName;
     private String steamName;
-    @Setter private Map<String, DeviceInfo> deviceInfo;
     private Boolean requireAccountReactivation;
     private String requireAccountReactivationTicket;
     private Boolean requireDeviceGrant;
@@ -54,14 +49,6 @@ public final class Account implements PlayerIdentity {
     @Setter private Boolean isPendingDeletion;
     @Setter private FatigueRemind fatigueRemind;
     private final Map<Integer, Boolean> agreementInfos;
-    @Setter private Long lastLoginDate;
-    private final Map<Integer, Avatar> avatars;
-    @Setter private Integer currentAvatarId;
-    private final Set<Integer> flyCloakList;
-    private final Set<Integer> costumeList;
-    @Getter private final LinkedHashMap<Integer, PlayerTeam> teamList;
-    @Setter private Integer currentTeamId;
-    @Setter private PlayerPosition playerPosition;
 
     public Account(String emailAddress, String password, DeviceInfoModel deviceInfo) {
         this.id = DBManager.getCounterValue("lastAccountId");
@@ -78,13 +65,14 @@ public final class Account implements PlayerIdentity {
         this.requireRealPerson = false;
         this.requireSafeMobile = false;
         this.lastLoginDate = System.currentTimeMillis() / 1000;
-        this.avatars = new HashMap<>();
-        this.currentAvatarId = 0;
-        this.flyCloakList = new HashSet<>();
-        this.costumeList = new HashSet<>();
-        this.teamList = new LinkedHashMap<>();
-        this.currentTeamId = 0;
+        this.unlockedAvatars = new HashMap<>();
+        this.mainCharacterId = 0;
+        this.profileAvatarImageId = 0;
         this.playerPosition = new PlayerPosition();
+        this.playerRotation = new PlayerPosition(0, 0, 0);
+        this.playerTeam = new Team();
+        this.ownedFlyCloakList = new HashSet<>();
+        this.ownedCostumeList = new HashSet<>();
     }
 
     /**
@@ -118,5 +106,14 @@ public final class Account implements PlayerIdentity {
     public void setRequireActivation(boolean enable, String ticketId) {
         this.requireAccountReactivation = enable;
         this.requireAccountReactivationTicket = (enable ? ticketId : null);
+    }
+
+    /**
+     * Checks if the player is Guest.
+     * @return False.
+     */
+    @Override
+    public boolean isGuest() {
+        return false;
     }
 }

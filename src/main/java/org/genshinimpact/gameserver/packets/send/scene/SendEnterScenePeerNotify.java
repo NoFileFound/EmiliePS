@@ -14,8 +14,8 @@ public final class SendEnterScenePeerNotify implements SendPacket {
             EnterScenePeerNotify.newBuilder()
                 .setEnterSceneToken(enterSceneToken)
                 .setDestSceneId(destinationSceneId)
-                .setPeerId(peerId)
                 .setHostPeerId(hostPeerId)
+                .setPeerId(peerId)
                 .build();
 
         this.data = proto.toByteArray();

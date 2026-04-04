@@ -67,7 +67,7 @@ public final class Server extends KcpServer {
      * @param data The session's data.
      * @throws BadPacketException The packet is invalid.
      */
-    public void sessionReceiveData(Ukcp ukcp, ByteBuf data) throws BadPacketException {
+    public void sessionReceiveData(Ukcp ukcp, ByteBuf data) throws Exception {
         if(this.sessions.containsKey(ukcp)) {
             this.sessions.get(ukcp).onReceive(data);
         }
@@ -77,8 +77,8 @@ public final class Server extends KcpServer {
      * Shutdowns the server.
      */
     public void shutdownServer() {
-        ///  TODO: FINISH
 
+        ///  TODO: FINISH
         for(var player : this.players.values()) {
             player.closeConnection();
         }

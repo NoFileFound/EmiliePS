@@ -37,8 +37,8 @@ import org.generated.protobuf.StopServerInfoOuterClass.StopServerInfo;
 @RestController
 public final class RegionController {
     private record RegionMap(WebConfig.RegionConfig regionClass, String base64) {}
+    private static final Map<String, RegionMap> serverRegions = new HashMap<>();
     private String queryAllRegionResponse, queryAllRegionResponseOverseas;
-    private final Map<String, RegionMap> serverRegions = new HashMap<>();
     private final Map<String, Set<String>> regionPrefixes = new HashMap<>();
 
     public RegionController() {
@@ -54,7 +54,7 @@ public final class RegionController {
         for(var region : regionsConfig) {
             regions.add(RegionSimpleInfo.newBuilder().setName(region.name).setTitle(region.title).setType(region.regionType).setDispatchUrl(region.dispatchUrl).build());
             try {
-                this.serverRegions.put(region.name, new RegionMap(region, CryptoUtils.encodeBase64(
+                serverRegions.put(region.name, new RegionMap(region, CryptoUtils.encodeBase64(
                         QueryCurrRegionHttpRsp.newBuilder()
                                 .setRetcode(0)
                                 .setRegionInfo(this.buildRegionInfo(region))
@@ -147,7 +147,7 @@ public final class RegionController {
                 return "CAESGE5vdCBGb3VuZCB2ZXJzaW9uIGNvbmZpZw==";
             }
 
-            var region = this.serverRegions.get(regionName);
+            var region = serverRegions.get(regionName);
             if(region == null || !this.regionPrefixes.get(regionName).contains(version.replaceAll("[0-9.]+$", ""))) {
                 return "CAESGE5vdCBGb3VuZCB2ZXJzaW9uIGNvbmZpZw==";
             }
@@ -208,6 +208,16 @@ public final class RegionController {
     @GetMapping(value = "query_security_file")
     public String SendQuerySecurityFile(String file_key) {
         return "";
+    }
+
+    /**
+     * Gets the region config of a region name.
+     * @param regionId The region name.
+     * @return The region's config.
+     */
+    public static WebConfig.RegionConfig getRegionInfo(String regionId) {
+        RegionMap rm = serverRegions.get(regionId);
+        return rm != null ? rm.regionClass() : null;
     }
 
     /**

@@ -1,18 +1,32 @@
 package org.genshinimpact.gameserver.packets.send.scene;
 
 // Imports
+import org.genshinimpact.gameserver.game.player.Player;
 import org.genshinimpact.gameserver.packets.SendPacket;
 
 // Protocol buffers
+import org.generated.protobuf.AbilitySyncStateInfoOuterClass.AbilitySyncStateInfo;
 import org.generated.protobuf.SyncScenePlayTeamEntityNotifyOuterClass.SyncScenePlayTeamEntityNotify;
 
-public class SendSyncScenePlayTeamEntityNotify implements SendPacket {
+public final class SendSyncScenePlayTeamEntityNotify implements SendPacket {
     private final byte[] data;
 
-    public SendSyncScenePlayTeamEntityNotify(int sceneId) {
-        var proto = SyncScenePlayTeamEntityNotify.newBuilder().setSceneId(sceneId).build();
+    public SendSyncScenePlayTeamEntityNotify(Player player) {
+        var proto =
+            SyncScenePlayTeamEntityNotify.newBuilder()
+                .setSceneId(player.getSceneId());
 
-        this.data = proto.toByteArray();
+        for(var entityEntry : player.getScene().getSceneEntities().values()) {
+            proto.addEntityInfoList(
+                SyncScenePlayTeamEntityNotify.PlayTeamEntityInfo.newBuilder()
+                    .setAbilityInfo(AbilitySyncStateInfo.newBuilder().build())
+                    .setAuthorityPeerId(player.getPeerId())
+                    .setEntityId(entityEntry.getEntityId())
+                    .setPlayerUid(player.getAccount().getId().intValue())
+                    .build());
+        }
+
+        this.data = proto.build().toByteArray();
     }
 
     @Override
@@ -25,5 +39,3 @@ public class SendSyncScenePlayTeamEntityNotify implements SendPacket {
         return this.data;
     }
 }
-
-///  todo: finish

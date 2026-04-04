@@ -1,31 +1,38 @@
 package org.genshinimpact.gameserver.packets.send.scene;
 
-import org.generated.protobuf.EntityClientDataOuterClass;
-import org.generated.protobuf.SceneAvatarInfoOuterClass;
-import org.generated.protobuf.SceneEntityAppearNotifyOuterClass.SceneEntityAppearNotify;
-import org.generated.protobuf.SceneEntityInfoOuterClass;
+// Imports
+import org.genshinimpact.gameserver.game.Entity;
 import org.genshinimpact.gameserver.packets.SendPacket;
 
-public class SendSceneEntityAppearNotify implements SendPacket {
+// Protocol buffers
+import org.generated.protobuf.SceneEntityAppearNotifyOuterClass.SceneEntityAppearNotify;
+
+public final class SendSceneEntityAppearNotify implements SendPacket {
     private final byte[] data;
 
-    public SendSceneEntityAppearNotify(int entityId, int uid, int peerId, long guid) {
-        var proto = SceneEntityAppearNotify.newBuilder()
+    public SendSceneEntityAppearNotify(Entity entity) {
+        var proto =
+            SceneEntityAppearNotify.newBuilder()
                 .setAppearType(SceneEntityAppearNotify.VisionType.VISION_BORN)
-                .addEntityList(SceneEntityInfoOuterClass.SceneEntityInfo.newBuilder().setEntityId(entityId).setEntityType(SceneEntityInfoOuterClass.SceneEntityInfo.ProtEntityType.PROT_ENTITY_AVATAR).setEntityClientData(EntityClientDataOuterClass.EntityClientData.newBuilder()).setLifeState(1)
-                        .setAvatar(SceneAvatarInfoOuterClass.SceneAvatarInfo.newBuilder()
-                                .setGuid(guid)
-                                .setAvatarId(entityId)
-                                .setBornTime((int)System.currentTimeMillis() / 1000)
-                                .setUid(uid)
-                                .setPeerId(peerId).build()).build());
+                .addEntityList(entity.toProto())
+                .build();
 
-        this.data = proto.build().toByteArray();
+        this.data = proto.toByteArray();
+    }
+
+    public SendSceneEntityAppearNotify(Entity entity, SceneEntityAppearNotify.VisionType visionType) {
+        var proto =
+            SceneEntityAppearNotify.newBuilder()
+                .setAppearType(visionType)
+                .addEntityList(entity.toProto())
+                .build();
+
+        this.data = proto.toByteArray();
     }
 
     @Override
     public int getCode() {
-        return 221;
+        return org.genshinimpact.gameserver.packets.PacketIdentifiers.Send.SceneEntityAppearNotify;
     }
 
     @Override

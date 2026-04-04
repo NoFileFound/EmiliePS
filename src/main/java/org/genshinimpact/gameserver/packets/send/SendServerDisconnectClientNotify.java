@@ -1,4 +1,4 @@
-package org.genshinimpact.gameserver.packets.send.player;
+package org.genshinimpact.gameserver.packets.send;
 
 // Imports
 import org.genshinimpact.gameserver.packets.SendPacket;

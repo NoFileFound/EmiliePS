@@ -1,0 +1,23 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+import "PlayerLocationInfo.proto";
+import "Vector.proto";
+
+// CmdId: 248
+message ScenePlayerLocationNotify {
+    repeated VehicleLocationInfo vehicle_loc_list = 3;
+    uint32 scene_id = 9;
+    repeated PlayerLocationInfo player_loc_list = 14;
+	
+	message VehicleLocationInfo {
+		Vector rot = 14;
+		uint32 entity_id = 15;
+		float cur_hp = 11;
+		uint32 owner_uid = 5;
+		Vector pos = 1;
+		repeated uint32 uid_list = 3;
+		uint32 gadget_id = 13;
+		float max_hp = 6;
+	}
+}

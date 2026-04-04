@@ -1,6 +1,8 @@
 package org.genshinimpact.gameserver.packets.send.avatar;
 
 // Imports
+import java.util.stream.StreamSupport;
+import org.genshinimpact.gameserver.game.avatar.Avatar;
 import org.genshinimpact.gameserver.game.player.Player;
 import org.genshinimpact.gameserver.packets.SendPacket;
 
@@ -11,20 +13,15 @@ public final class SendAvatarDataNotify implements SendPacket {
     private final byte[] data;
 
     public SendAvatarDataNotify(Player player) {
-        var currentTeamId = player.getPlayerIdentity().getCurrentTeamId();
         var proto =
             AvatarDataNotify.newBuilder()
-                .setCurAvatarTeamId(currentTeamId)
-                .setChooseAvatarGuid(player.getPlayerIdentity().getAvatars().get(player.getPlayerIdentity().getTeamList().get(currentTeamId).getAvatars().get(0)).getGuid())
-                .addAllOwnedFlycloakList(player.getPlayerIdentity().getFlyCloakList())
-                .addAllOwnedCostumeList(player.getPlayerIdentity().getCostumeList());
+                .addAllAvatarList(() -> StreamSupport.stream(player.getAvatarStorage().spliterator(), false).map(Avatar::toProto).iterator())
+                .addAllOwnedFlycloakList(player.getAccount().getOwnedFlyCloakList())
+                .addAllOwnedCostumeList(player.getAccount().getOwnedCostumeList())
+                .setCurAvatarTeamId(player.getAccount().getPlayerTeam().getCurrentTeamIndex())
+                .setChooseAvatarGuid(player.getAccount().getPlayerTeam().getCurrentAvatarEntity().getAvatar().getAvatarGuid());
 
-        proto.addAllTempAvatarGuidList(player.getTempAvatarGuidList());
-        for(var avatarEntry : player.getPlayerIdentity().getAvatars().values()) {
-            proto.addAvatarList(avatarEntry.toProto());
-        }
-
-        for(var teamEntry : player.getPlayerIdentity().getTeamList().entrySet()) {
+        for(var teamEntry : player.getAccount().getPlayerTeam().getTeams().entrySet()) {
             int id = teamEntry.getKey();
             proto.putAvatarTeamMap(id, teamEntry.getValue().toProto(player));
             if(id > 4) {

@@ -5,44 +5,38 @@ import org.genshinimpact.gameserver.game.player.Player;
 import org.genshinimpact.gameserver.packets.SendPacket;
 
 // Protocol buffers
-import org.generated.protobuf.AbilityControlBlockOuterClass.AbilityControlBlock;
 import org.generated.protobuf.AbilitySyncStateInfoOuterClass.AbilitySyncStateInfo;
 import org.generated.protobuf.PlayerEnterSceneInfoNotifyOuterClass.PlayerEnterSceneInfoNotify;
 
-public class SendPlayerEnterSceneInfoNotify implements SendPacket {
+public final class SendPlayerEnterSceneInfoNotify implements SendPacket {
     private final byte[] data;
 
     public SendPlayerEnterSceneInfoNotify(Player player, int enterSceneToken) {
         var proto =
             PlayerEnterSceneInfoNotify.newBuilder()
-                .setCurAvatarEntityId(player.getPlayerIdentity().getTeamList().get(0).getAvatars().get(0))
+                .setCurAvatarEntityId(player.getAccount().getPlayerTeam().getCurrentAvatarEntity().getEntityId())
                 .setEnterSceneToken(enterSceneToken)
-                .setTeamEnterInfo(
-                    PlayerEnterSceneInfoNotify.TeamEnterSceneInfo.newBuilder()
-                        .setTeamEntityId(150995833)
-                        .setAbilityControlBlock(AbilityControlBlock.newBuilder().build())
-                        .setTeamAbilityInfo(AbilitySyncStateInfo.newBuilder().build())
-                    .build())
                 .setMpLevelEntityInfo(
                     PlayerEnterSceneInfoNotify.MPLevelEntityInfo.newBuilder()
                         .setAbilityInfo(AbilitySyncStateInfo.newBuilder().build())
-                        .setEntityId(184550274)
                         .setAuthorityPeerId(player.getWorld().getWorldHost().getPeerId())
+                        .setEntityId(player.getWorld().getEntity().getEntityId()))
+                .setTeamEnterInfo(
+                    PlayerEnterSceneInfoNotify.TeamEnterSceneInfo.newBuilder()
+                        .setAbilityControlBlock(player.getAccount().getPlayerTeam().getAbilityControlBlock())
+                        .setTeamAbilityInfo(AbilitySyncStateInfo.newBuilder().build())
+                        .setTeamEntityId(player.getAccount().getPlayerTeam().getEntity().getEntityId()));
+
+        for(var avatarEntityEntry : player.getAccount().getPlayerTeam().getEntityAvatarList()) {
+            proto.addAvatarEnterInfo(
+                PlayerEnterSceneInfoNotify.AvatarEnterSceneInfo.newBuilder()
+                    .setAvatarAbilityInfo(AbilitySyncStateInfo.newBuilder().build())
+                    .setAvatarEntityId(avatarEntityEntry.getEntityId())
+                    .setAvatarGuid(avatarEntityEntry.getAvatar().getAvatarGuid())
+                    .setWeaponAbilityInfo(AbilitySyncStateInfo.newBuilder().build())
+                    .setWeaponEntityId(avatarEntityEntry.getAvatar().getWeapon() != null ? avatarEntityEntry.getAvatar().getWeapon().getItemEntity().getEntityId() : 0)
+                    .setWeaponGuid(avatarEntityEntry.getAvatar().getWeapon() != null ? avatarEntityEntry.getAvatar().getWeapon().getItemGuid() : 0)
                     .build());
-
-        for(var avatar : player.getPlayerIdentity().getTeamList().get(player.getPlayerIdentity().getCurrentTeamId()).getAvatars()) {
-            var avatarObj = player.getPlayerIdentity().getAvatars().get(avatar);
-            PlayerEnterSceneInfoNotify.AvatarEnterSceneInfo avatarInfo =
-                    PlayerEnterSceneInfoNotify.AvatarEnterSceneInfo.newBuilder()
-                            .setAvatarGuid(avatarObj.getGuid())
-                            .setAvatarEntityId(avatarObj.getAvatarId())
-                            .setWeaponGuid(0)
-                            .setWeaponEntityId(0)
-                            .setAvatarAbilityInfo(AbilitySyncStateInfo.newBuilder().build())
-                            .setWeaponAbilityInfo(AbilitySyncStateInfo.newBuilder().build())
-                            .build();
-
-            proto.addAvatarEnterInfo(avatarInfo);
         }
 
         this.data = proto.build().toByteArray();
@@ -58,5 +52,3 @@ public class SendPlayerEnterSceneInfoNotify implements SendPacket {
         return this.data;
     }
 }
-
-/// TODO: FINISH
