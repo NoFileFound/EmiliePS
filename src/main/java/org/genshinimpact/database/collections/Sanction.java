@@ -48,7 +48,6 @@ public final class Sanction {
         DBManager.saveInstance(this);
     }
 
-
     enum SanctionType {
         FORBID_CHEATING_PLUGINS,
         FORBID_CHAT_INVALID,

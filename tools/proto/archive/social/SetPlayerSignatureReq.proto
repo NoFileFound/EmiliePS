@@ -1,0 +1,7 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// CmdId: 4081
+message SetPlayerSignatureReq {
+    string signature = 3;
+}

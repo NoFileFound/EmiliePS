@@ -13,6 +13,13 @@ import org.genshinimpact.gameserver.enums.EntityIdType;
 import org.genshinimpact.gameserver.game.Server;
 import org.genshinimpact.gameserver.game.team.TeamEntity;
 import org.genshinimpact.gameserver.game.player.Player;
+import org.genshinimpact.gameserver.packets.SendPacket;
+
+// Packets
+import org.genshinimpact.gameserver.packets.send.chat.SendPlayerChatNotify;
+import org.genshinimpact.gameserver.packets.send.player.SendPlayerGameTimeNotify;
+import org.genshinimpact.gameserver.packets.send.scene.SendSceneTimeNotify;
+import org.genshinimpact.gameserver.packets.send.team.SendDelTeamEntityNotify;
 
 public final class World {
     @Getter private final Player worldHost;
@@ -23,7 +30,7 @@ public final class World {
     @Getter private int worldLevel;
     @Getter private int worldType;
     @Getter @Setter private boolean isPaused;
-    @Getter private boolean timeLocked;
+    @Getter private boolean lockTime;
     @Getter private long currentWorldTime;
     private int nextPeerId;
     private int nextEntityId;
@@ -34,15 +41,24 @@ public final class World {
      * @param worldHoster The player who created the world.
      */
     public World(Player worldHoster) {
+        this(worldHoster, 1);
+    }
+
+    /**
+     * Creates a new instance of World.
+     * @param worldHoster The player who created the world.
+     * @param worldType The world type.
+     */
+    public World(Player worldHoster, int worldType) {
         this.worldHost = worldHoster;
         this.server = worldHoster.getServer();
         this.players = Collections.synchronizedList(new ArrayList<>());
         this.scenes = Int2ObjectMaps.synchronize(new Int2ObjectOpenHashMap<>());
         this.entity = new WorldEntity(this);
-        this.worldLevel = 8;
-        this.worldType = 1;
+        this.worldLevel = worldHoster.getAccount().getWorldLevel();
+        this.worldType = worldType;
         this.isPaused = false;
-        this.timeLocked = false;
+        this.lockTime = false;
         this.lastUpdateTime = System.currentTimeMillis();
         this.nextPeerId = 0;
         this.nextEntityId = 0;
@@ -63,14 +79,11 @@ public final class World {
         player.setWorld(this);
         player.setPeerId(this.getNextPeerId());
         player.getAccount().getPlayerTeam().setEntity(new TeamEntity(player, this));
-        if(this.isMultiplayer()) {
-            ///  TODO: MULTIPLAYER
-        }
-
         player.setSceneId(sceneId);
         this.getSceneById(sceneId).addPlayer(player);
         if(this.isMultiplayer()) {
-            ///  TODO: MULTIPLAYER
+            this.sendPacket(new SendPlayerChatNotify(player.getAccount().getId(), 0, 1), null);
+            ///  TODO: Finish : Send player positions.
         }
     }
 
@@ -94,14 +107,20 @@ public final class World {
         this.players.remove(player);
         player.setWorld(null);
         player.setPeerId(-1);
+        player.sendPacket(new SendDelTeamEntityNotify(player.getSceneId(), this.getPlayers().stream().map(p -> p.getAccount().getPlayerTeam().getEntity().getEntityId()).toList()));
         player.getAccount().getPlayerTeam().setEntity(null);
         this.getSceneById(player.getSceneId()).removePlayer(player);
         if(this.isMultiplayer()) {
-            ///  TODO: MULTIPLAYER
+            ///  TODO: Finish : Send player positions.
         }
 
         if(player == this.worldHost) {
-            ///  TODO: FIX
+            for(var playerEntry : this.players) {
+                var myWorld = new World(playerEntry);
+                myWorld.addPlayer(playerEntry);
+            }
+        } else {
+            this.sendPacket(new SendPlayerChatNotify(player.getAccount().getId(), 0, 2), null);
         }
     }
 
@@ -145,12 +164,52 @@ public final class World {
      * @return The world's time in milliseconds.
      */
     public long getWorldTime() {
-        if(!this.isPaused && !this.timeLocked) {
-            var newUpdateTime = System.currentTimeMillis();
+        if(!this.isPaused && !this.lockTime) {
+            long newUpdateTime = System.currentTimeMillis();
             this.currentWorldTime += (newUpdateTime - lastUpdateTime);
             this.lastUpdateTime = newUpdateTime;
         }
 
         return this.currentWorldTime;
+    }
+
+    /**
+     * Sends a packet to every player in the world.
+     * @param packet The packet to send.
+     */
+    public void sendPacket(SendPacket packet) {
+        this.sendPacket(packet, null);
+    }
+
+    /**
+     * Sends a packet to every player in the world except {@code other}.
+     * @param packet The packet to send.
+     * @param other The packet to skip sending a packet.
+     */
+    public void sendPacket(SendPacket packet, Player other) {
+        for(var playerEntry : this.players) {
+            if(playerEntry != other) {
+                playerEntry.sendPacket(packet);
+            }
+        }
+    }
+
+    /**
+     * Locks the world time.
+     */
+    public void sendLockWorldTime() {
+        this.lockTime = true;
+        for(var playerEntry : this.players) {
+            playerEntry.sendPacket(new SendPlayerGameTimeNotify(playerEntry.getAccount().getId(), playerEntry.getPlayerGameTime()));
+            playerEntry.sendPacket(new SendSceneTimeNotify(playerEntry.getScene()));
+        }
+    }
+
+    /**
+     * Changes the world timestamp.
+     * @param worldTime The world's time in milliseconds.
+     */
+    public void setWorldTime(long worldTime) {
+        this.currentWorldTime = worldTime;
     }
 }

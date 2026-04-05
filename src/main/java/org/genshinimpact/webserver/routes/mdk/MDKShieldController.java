@@ -735,7 +735,7 @@ public final class MDKShieldController {
             }
 
             if(myAccount.getDeviceInfo().get(device_id) == null || myAccount.getIsPendingDeletion() || myAccount.getRequireAccountReactivation()) {
-                return ResponseEntity.ok(new Response<>(Retcode.RET_LOGIN_NEW_LOCATION_FOUND, "请重新登录"));
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_LOGIN_NEW_LOCATION_FOUND, "请重新登录"));
             }
 
             myAccount.setSessionToken(CryptoUtils.generateStringKey(32));

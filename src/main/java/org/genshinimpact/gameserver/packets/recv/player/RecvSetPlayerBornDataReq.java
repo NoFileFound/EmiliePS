@@ -4,6 +4,7 @@ package org.genshinimpact.gameserver.packets.recv.player;
 import com.google.protobuf.InvalidProtocolBufferException;
 import org.genshinimpact.bootstrap.AppBootstrap;
 import org.genshinimpact.gameserver.enums.Retcode;
+import org.genshinimpact.gameserver.game.Server;
 import org.genshinimpact.gameserver.game.player.Player;
 import org.genshinimpact.gameserver.packets.RecvPacket;
 
@@ -15,15 +16,15 @@ import org.generated.protobuf.SetPlayerBornDataReqOuterClass.SetPlayerBornDataRe
 
 public final class RecvSetPlayerBornDataReq implements RecvPacket {
     @Override
-    public void handle(Player player, byte[] header, byte[] data) throws InvalidProtocolBufferException {
+    public void handle(Server server, Player player, byte[] header, byte[] data) throws InvalidProtocolBufferException {
         var req = SetPlayerBornDataReq.parseFrom(data);
-        if(!player.getAccount().getUnlockedAvatars().isEmpty()) {
-            player.sendPacket(new SendSetPlayerBornDataRsp(Retcode.RET_FAIL));
+        if(!player.getAccount().getUnlockedAvatars().isEmpty() || player.getAccount().isGuest()) {
+            player.sendPacket(new SendSetPlayerBornDataRsp(Retcode.RET_FORBIDDEN));
             return;
         }
 
         var avatarId = req.getAvatarId();
-        if(avatarId == 10000005 || avatarId == 10000007)
+        if(avatarId == 10000005 || avatarId == 10000007) ///  TODO: Make better way to check if avatarId exist.
         {
             var nickname = req.getNickName();
             if(nickname.isEmpty()) {
@@ -59,6 +60,7 @@ public final class RecvSetPlayerBornDataReq implements RecvPacket {
             player.sendLogin();
             player.sendPacket(new SendSetPlayerBornDataRsp(Retcode.RET_SUCC));
         } else {
+            server.sendPlayerSanction(player.getAccount().getId(), 7 * 24, "System");
             player.closeConnection();
         }
     }

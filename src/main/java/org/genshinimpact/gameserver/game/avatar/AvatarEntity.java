@@ -2,7 +2,6 @@ package org.genshinimpact.gameserver.game.avatar;
 
 // Imports
 import lombok.Getter;
-import org.generated.protobuf.SceneWeaponInfoOuterClass.SceneWeaponInfo;
 import org.genshinimpact.gameserver.enums.EntityIdType;
 import org.genshinimpact.gameserver.game.Entity;
 import org.genshinimpact.gameserver.game.world.Scene;
@@ -17,10 +16,8 @@ import org.generated.protobuf.EntityRendererChangedInfoOuterClass.EntityRenderer
 import org.generated.protobuf.MotionInfoOuterClass.MotionInfo;
 import org.generated.protobuf.SceneAvatarInfoOuterClass.SceneAvatarInfo;
 import org.generated.protobuf.SceneEntityInfoOuterClass.SceneEntityInfo;
+import org.generated.protobuf.SceneWeaponInfoOuterClass.SceneWeaponInfo;
 import org.generated.protobuf.VectorOuterClass.Vector;
-
-import java.util.HashMap;
-import java.util.List;
 
 public final class AvatarEntity extends Entity {
     @Getter private final Avatar avatar;
@@ -41,25 +38,13 @@ public final class AvatarEntity extends Entity {
             .addAnimatorParaList(AnimatorParameterValueInfoPair.newBuilder())
             .setAvatar(
                 SceneAvatarInfo.newBuilder()
-                        .addEquipIdList(11101)
                     .setAvatarId(this.avatar.getAvatarId())
+                    .setBornTime(this.avatar.getBornTime())
+                    .setCostumeId(this.avatar.getCostumeId())
                     .setGuid(this.avatar.getAvatarGuid())
                     .setPeerId(this.avatar.getPlayer().getPeerId())
                     .setUid(this.avatar.getPlayer().getAccount().getId().intValue())
-                    .addAllTalentIdList(List.of(151))
-                    .setCoreProudSkillLevel(0)
-                    .putAllSkillLevelMap(new HashMap<Integer, Integer>() {{
-                        put(11221, 1);
-                        put(11222, 1);
-                        put(11225, 1);
-                    }})
-                    .setSkillDepotId(12201)
-                    .addAllInherentProudSkillList(List.of(1222301, 1222501))
-                    /// TODO .putAllProudSkillExtraLevelMap(this.avatar.getProudSkillBonusMap())
-                    .addAllTeamResonanceList(List.of(10701))
                     .setWearingFlycloakId(this.avatar.getFlyCloakId())
-                    .setCostumeId(this.avatar.getCostumeId())
-                    .setBornTime(this.avatar.getBornTime())
                     .setWeapon(SceneWeaponInfo.newBuilder()
                             .setEntityId(this.avatar.getWeapon().getItemEntity().getEntityId())
                             .setGuid(this.avatar.getWeapon().getItemGuid())
@@ -81,10 +66,8 @@ public final class AvatarEntity extends Entity {
             .setEntityClientData(EntityClientData.newBuilder())
             .setEntityId(this.entityId)
             .setEntityType(SceneEntityInfo.ProtEntityType.PROT_ENTITY_AVATAR)
-            .setLastMoveSceneTimeMs(0)
-            .setLastMoveReliableSeq(0)
-                .setMotionInfo(MotionInfo.newBuilder().setPos(this.avatar.getPlayer().getAccount().getPlayerPosition().toProto()).setRot(Vector.newBuilder().build()).setSpeed(Vector.newBuilder().build()).setRefPos(Vector.newBuilder().build()).build())
-            .setLifeState(1) ///  TODO
+            .setLifeState(1)
+            .setMotionInfo(MotionInfo.newBuilder().setPos(this.avatar.getPlayer().getAccount().getPlayerPosition().toProto()).setRot(this.avatar.getPlayer().getAccount().getPlayerRotation().toProto()).setSpeed(Vector.newBuilder().build()).setRefPos(Vector.newBuilder().build()).build())
             .build();
     }
 
@@ -96,3 +79,5 @@ public final class AvatarEntity extends Entity {
         return SceneAvatarInfo.newBuilder().build();
     }
 }
+
+/// TODO: FINISH

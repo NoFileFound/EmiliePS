@@ -1,0 +1,7 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// CmdId: 6107
+message ToTheMoonEnterSceneRsp {
+    int32 retcode = 7;
+}

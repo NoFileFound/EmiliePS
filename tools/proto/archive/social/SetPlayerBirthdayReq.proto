@@ -1,0 +1,10 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// Imports
+import "Birthday.proto";
+
+// CmdId: 4048
+message SetPlayerBirthdayReq {
+    Birthday birthday = 9;
+}

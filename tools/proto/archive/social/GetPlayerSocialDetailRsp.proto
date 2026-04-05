@@ -1,0 +1,11 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// Imports
+import "SocialDetail.proto";
+
+// CmdId: 4099
+message GetPlayerSocialDetailRsp {
+    SocialDetail detail_data = 12;
+    int32 retcode = 1;
+}

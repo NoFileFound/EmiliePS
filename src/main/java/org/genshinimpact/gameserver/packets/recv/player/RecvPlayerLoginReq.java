@@ -5,6 +5,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import org.genshinimpact.gameserver.ServerApp;
 import org.genshinimpact.gameserver.connection.SessionState;
 import org.genshinimpact.gameserver.enums.Retcode;
+import org.genshinimpact.gameserver.game.Server;
 import org.genshinimpact.gameserver.game.player.Player;
 import org.genshinimpact.gameserver.packets.RecvPacket;
 import org.genshinimpact.webserver.routes.RegionController;
@@ -20,7 +21,7 @@ import org.generated.protobuf.PlayerLoginReqOuterClass.PlayerLoginReq;
 
 public final class RecvPlayerLoginReq implements RecvPacket {
     @Override
-    public void handle(Player player, byte[] header, byte[] data) throws InvalidProtocolBufferException {
+    public void handle(Server server, Player player, byte[] header, byte[] data) throws InvalidProtocolBufferException {
         var req = PlayerLoginReq.parseFrom(data);
         try {
             if(!player.getAccount().getComboToken().equals(req.getToken())) {
@@ -37,13 +38,13 @@ public final class RecvPlayerLoginReq implements RecvPacket {
 
             var resVersionConfig = ResVersionConfig.newBuilder();
             if(regionInfo.resourceConfig.res_version_config != null) {
-                resVersionConfig = ResVersionConfig.newBuilder()
-                        .setRelogin(regionInfo.resourceConfig.res_version_config.re_login)
-                        .setMd5(JsonUtils.toJsonString(regionInfo.resourceConfig.res_version_config.md5))
-                        .setVersion(regionInfo.resourceConfig.res_version_config.version)
-                        .setReleaseTotalSize(regionInfo.resourceConfig.res_version_config.release_total_size)
-                        .setVersionSuffix(regionInfo.resourceConfig.res_version_config.version_suffix)
-                        .setBranch(regionInfo.resourceConfig.res_version_config.branch);
+                resVersionConfig
+                    .setRelogin(regionInfo.resourceConfig.res_version_config.re_login)
+                    .setMd5(JsonUtils.toJsonString(regionInfo.resourceConfig.res_version_config.md5))
+                    .setVersion(regionInfo.resourceConfig.res_version_config.version)
+                    .setReleaseTotalSize(regionInfo.resourceConfig.res_version_config.release_total_size)
+                    .setVersionSuffix(regionInfo.resourceConfig.res_version_config.version_suffix)
+                    .setBranch(regionInfo.resourceConfig.res_version_config.branch);
             }
 
             if(!regionInfo.dispatchVersions.contains(req.getChecksumClientVersion())) {
@@ -61,7 +62,7 @@ public final class RecvPlayerLoginReq implements RecvPacket {
                 return;
             }
 
-            boolean isNewPlayer = player.getAvatarStorage().getTotalAvatars() == 0;
+            boolean isNewPlayer = (player.getAvatarStorage().getTotalAvatars() == 0);
             if(!isNewPlayer) {
                 player.sendLogin();
             } else {

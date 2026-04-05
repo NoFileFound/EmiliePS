@@ -12,10 +12,7 @@ public final class SendScenePlayerLocationNotify implements SendPacket {
     private final byte[] data;
 
     public SendScenePlayerLocationNotify(Scene scene) {
-        var proto =
-            ScenePlayerLocationNotify.newBuilder()
-                .setSceneId(scene.getSceneId());
-
+        var proto = ScenePlayerLocationNotify.newBuilder().setSceneId(scene.getSceneId());
         for(var playerEntry : scene.getPlayers()) {
             proto.addPlayerLocList(
                 PlayerLocationInfo.newBuilder()

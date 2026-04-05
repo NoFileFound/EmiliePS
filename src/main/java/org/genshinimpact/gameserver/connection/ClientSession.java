@@ -109,7 +109,7 @@ public final class ClientSession implements KcpSession {
             if(handler != null) {
                 AppBootstrap.getLogger().info("[Game] The IP Address {} received a packet -> {} [{}]", ip, packetId, packetName);
                 try {
-                    handler.handle(this.player, packetHeader, packetData);
+                    handler.handle(this.server, this.player, packetHeader, packetData);
                 } catch(Exception ex) {
                     throw new RuntimeException(ex);
                 }

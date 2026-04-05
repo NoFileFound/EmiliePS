@@ -83,4 +83,10 @@ public final class Server extends KcpServer {
             player.closeConnection();
         }
     }
+
+
+
+    public void sendPlayerSanction(long playerUid, int durationHours, String moderator) {
+
+    }
 }

@@ -1,7 +1,6 @@
 package org.genshinimpact.gameserver.packets.send;
 
 // Imports
-import org.genshinimpact.gameserver.packets.PacketIdentifiers;
 import org.genshinimpact.gameserver.packets.SendPacket;
 
 // Protocol buffers
@@ -21,7 +20,7 @@ public final class SendServerTimeNotify implements SendPacket {
 
     @Override
     public int getCode() {
-        return PacketIdentifiers.Send.ServerTimeNotify;
+        return org.genshinimpact.gameserver.packets.PacketIdentifiers.Send.ServerTimeNotify;
     }
 
     @Override

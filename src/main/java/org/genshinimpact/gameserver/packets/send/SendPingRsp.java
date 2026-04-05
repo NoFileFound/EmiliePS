@@ -13,8 +13,8 @@ public final class SendPingRsp implements SendPacket {
     public SendPingRsp(int clientTime, int clientSequenceId) {
         var proto =
             PingRsp.newBuilder()
-                .setRetcode(RET_SUCC.getValue())
                 .setClientTime(clientTime)
+                .setRetcode(RET_SUCC.getValue())
                 .setSeq(clientSequenceId)
                 .build();
 

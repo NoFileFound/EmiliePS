@@ -1,0 +1,8 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// CmdId: 4005
+message SetPlayerSignatureRsp {
+    string signature = 1;
+    int32 retcode = 4;
+}

@@ -1,0 +1,8 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// CmdId: 4094
+message GetAllUnlockNameCardRsp {
+    int32 retcode = 4;
+    repeated uint32 name_card_list = 14;
+}

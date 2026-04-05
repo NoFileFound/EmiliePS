@@ -12,10 +12,7 @@ public final class SendSyncTeamEntityNotify implements SendPacket {
     private final byte[] data;
 
     public SendSyncTeamEntityNotify(Player player) {
-        var proto =
-            SyncTeamEntityNotify.newBuilder()
-                .setSceneId(player.getSceneId());
-
+        var proto = SyncTeamEntityNotify.newBuilder().setSceneId(player.getSceneId());
         if(player.getWorld().isMultiplayer()) {
             for(var playerEntry : player.getWorld().getPlayers()) {
                 if(playerEntry != player) {
@@ -24,14 +21,14 @@ public final class SendSyncTeamEntityNotify implements SendPacket {
                             .setTeamEntityId(playerEntry.getAccount().getPlayerTeam().getEntity().getEntityId())
                             .setAuthorityPeerId(playerEntry.getPeerId())
                             .setTeamAbilityInfo(AbilitySyncStateInfo.newBuilder())
-                            .build());
+                            .build()
+                    );
                 }
             }
         }
 
         this.data = proto.build().toByteArray();
     }
-
 
     @Override
     public int getCode() {

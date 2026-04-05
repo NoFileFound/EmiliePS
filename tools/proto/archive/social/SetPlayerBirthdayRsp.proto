@@ -1,0 +1,11 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// Imports
+import "Birthday.proto";
+
+// CmdId: 4097
+message SetPlayerBirthdayRsp {
+    Birthday birthday = 2;
+    int32 retcode = 5;
+}

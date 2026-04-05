@@ -1,0 +1,11 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// Imports
+import "ChatInfo.proto";
+
+// CmdId: 3010
+message PlayerChatNotify {
+    ChatInfo chat_info = 3;
+    uint32 channel_id = 6;
+}

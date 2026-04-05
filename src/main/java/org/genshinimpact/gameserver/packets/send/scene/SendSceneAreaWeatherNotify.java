@@ -13,7 +13,7 @@ public final class SendSceneAreaWeatherNotify implements SendPacket {
     public SendSceneAreaWeatherNotify(Player player) {
         var proto =
             SceneAreaWeatherNotify.newBuilder()
-                .setClimateType(player.getClimate().getValue())
+                .setClimateType(player.getClimateType().getValue())
                 .setWeatherAreaId(player.getWeatherId())
                 .build();
 

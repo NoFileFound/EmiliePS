@@ -13,8 +13,8 @@ public final class SendSceneTimeNotify implements SendPacket {
     public SendSceneTimeNotify(Scene scene) {
         var proto =
             SceneTimeNotify.newBuilder()
-                .setSceneId(scene.getSceneId())
                 .setIsPaused(scene.isPaused())
+                .setSceneId(scene.getSceneId())
                 .setSceneTime(scene.getSceneTime())
                 .build();
 

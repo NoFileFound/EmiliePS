@@ -1,0 +1,13 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// Imports
+import "Vector.proto";
+
+// CmdId: 1640
+message ChangeAvatarReq {
+    uint32 skill_id = 2;
+    uint64 guid = 7;
+    bool is_move = 10;
+    Vector move_pos = 15;
+}

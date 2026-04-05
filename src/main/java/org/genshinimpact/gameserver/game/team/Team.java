@@ -22,6 +22,7 @@ import org.generated.protobuf.AvatarTeamOuterClass.AvatarTeam;
 public final class Team {
     @Transient private final List<AvatarEntity> entityAvatarList;
     @Transient @Getter @Setter private TeamEntity entity;
+    @Transient private Player player;
     private final LinkedHashMap<Integer, TeamObject> teams;
     private int currentTeamIndex;
     private int currentCharacterIndex;
@@ -63,6 +64,35 @@ public final class Team {
         return this.teams.get(this.currentTeamIndex);
     }
 
+    /**
+     * Changes the current avatar from the team in the scene.
+     * @param guid The avatar's guid.
+     */
+    public synchronized void setCurrentAvatarEntity(long guid) {
+        AvatarEntity currentEntity = this.getCurrentAvatarEntity(), newEntity = null;
+        if(currentEntity.getAvatar().getAvatarGuid() == guid) {
+            return;
+        }
+
+        int idx = -1;
+        for(int i = 0; i < this.entityAvatarList.size(); i++) {
+            if(this.entityAvatarList.get(i).getAvatar().getAvatarGuid() == guid) {
+                idx = i;
+                newEntity = this.entityAvatarList.get(i);
+                break;
+            }
+        }
+
+        if(newEntity != null) {
+            this.currentCharacterIndex = idx;
+            this.player.getScene().replaceEntity(currentEntity, newEntity);
+        }
+    }
+
+
+    public void setPlayer(Player player) {
+        this.player = player;
+    }
 
     @Entity("TeamInfo")
     @Getter

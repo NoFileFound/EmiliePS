@@ -14,12 +14,16 @@ public final class SendWorldPlayerLocationNotify implements SendPacket {
     public SendWorldPlayerLocationNotify(World world) {
         var proto = WorldPlayerLocationNotify.newBuilder();
         for(var playerEntry : world.getPlayers()) {
-            proto.addPlayerWorldLocList(WorldPlayerLocationNotify.PlayerWorldLocationInfo.newBuilder().setSceneId(playerEntry.getSceneId())
-                .setPlayerLoc(PlayerLocationInfo.newBuilder()
-                    .setUid(playerEntry.getAccount().getId().intValue())
-                    .setPos(playerEntry.getAccount().getPlayerPosition().toProto())
-                    .setRot(playerEntry.getAccount().getPlayerRotation().toProto())
-                    .build()).build());
+            proto.addPlayerWorldLocList(
+                WorldPlayerLocationNotify.PlayerWorldLocationInfo.newBuilder()
+                    .setSceneId(playerEntry.getSceneId())
+                    .setPlayerLoc(PlayerLocationInfo.newBuilder()
+                        .setUid(playerEntry.getAccount().getId().intValue())
+                        .setPos(playerEntry.getAccount().getPlayerPosition().toProto())
+                        .setRot(playerEntry.getAccount().getPlayerRotation().toProto())
+                        .build()
+                    ).build()
+            );
         }
 
         this.data = proto.build().toByteArray();

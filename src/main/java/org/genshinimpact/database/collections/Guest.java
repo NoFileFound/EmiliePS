@@ -6,10 +6,12 @@ import dev.morphia.annotations.Id;
 import dev.morphia.annotations.Transient;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import org.genshinimpact.database.DBManager;
 import org.genshinimpact.gameserver.game.account.AccountBase;
+import org.genshinimpact.gameserver.game.player.PlayerBirthday;
 import org.genshinimpact.gameserver.game.player.PlayerPosition;
 import org.genshinimpact.gameserver.game.team.Team;
 
@@ -28,17 +30,23 @@ public final class Guest extends AccountBase {
      */
     public Guest(String deviceId) {
         this.id = DBManager.getCounterValue("lastAccountId");
-        this.username = "Guest";
         this.deviceId = deviceId;
         this.lastLoginDate = System.currentTimeMillis() / 1000;
         this.unlockedAvatars = new HashMap<>();
+        this.unlockedNameCards = new HashSet<>(Set.of(210001));
         this.mainCharacterId = 0;
         this.profileAvatarImageId = 0;
+        this.profileSignature = "";
+        this.nameCardId = 210001;
         this.playerPosition = new PlayerPosition();
         this.playerRotation = new PlayerPosition(0, 0, 0);
+        this.playerBirthday = new PlayerBirthday();
         this.playerTeam = new Team();
         this.ownedFlyCloakList = new HashSet<>();
         this.ownedCostumeList = new HashSet<>();
+        this.playerLevel = 1;
+        this.worldLevel = 0;
+        this.chatEmojiCollection = new HashSet<>();
     }
 
     /**

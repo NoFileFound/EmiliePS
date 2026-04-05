@@ -63,7 +63,7 @@ public final class SendGetPlayerTokenRsp implements SendPacket {
                 .setChannelId(channelId)
                 .setClientIpStr(clientIpAddress)
                 .setClientVersionRandomKey("c25-314dd05b0b5f")
-                .setCountryCode(countryCode)
+                .setCountryCode(countryCode.isEmpty() ? "US" : countryCode)
                 .setIsGuest(isGuest)
                 .setIsProficientPlayer(avatarsCount > 0)
                 .setPlatformType(platformType)

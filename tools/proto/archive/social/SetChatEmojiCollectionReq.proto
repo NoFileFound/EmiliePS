@@ -1,0 +1,11 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// CmdId: 4084
+message SetChatEmojiCollectionReq {
+    ChatEmojiCollectionData chat_emoji_collection_data = 12;
+    
+	message ChatEmojiCollectionData {
+		repeated uint32 emoji_id_list = 1;
+	}
+}
