@@ -1,6 +1,7 @@
 package org.genshinimpact.gameserver.packets.recv.social;
 
 // Imports
+import static org.genshinimpact.gameserver.enums.Retcode.RET_PSN_GET_PLAYER_SOCIAL_DETAIL_FAIL;
 import com.google.protobuf.InvalidProtocolBufferException;
 import org.genshinimpact.gameserver.game.Server;
 import org.genshinimpact.gameserver.game.player.Player;
@@ -15,13 +16,14 @@ import org.generated.protobuf.GetPlayerSocialDetailReqOuterClass.GetPlayerSocial
 public final class RecvGetPlayerSocialDetailReq implements RecvPacket {
     @Override
     public void handle(Server server, Player player, byte[] header, byte[] data) throws InvalidProtocolBufferException {
-        var targetPlayer = server.getPlayers().get((long)GetPlayerSocialDetailReq.parseFrom(data).getUid());
-        if(targetPlayer == null) {
+        long targetUid = GetPlayerSocialDetailReq.parseFrom(data).getUid();
+        var targetSocialInfo = server.getPlayerSocialInfo(targetUid, player.getAccount().getFriendsList().contains(targetUid), player.getAccount().getIgnoredList().contains(targetUid));
+        if(targetSocialInfo == null) {
+            player.sendPacket(new SendGetPlayerSocialDetailRsp(RET_PSN_GET_PLAYER_SOCIAL_DETAIL_FAIL));
             return;
         }
 
-        ///  TODO: Add isFriend
-        player.sendPacket(new SendGetPlayerSocialDetailRsp(targetPlayer.getPlayerSocialDetail()));
+        player.sendPacket(new SendGetPlayerSocialDetailRsp(targetSocialInfo));
     }
 
     @Override

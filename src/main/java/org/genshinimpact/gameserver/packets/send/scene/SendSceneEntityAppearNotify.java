@@ -1,7 +1,6 @@
 package org.genshinimpact.gameserver.packets.send.scene;
 
 // Imports
-import org.generated.protobuf.SceneEntityAppearNotifyOuterClass;
 import org.genshinimpact.gameserver.enums.VisionType;
 import org.genshinimpact.gameserver.game.Entity;
 import org.genshinimpact.gameserver.packets.SendPacket;
@@ -16,7 +15,7 @@ public final class SendSceneEntityAppearNotify implements SendPacket {
         var proto =
             SceneEntityAppearNotify.newBuilder()
                 .addEntityList(entity.toProto())
-                .setAppearType(SceneEntityAppearNotify.VisionType.VISION_BORN)
+                .setAppearType(VisionType.VISION_BORN.getValue())
                 .build();
 
         this.data = proto.toByteArray();
@@ -26,7 +25,7 @@ public final class SendSceneEntityAppearNotify implements SendPacket {
         var proto =
             SceneEntityAppearNotify.newBuilder()
                 .addEntityList(entity.toProto())
-                .setAppearType(SceneEntityAppearNotify.VisionType.forNumber(visionType.ordinal()))
+                .setAppearType(visionType.getValue())
                 .build();
 
         this.data = proto.toByteArray();
@@ -36,7 +35,7 @@ public final class SendSceneEntityAppearNotify implements SendPacket {
         var proto =
             SceneEntityAppearNotify.newBuilder()
                 .addEntityList(entity.toProto())
-                .setAppearType(SceneEntityAppearNotify.VisionType.forNumber(visionType.ordinal()))
+                .setAppearType(visionType.getValue())
                 .setParam(param)
                 .build();
 

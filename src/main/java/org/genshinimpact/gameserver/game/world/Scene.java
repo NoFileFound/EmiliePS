@@ -80,9 +80,9 @@ public final class Scene {
         player.getAntiCheatInfo().deInitAntiCheat();
         for(var entityEntry : player.getAccount().getPlayerTeam().getEntityAvatarList()) {
             this.removeEntity(entityEntry);
-            player.getAccount().getPlayerTeam().getEntityAvatarList().remove(entityEntry);
         }
 
+        player.getAccount().getPlayerTeam().getEntityAvatarList().clear();
         ///  TODO: remove player's gadgets
         ///  TODO: Remove the scene from the world. if there are no players.
     }
@@ -152,11 +152,14 @@ public final class Scene {
         }
     }
 
-    public void replaceEntity(Entity oldEntity, Entity newEntity) {
+
+
+
+    public synchronized void replaceEntity(Entity oldEntity, Entity newEntity) {
+        ///  TODO: FIX
         this.sceneEntities.remove(oldEntity.getEntityId());
         this.sceneEntities.put(newEntity.getEntityId(), newEntity);
         this.sendPacket(new SendSceneEntityDisappearNotify(oldEntity, VisionType.VISION_REPLACE));
         this.sendPacket(new SendSceneEntityAppearNotify(newEntity, VisionType.VISION_REPLACE, oldEntity.getEntityId()));
-
     }
 }

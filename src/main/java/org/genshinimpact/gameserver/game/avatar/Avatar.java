@@ -20,8 +20,8 @@ public final class Avatar {
     @Transient private Player player;
     @Transient private long avatarGuid;
     private final int bornTime;
+    @Setter private int flyCloakId = 0;
     @Setter private int costumeId = 0;
-    @Setter private int flyCloakId = 140001;
     @Transient private Item weaponItem;
 
     /**
@@ -61,6 +61,12 @@ public final class Avatar {
                 .build();
     }
 
+
+
+
+
+
+
     public Item getWeapon() {
         ///  TODO: FINISH
         if(this.weaponItem == null) {
@@ -68,6 +74,10 @@ public final class Avatar {
         }
 
         return this.weaponItem;
+    }
+
+    public int getLevel() {
+        return 60;
     }
 }
 

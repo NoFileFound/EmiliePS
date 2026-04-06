@@ -8,15 +8,15 @@ import org.genshinimpact.gameserver.packets.SendPacket;
 // Protocol buffers
 import org.generated.protobuf.SceneEntityDisappearNotifyOuterClass.SceneEntityDisappearNotify;
 
-public class SendSceneEntityDisappearNotify implements SendPacket {
+public final class SendSceneEntityDisappearNotify implements SendPacket {
     private final byte[] data;
 
     public SendSceneEntityDisappearNotify(Entity entity, VisionType visionType) {
         var proto =
             SceneEntityDisappearNotify.newBuilder()
-                    .setDisappearType(SceneEntityDisappearNotify.VisionType.forNumber(visionType.ordinal()))
-                    .addEntityList(entity.getEntityId())
-                    .build();
+                .addEntityList(entity.getEntityId())
+                .setDisappearType(visionType.getValue())
+                .build();
 
         this.data = proto.toByteArray();
     }

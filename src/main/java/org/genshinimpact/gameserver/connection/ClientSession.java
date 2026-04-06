@@ -124,8 +124,18 @@ public final class ClientSession implements KcpSession {
      */
     @Override
     public void onClose() {
-        this.sendPacket(new SendServerDisconnectClientNotify());
+        if(this.state == SessionState.CLOSED) {
+            return;
+        }
+
+        if(this.player != null) {
+            this.player.getAccount().save(true);
+            this.player.getWorld().removePlayer(player);
+            this.server.getPlayers().remove(this.player.getAccount().getId());
+        }
+
         this.state = SessionState.CLOSED;
+        this.sendPacket(new SendServerDisconnectClientNotify());
         this.tunnel = null;
     }
 
@@ -194,6 +204,11 @@ public final class ClientSession implements KcpSession {
             ClientType myPlatform = ClientType.fromValue(String.valueOf(req.getPlatformType()));
             if(myPlatform == ClientType.PLATFORM_UNKNOWN) {
                 this.sendPacket(new SendGetPlayerTokenRsp(Retcode.RET_UNKNOWN_PLATFORM, req.getAccountUid(), req.getPsnId(), req.getAccountToken(), req.getIsGuest(), req.getPlatformType(), req.getChannelId(), req.getSubChannelId()));
+                return;
+            }
+
+            if(this.state == SessionState.ACTIVE) {
+                this.sendPacket(new SendGetPlayerTokenRsp(Retcode.RET_REPEAT_LOGIN, req.getAccountUid(), req.getPsnId(), req.getAccountToken(), req.getIsGuest(), req.getPlatformType(), req.getChannelId(), req.getSubChannelId()));
                 return;
             }
 
@@ -275,11 +290,13 @@ public final class ClientSession implements KcpSession {
                     privateSignature.initSign(CryptoUtils.getDispatchSignatureKey());
                     privateSignature.update(seedBytes);
                     this.sendPacket(new SendGetPlayerTokenRsp(req.getAccountUid(), req.getPsnId(), req.getAccountToken(), req.getIsGuest(), req.getPlatformType(), 3, req.getChannelId(), req.getSubChannelId(), CryptoUtils.encodeBase64(cipher.doFinal(seedBytes)), CryptoUtils.encodeBase64(privateSignature.sign()), req.getBirthday(), req.getCountryCode(), this.tunnel.getAddress().getAddress().getHostAddress(), this.player.getAvatarStorage().getTotalAvatars()));
-                } catch(Exception ignored) {
+                } catch(Exception ex) {
+                    AppBootstrap.getLogger().error("OnPlayerGetTokenRsp : 12 [RET_ACCOUNT_VERIFY_ERROR]", ex);
                     this.sendPacket(new SendGetPlayerTokenRsp(Retcode.RET_ACCOUNT_VERIFY_ERROR, req.getAccountUid(), req.getPsnId(), req.getAccountToken(), req.getIsGuest(), req.getPlatformType(), req.getChannelId(), req.getSubChannelId()));
                 }
             }
-        } catch(Exception ignored) {
+        } catch(Exception ex) {
+            AppBootstrap.getLogger().error("OnPlayerGetTokenRsp : 23 [RET_LOGIN_INIT_FAIL]", ex);
             this.sendPacket(new SendGetPlayerTokenRsp(Retcode.RET_LOGIN_INIT_FAIL, req.getAccountUid(), req.getPsnId(), req.getAccountToken(), req.getIsGuest(), req.getPlatformType(), req.getChannelId(), req.getSubChannelId()));
         }
     }

@@ -1,4 +1,4 @@
-package org.genshinimpact.gameserver.packets.recv.social;
+package org.genshinimpact.gameserver.packets.recv.chat;
 
 // Imports
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -7,7 +7,7 @@ import org.genshinimpact.gameserver.game.player.Player;
 import org.genshinimpact.gameserver.packets.RecvPacket;
 
 // Packets
-import org.genshinimpact.gameserver.packets.send.social.SendGetChatEmojiCollectionRsp;
+import org.genshinimpact.gameserver.packets.send.chat.SendGetChatEmojiCollectionRsp;
 
 public final class RecvGetChatEmojiCollectionReq implements RecvPacket {
     @Override

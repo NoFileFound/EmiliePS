@@ -8,9 +8,13 @@ import org.genshinimpact.gameserver.game.avatar.Avatar;
 import org.genshinimpact.gameserver.game.player.Player;
 import org.jetbrains.annotations.NotNull;
 
+// Packets
+import org.genshinimpact.gameserver.packets.send.avatar.SendAvatarAddNotify;
+
 public final class AvatarStorage implements Iterable<Avatar> {
     private final Player player;
     private final Map<Integer, Avatar> avatarMap;
+    private boolean isLoaded = false;
 
     /**
      * Creates a new avatar storage on the given player.
@@ -37,9 +41,13 @@ public final class AvatarStorage implements Iterable<Avatar> {
         this.avatarMap.put(avatarId, myAvatar);
         this.player.getAccount().getUnlockedAvatars().put(avatarId, myAvatar);
         if(addToTeam) {
+            ///  TODO: ADD TO NEXT TEAM IF THE CURRENT TEAM IS FULL.
             this.player.getAccount().getPlayerTeam().getCurrentTeam().addAvatar(myAvatar);
         }
 
+        if(this.player.isActive()) {
+            this.player.sendPacket(new SendAvatarAddNotify(myAvatar, addToTeam));
+        }
         return true;
     }
 
@@ -58,11 +66,19 @@ public final class AvatarStorage implements Iterable<Avatar> {
      * @return True if avatar was removed or else False.
      */
     public boolean removeAvatar(int avatarId) {
-        if(!this.avatarMap.containsKey(avatarId)) {
+        if(!this.avatarMap.containsKey(avatarId) || this.player.getAccount().getMainCharacterId() == avatarId) {
             return false;
         }
 
-        ///  TODO: FINISH
+        this.avatarMap.remove(avatarId);
+        this.player.getAccount().getUnlockedAvatars().remove(avatarId);
+        if(this.player.getAccount().getProfileAvatarImageId() == avatarId) {
+            this.player.getAccount().setProfileAvatarImageId(this.player.getAccount().getMainCharacterId());
+            this.player.getAccount().setProfileAvatarCostumeImageId(0);
+        }
+
+        ///  TODO: REMOVE THE AVATAR FROM TEAM.
+        /// TODO: SEND THE PACKETS TO AVATAR APPLY IN THE GAME
         return true;
     }
 
@@ -84,13 +100,29 @@ public final class AvatarStorage implements Iterable<Avatar> {
     }
 
     /**
+     * Checks if the player has the given avatar.
+     * @param avatarId The avatar's id.
+     * @return True if he has it or else False.
+     */
+    public boolean hasAvatar(int avatarId) {
+        return this.avatarMap.containsKey(avatarId);
+    }
+
+    /**
      * Loads the avatars from the database.
      */
     public void loadAvatars() {
+        if(this.isLoaded) {
+            return;
+        }
+
+        this.player.getAccount().getPlayerTeam().setPlayer(this.player);
         for(var avatarEntry : this.player.getAccount().getUnlockedAvatars().values()) {
             avatarEntry.setPlayer(this.player);
             this.avatarMap.put(avatarEntry.getAvatarId(), avatarEntry);
         }
+
+        this.isLoaded = true;
     }
 
     /**

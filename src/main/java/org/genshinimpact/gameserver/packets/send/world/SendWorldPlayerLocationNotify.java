@@ -5,8 +5,8 @@ import org.genshinimpact.gameserver.game.world.World;
 import org.genshinimpact.gameserver.packets.SendPacket;
 
 // Protocol buffers
-import org.generated.protobuf.WorldPlayerLocationNotifyOuterClass.WorldPlayerLocationNotify;
 import org.generated.protobuf.PlayerLocationInfoOuterClass.PlayerLocationInfo;
+import org.generated.protobuf.WorldPlayerLocationNotifyOuterClass.WorldPlayerLocationNotify;
 
 public final class SendWorldPlayerLocationNotify implements SendPacket {
     private final byte[] data;

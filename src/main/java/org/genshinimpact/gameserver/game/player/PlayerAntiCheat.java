@@ -1,6 +1,7 @@
 package org.genshinimpact.gameserver.game.player;
 
 // Imports
+import lombok.Getter;
 import org.genshinimpact.gameserver.game.world.Scene;
 import org.genshinimpact.gameserver.game.world.World;
 
@@ -9,7 +10,7 @@ public final class PlayerAntiCheat {
     private final Player player;
     private World world;
     private Scene scene;
-    private AntiCheatStatus acStatus;
+    @Getter private AntiCheatStatus acStatus;
 
     /**
      * Creates a new instance of PlayerAntiCheat.
@@ -40,10 +41,18 @@ public final class PlayerAntiCheat {
 
     /**
      * Checks if there are any issues with the player on the scene.
+     * @return True if there are no problems or else False.
+     */
+    public boolean checkToTheMoonEnterScene() {
+        return this.acStatus == AntiCheatStatus.PASSED_TO_THE_MOON_ENTER_SCENE;
+    }
+
+    /**
+     * Checks if there are any issues with the player on the scene.
      * @param sceneId The scene id.
      * @return True if there are no problems or else False.
      */
-    public boolean checkEnterScene(int sceneId) {
+    public boolean checkToTheMoonEnterScene(int sceneId) {
         if(this.scene == null || this.world == null) {
             return false;
         }

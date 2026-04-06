@@ -4,6 +4,7 @@ package org.genshinimpact.gameserver.packets.recv.social;
 import static org.genshinimpact.gameserver.enums.Retcode.RET_SIGNATURE_ILLEGAL;
 import com.google.protobuf.InvalidProtocolBufferException;
 import org.genshinimpact.bootstrap.AppBootstrap;
+import org.genshinimpact.gameserver.enums.Retcode;
 import org.genshinimpact.gameserver.game.Server;
 import org.genshinimpact.gameserver.game.player.Player;
 import org.genshinimpact.gameserver.packets.RecvPacket;
@@ -18,6 +19,11 @@ public final class RecvSetPlayerSignatureReq implements RecvPacket {
     @Override
     public void handle(Server server, Player player, byte[] header, byte[] data) throws InvalidProtocolBufferException {
         String signature = SetPlayerSignatureReq.parseFrom(data).getSignature();
+        if(player.getAccount().isGuest()) {
+            player.sendPacket(new SendSetPlayerSignatureRsp(Retcode.RET_FORBIDDEN));
+            return;
+        }
+
         if(signature.isBlank()) {
             player.sendPacket(new SendSetPlayerSignatureRsp(RET_SIGNATURE_ILLEGAL));
             return;
@@ -28,7 +34,6 @@ public final class RecvSetPlayerSignatureReq implements RecvPacket {
             return;
         }
 
-        ///  TODO: INVESTIGATE: PlayerSignatureNotify
         player.getAccount().setProfileSignature(signature);
         player.sendPacket(new SendSetPlayerSignatureRsp(signature));
     }

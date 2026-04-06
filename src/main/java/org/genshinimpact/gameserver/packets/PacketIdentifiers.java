@@ -10,8 +10,10 @@ public final class PacketIdentifiers {
         public static final int SetPlayerBornDataReq = 105;
         public static final int PlayerLoginReq = 112;
         public static final int PlayerSetPauseReq = 124;
+        public static final int SetPlayerNameReq = 153;
         public static final int SetOpenStateReq = 165;
         public static final int GetPlayerTokenReq = 172;
+        public static final int PlayerForceExitReq = 189;
         public static final int EnterSceneReadyReq = 208;
         public static final int SceneInitFinishReq = 235;
         public static final int EnterWorldAreaReq = 250;
@@ -30,15 +32,19 @@ public final class PacketIdentifiers {
         public static final int GetMapAreaReq = 3108;
         public static final int EntityConfigHashNotifyReq = 3189;
         public static final int PostEnterSceneReq = 3312;
+        public static final int UpdatePlayerShowNameCardListReq = 4002;
+        public static final int SetNameCardReq = 4004;
         public static final int GetPlayerAskFriendListReq = 4018;
         public static final int GetAllUnlockNameCardReq = 4027;
         public static final int GetRecentMpPlayerListReq = 4034;
         public static final int SetPlayerBirthdayReq = 4048;
         public static final int GetPlayerBlacklistReq = 4049;
+        public static final int UpdatePlayerShowAvatarListReq = 4067;
         public static final int GetChatEmojiCollectionReq = 4068;
         public static final int GetPlayerFriendListReq = 4072;
         public static final int GetPlayerSocialDetailReq = 4073;
         public static final int SetPlayerSignatureReq = 4081;
+        public static final int SetPlayerHeadImageReq = 4082;
         public static final int QueryCodexMonsterBeKilledNumReq = 4203;
         public static final int GetWidgetSlotReq = 4253;
         public static final int GetHomeExchangeWoodInfoReq = 4473;
@@ -55,10 +61,12 @@ public final class PacketIdentifiers {
     public static final class Send {
         public static final int PingRsp = 21;
         public static final int ServerTimeNotify = 99;
+        public static final int SetPlayerNameRsp = 122;
         public static final int PlayerGameTimeNotify = 131;
         public static final int PlayerLoginRsp = 135;
         public static final int DoSetPlayerBornDataNotify = 147;
         public static final int PlayerSetPauseRsp = 156;
+        public static final int PlayerForceExitRsp = 159;
         public static final int SetPlayerBornDataRsp = 182;
         public static final int ServerDisconnectClientNotify = 184;
         public static final int PlayerDataNotify = 190;
@@ -84,6 +92,7 @@ public final class PacketIdentifiers {
         public static final int StoreWeightLimitNotify = 698;
         public static final int ChangeAvatarRsp = 1607;
         public static final int AvatarDataNotify = 1633;
+        public static final int AvatarAddNotify = 1769;
         public static final int SceneTeamUpdateNotify = 1775;
         public static final int PlayerChatNotify = 3010;
         public static final int PlayerWorldSceneInfoListNotify = 3129;
@@ -93,9 +102,16 @@ public final class PacketIdentifiers {
         public static final int WorldDataNotify = 3308;
         public static final int SyncScenePlayTeamEntityNotify = 3333;
         public static final int SetPlayerSignatureRsp = 4005;
+        public static final int UpdatePlayerShowNameCardListRsp = 4019;
         public static final int GetChatEmojiCollectionRsp = 4033;
+        public static final int SetPlayerHeadImageRsp = 4047;
+        public static final int UpdatePlayerShowAvatarListRsp = 4058;
+        public static final int SetChatEmojiCollectionRsp = 4080;
+        public static final int GetPlayerBlacklistRsp = 4091;
+        public static final int SetNameCardRsp = 4093;
         public static final int GetAllUnlockNameCardRsp = 4094;
         public static final int SetPlayerBirthdayRsp = 4097;
+        public static final int GetPlayerFriendListRsp = 4098;
         public static final int GetPlayerSocialDetailRsp = 4099;
         public static final int ToTheMoonEnterSceneRsp = 6107;
     }

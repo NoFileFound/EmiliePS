@@ -11,9 +11,6 @@ import org.genshinimpact.database.DBManager;
 import org.genshinimpact.database.embeds.DeviceInfo;
 import org.genshinimpact.database.embeds.FatigueRemind;
 import org.genshinimpact.gameserver.game.account.AccountBase;
-import org.genshinimpact.gameserver.game.player.PlayerBirthday;
-import org.genshinimpact.gameserver.game.player.PlayerPosition;
-import org.genshinimpact.gameserver.game.team.Team;
 import org.genshinimpact.webserver.models.account.device.DeviceInfoModel;
 
 @Getter
@@ -65,22 +62,6 @@ public final class Account extends AccountBase {
         this.requireDeviceGrant = false;
         this.requireRealPerson = false;
         this.requireSafeMobile = false;
-        this.lastLoginDate = System.currentTimeMillis() / 1000;
-        this.unlockedAvatars = new HashMap<>();
-        this.unlockedNameCards = new HashSet<>(Set.of(210001));
-        this.mainCharacterId = 0;
-        this.profileAvatarImageId = 0;
-        this.profileSignature = "";
-        this.nameCardId = 210001;
-        this.playerPosition = new PlayerPosition();
-        this.playerRotation = new PlayerPosition(0, 0, 0);
-        this.playerBirthday = new PlayerBirthday();
-        this.playerTeam = new Team();
-        this.ownedFlyCloakList = new HashSet<>();
-        this.ownedCostumeList = new HashSet<>();
-        this.playerLevel = 1;
-        this.worldLevel = 0;
-        this.chatEmojiCollection = new HashSet<>();
     }
 
     /**

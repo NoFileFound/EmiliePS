@@ -49,7 +49,6 @@ public final class ClientHandler implements KcpListener {
      * @param ukcp The User's KCP.
      */
     @Override
-    @SuppressWarnings("CallToPrintStackTrace")
     public void handleReceive(ByteBuf byteBuf, Ukcp ukcp) {
         try {
             this.server.sessionReceiveData(ukcp, byteBuf);
@@ -63,7 +62,6 @@ public final class ClientHandler implements KcpListener {
 
             AppBootstrap.getLogger().error("[Game] Bad packet -> {}", ukcp.user().getRemoteAddress().toString(), ex);
             AppBootstrap.getLogger().error("{}", hex);
-            ex.printStackTrace();
         }
     }
 

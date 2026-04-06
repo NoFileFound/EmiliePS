@@ -37,7 +37,7 @@ public final class RecvSceneInitFinishReq implements RecvPacket {
             return;
         }
 
-        if(player.getSceneLoadState() != SceneLoadState.LOADING) {
+        if(player.getSceneLoadState() != SceneLoadState.LOADING || !player.getAntiCheatInfo().checkToTheMoonEnterScene()) {
             player.sendPacket(new SendSceneInitFinishRsp(Retcode.RET_ENTER_SCENE_FAIL, enterSceneToken));
             return;
         }

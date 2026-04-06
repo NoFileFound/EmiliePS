@@ -25,3 +25,5 @@ public class RecvChangeAvatarReq implements RecvPacket {
         return org.genshinimpact.gameserver.packets.PacketIdentifiers.Receive.ChangeAvatarReq;
     }
 }
+
+/// TODO: FINISH

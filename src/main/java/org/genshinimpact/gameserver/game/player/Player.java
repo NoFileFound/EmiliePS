@@ -1,6 +1,7 @@
 package org.genshinimpact.gameserver.game.player;
 
 // Imports
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import org.genshinimpact.database.collections.Guest;
 import org.genshinimpact.gameserver.connection.ClientSession;
 import org.genshinimpact.gameserver.connection.SessionState;
 import org.genshinimpact.gameserver.enums.ClimateType;
+import org.genshinimpact.gameserver.enums.MpSettingType;
 import org.genshinimpact.gameserver.game.Server;
 import org.genshinimpact.gameserver.game.account.AccountBase;
 import org.genshinimpact.gameserver.game.storages.AvatarStorage;
@@ -29,10 +31,6 @@ import org.genshinimpact.gameserver.packets.send.scene.SendSceneAreaWeatherNotif
 import org.genshinimpact.gameserver.packets.send.scene.SendScenePlayerLocationNotify;
 import org.genshinimpact.gameserver.packets.send.world.SendWorldPlayerLocationNotify;
 
-// Protocol buffers
-import org.generated.protobuf.ProfilePictureOuterClass.ProfilePicture;
-import org.generated.protobuf.SocialDetailOuterClass.SocialDetail;
-
 public final class Player {
     @Getter private final AccountBase account;
     private final ClientSession session;
@@ -40,6 +38,7 @@ public final class Player {
     @Getter private final String ipAddress;
     @Getter private final AvatarStorage avatarStorage;
     @Getter private final InventoryStorage inventoryStorage;
+    @Getter private final PlayerAntiCheat antiCheatInfo;
     @Getter private long playerGameTime = 540000; // hardcoded in the game.
     @Getter private boolean isPaused;
     @Getter @Setter private World world;
@@ -48,7 +47,6 @@ public final class Player {
     @Getter @Setter private int sceneId;
     @Getter @Setter private int sceneEnterToken;
     @Getter @Setter private SceneLoadState sceneLoadState;
-    @Getter private final PlayerAntiCheat antiCheatInfo;
     @Getter private final Map<Integer, Integer> properties;
     @Getter private int weatherId = 0;
     @Getter private ClimateType climateType = ClimateType.SUNNY;
@@ -65,10 +63,10 @@ public final class Player {
         this.server = session.getServer();
         this.ipAddress = session.getTunnel().getAddress().getAddress().getHostAddress();
         this.antiCheatInfo = new PlayerAntiCheat(this);
-        this.properties = new HashMap<>();
         this.avatarStorage = new AvatarStorage(this);
         this.inventoryStorage = new InventoryStorage(this);
         this.world = new World(this);
+        this.properties = new HashMap<>();
     }
 
     /**
@@ -82,10 +80,25 @@ public final class Player {
         this.server = session.getServer();
         this.ipAddress = session.getTunnel().getAddress().getAddress().getHostAddress();
         this.antiCheatInfo = new PlayerAntiCheat(this);
-        this.properties = new HashMap<>();
         this.avatarStorage = new AvatarStorage(this);
         this.inventoryStorage = new InventoryStorage(this);
         this.world = new World(this);
+        this.properties = new HashMap<>();
+    }
+
+    /**
+     * Closes the player's connection.
+     */
+    public void closeConnection() {
+        this.session.getTunnel().close();
+    }
+
+    /**
+     * Gets the client's time since login.
+     * @return The client's time since login.
+     */
+    public long getClientTime() {
+        return this.session.getClientTime();
     }
 
     /**
@@ -109,11 +122,11 @@ public final class Player {
     }
 
     /**
-     * Gets the player's session state type.
-     * @return The player's session state.
+     * Checks if the player is online in the game.
+     * @return True if he is online in the game or not.
      */
-    public SessionState getSessionState() {
-        return this.session.getState();
+    public boolean isActive() {
+        return this.session.getState() == SessionState.ACTIVE;
     }
 
     /**
@@ -136,7 +149,6 @@ public final class Player {
      * Sends the login packets.
      */
     public void sendLogin() {
-        this.account.getPlayerTeam().setPlayer(this);
         this.sendPacket(new SendPlayerDataNotify(this.account.getUsername(), this.getFirstLoginToday(), this.properties));
         this.sendPacket(new SendStoreWeightLimitNotify());
         ///  TODO: SendPlayerStoreNotify
@@ -181,20 +193,14 @@ public final class Player {
 
 
 
-
-
-
-
-
-    /**
-     * Closes the player's connection.
-     */
-    public void closeConnection() {
-        this.world.removePlayer(this);
-        this.server.getPlayers().remove(this.account.getId());
-        this.session.getTunnel().close();
-        ///  TODO: FINISH
+    public MpSettingType getMpSettingType() {
+        return MpSettingType.MP_SETTING_ENTER_FREELY;
     }
+
+
+
+
+
 
 
 
@@ -209,31 +215,7 @@ public final class Player {
 
     }
 
-    public long getClientTime() {
-        return this.session.getClientTime();
-    }
 
-
-
-
-    public SocialDetail getPlayerSocialDetail() {
-        return SocialDetail.newBuilder()
-                .setUid(this.account.getId().intValue())
-                .setProfilePicture(ProfilePicture.newBuilder().setAvatarId(this.account.getProfileAvatarImageId()).setCostumeId(0))
-                .setNickname(this.account.getUsername())
-                .setSignature(this.account.getProfileSignature())
-                .setLevel(this.account.getPlayerLevel())
-                .setBirthday(this.account.getPlayerBirthday().toProto())
-                .setWorldLevel(this.account.getWorldLevel())
-                .setNameCardId(this.account.getNameCardId())
-                .setIsShowAvatar(false)
-                .addAllShowAvatarInfoList(List.of())
-                .addAllShowNameCardIdList(this.account.getUnlockedNameCards())
-                .setFinishAchievementNum(0)
-                .setFriendEnterHomeOptionValue(0)
-                .setIsMpModeAvailable(true)
-                .build();
-    }
 
     public void setAreaInfo(int areaId, int areaType) {
 

@@ -19,7 +19,7 @@ public final class RecvToTheMoonEnterSceneReq implements RecvPacket {
     @Override
     public void handle(Server server, Player player, byte[] header, byte[] data) throws InvalidProtocolBufferException {
         var req = ToTheMoonEnterSceneReq.parseFrom(data);
-        if(req.getVersion() != PlayerAntiCheat.antiCheatVersion || !player.getAntiCheatInfo().checkEnterScene(req.getSceneId())) {
+        if(req.getVersion() != PlayerAntiCheat.antiCheatVersion || !player.getAntiCheatInfo().checkToTheMoonEnterScene(req.getSceneId())) {
             player.sendPacket(new SendToTheMoonEnterSceneRsp(Retcode.RET_TOTHEMOON_PLAYER_NOT_EXIST));
             return;
         }

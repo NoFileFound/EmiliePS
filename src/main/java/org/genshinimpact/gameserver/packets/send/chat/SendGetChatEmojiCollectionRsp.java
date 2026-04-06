@@ -1,4 +1,4 @@
-package org.genshinimpact.gameserver.packets.send.social;
+package org.genshinimpact.gameserver.packets.send.chat;
 
 // Imports
 import static org.genshinimpact.gameserver.enums.Retcode.RET_SUCC;

@@ -2,6 +2,7 @@ package org.genshinimpact.gameserver.packets.recv.player;
 
 // Imports
 import com.google.protobuf.InvalidProtocolBufferException;
+import org.genshinimpact.bootstrap.AppBootstrap;
 import org.genshinimpact.gameserver.ServerApp;
 import org.genshinimpact.gameserver.connection.SessionState;
 import org.genshinimpact.gameserver.enums.Retcode;
@@ -16,8 +17,8 @@ import org.genshinimpact.gameserver.packets.send.player.SendDoSetPlayerBornDataN
 import org.genshinimpact.gameserver.packets.send.player.SendPlayerLoginRsp;
 
 // Protocol buffers
-import org.generated.protobuf.ResVersionConfigOuterClass.ResVersionConfig;
 import org.generated.protobuf.PlayerLoginReqOuterClass.PlayerLoginReq;
+import org.generated.protobuf.ResVersionConfigOuterClass.ResVersionConfig;
 
 public final class RecvPlayerLoginReq implements RecvPacket {
     @Override
@@ -80,7 +81,8 @@ public final class RecvPlayerLoginReq implements RecvPacket {
             }
 
             player.sendPacket(new SendPlayerLoginRsp(req.getBirthday(), regionInfo.resourceConfig.client_data_version, regionInfo.resourceConfig.client_silence_data_version, regionInfo.resourceConfig.client_version_suffix, regionInfo.resourceConfig.client_silence_version_suffix, JsonUtils.toJsonString(regionInfo.resourceConfig.client_data_md5), JsonUtils.toJsonString(regionInfo.resourceConfig.client_silence_data_md5), req.getLoginRand(), isNewPlayer, req.getTargetUid(), req.getTargetHomeOwnerUid(), req.getCountryCode(), req.getCps(), resVersionConfig.build()));
-        } catch(Exception ignored) {
+        } catch(Exception ex) {
+            AppBootstrap.getLogger().error("OnPlayerLoginRsp : 23 [RET_LOGIN_INIT_FAIL]", ex);
             player.sendPacket(new SendPlayerLoginRsp(Retcode.RET_LOGIN_INIT_FAIL, req.getBirthday(), req.getCountryCode(), req.getTargetUid(), req.getLoginRand()));
         }
     }

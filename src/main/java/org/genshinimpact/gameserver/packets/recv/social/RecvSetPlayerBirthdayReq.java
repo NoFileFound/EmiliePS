@@ -31,7 +31,6 @@ public final class RecvSetPlayerBirthdayReq implements RecvPacket {
         }
 
         player.getAccount().getPlayerBirthday().setBirthday(day, month);
-        player.getAccount().save(true);
         player.sendPacket(new SendSetPlayerBirthdayRsp(player.getAccount().getPlayerBirthday()));
     }
 

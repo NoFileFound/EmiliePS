@@ -1,7 +1,6 @@
 package org.genshinimpact.gameserver.packets.send.scene;
 
 // Imports
-import org.genshinimpact.gameserver.connection.SessionState;
 import org.genshinimpact.gameserver.game.player.Player;
 import org.genshinimpact.gameserver.packets.SendPacket;
 
@@ -16,7 +15,7 @@ public final class SendPlayerEnterSceneNotify implements SendPacket {
             PlayerEnterSceneNotify.newBuilder()
                 .setEnterReason(PlayerEnterSceneNotify.EnterReason.ENTER_REASON_LOGIN)
                 .setEnterSceneToken(player.getSceneEnterToken())
-                .setIsFirstLoginEnterScene(player.getSessionState() == SessionState.ACTIVE)
+                .setIsFirstLoginEnterScene(player.isActive())
                 .setIsSkipUi(false)
                 .setPos(player.getAccount().getPlayerPosition().toProto())
                 .setSceneBeginTime(System.currentTimeMillis())

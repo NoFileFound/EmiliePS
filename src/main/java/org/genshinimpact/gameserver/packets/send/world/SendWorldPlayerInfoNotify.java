@@ -18,11 +18,11 @@ public final class SendWorldPlayerInfoNotify implements SendPacket {
             proto.addPlayerInfoList(
                 OnlinePlayerInfo.newBuilder()
                     .setCurPlayerNumInWorld(world.getPlayers().size())
-                    .setMpSettingType(OnlinePlayerInfo.MpSettingType.MP_SETTING_ENTER_FREELY) ///  TODO: FIX
+                    .setMpSettingType(playerEntry.getMpSettingType().getValue())
                     .setNameCardId(playerEntry.getAccount().getNameCardId())
                     .setNickname(playerEntry.getAccount().getUsername())
                     .setPlayerLevel(playerEntry.getAccount().getPlayerLevel())
-                    .setProfilePicture(ProfilePicture.newBuilder().setAvatarId(playerEntry.getAccount().getProfileAvatarImageId()).setCostumeId(0).build()) ///  TODO: FIX
+                    .setProfilePicture(ProfilePicture.newBuilder().setAvatarId(playerEntry.getAccount().getProfileAvatarImageId()).setCostumeId(playerEntry.getAccount().getProfileAvatarCostumeImageId()).build())
                     .setSignature(playerEntry.getAccount().getProfileSignature())
                     .setUid(playerEntry.getAccount().getId().intValue())
                     .build()

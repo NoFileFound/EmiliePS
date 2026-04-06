@@ -339,10 +339,19 @@ public final class ComboGranterController {
             boolean isGuest = data.get("guest").asBoolean();
             if(isGuest) {
                 var myGuest = DBUtils.getOrCreateGuest(body.device);
+                if(myGuest.getRequireHeartbeat()) {
+                    Instant now = Instant.now();
+                    Instant start = SpringBootApp.getHeartbeatService().getHeartBeatCache().get(ipAddress, k -> now);
+                    long elapsed = now.getEpochSecond() - start.getEpochSecond();
+                    if(elapsed >= 5400) {
+                        return ResponseEntity.ok(new Response<>(Retcode.RETCODE_ACCOUNT_ANTIADDICT_LOGIN, "已达到防沉迷限制"));
+                    }
+                }
+
                 myGuest.setComboToken(CryptoUtils.generateStringKey(32));
                 myGuest.save(true);
                 AppBootstrap.getLogger().info("[Combo] A new session token was generated on the guest: {}", myGuest.getId());
-                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new GranterLoginResponse(String.valueOf(myGuest.getId()), myGuest.getComboToken(), false, AccountType.ACCOUNT_GUEST, countryCode, myGuest.getIsNew(), null)));
+                return ResponseEntity.ok(new Response<>(Retcode.RETCODE_SUCC, "OK", new GranterLoginResponse(String.valueOf(myGuest.getId()), myGuest.getComboToken(), myGuest.getRequireHeartbeat(), AccountType.ACCOUNT_GUEST, countryCode, myGuest.getIsNew(), myGuest.getFatigueRemind())));
             } else {
                 String token = data.get("token").asText();
                 var myAccount = DBUtils.findAccountById(userId);

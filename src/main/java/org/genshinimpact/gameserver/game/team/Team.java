@@ -22,7 +22,7 @@ import org.generated.protobuf.AvatarTeamOuterClass.AvatarTeam;
 public final class Team {
     @Transient private final List<AvatarEntity> entityAvatarList;
     @Transient @Getter @Setter private TeamEntity entity;
-    @Transient private Player player;
+    @Transient @Setter private Player player;
     private final LinkedHashMap<Integer, TeamObject> teams;
     private int currentTeamIndex;
     private int currentCharacterIndex;
@@ -87,11 +87,6 @@ public final class Team {
             this.currentCharacterIndex = idx;
             this.player.getScene().replaceEntity(currentEntity, newEntity);
         }
-    }
-
-
-    public void setPlayer(Player player) {
-        this.player = player;
     }
 
     @Entity("TeamInfo")

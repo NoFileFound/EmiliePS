@@ -32,6 +32,10 @@ public final class AvatarEntity extends Entity {
         this.entityId = scene.getWorld().getNextEntityId(EntityIdType.AVATAR);
     }
 
+    /**
+     * Converts AvatarEntity into Proto object.
+     * @return A protobuf of the current avatar entity.
+     */
     @Override
     public SceneEntityInfo toProto() {
         return SceneEntityInfo.newBuilder()
@@ -76,6 +80,7 @@ public final class AvatarEntity extends Entity {
     }
 
     public SceneAvatarInfo getSceneAvatarInfo() {
+        ///  TODO: REPLACE THAT INTO SendSceneTeamUpdateNotify because it is only one object.
         return SceneAvatarInfo.newBuilder().build();
     }
 }

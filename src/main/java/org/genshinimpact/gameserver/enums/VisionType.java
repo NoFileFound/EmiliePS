@@ -21,4 +21,8 @@ public enum VisionType {
     VISION_FISH_BIG_SHOCK,
     VISION_FISH_QTE_SUCC,
     VISION_CAPTURE_DISAPPEAR;
+
+    public int getValue() {
+        return this.ordinal();
+    }
 }

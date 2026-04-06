@@ -24,7 +24,7 @@ public final class RecvSetPlayerBornDataReq implements RecvPacket {
         }
 
         var avatarId = req.getAvatarId();
-        if(avatarId == 10000005 || avatarId == 10000007) ///  TODO: Make better way to check if avatarId exist.
+        if(avatarId == 10000005 || avatarId == 10000007)
         {
             var nickname = req.getNickName();
             if(nickname.isEmpty()) {

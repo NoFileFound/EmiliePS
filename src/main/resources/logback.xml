@@ -1,7 +1,7 @@
 <configuration>
     <appender name="COLORED_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="org.genshinimpact.LoggerEncoder">
-            <pattern>[%d{HH:mm:ss}][%level] %msg%n</pattern>
+            <pattern>[%d{HH:mm:ss}][%level] %msg%n%ex</pattern>
         </encoder>
     </appender>
 
@@ -12,7 +12,7 @@
             <maxHistory>30</maxHistory>
         </rollingPolicy>
         <encoder>
-            <pattern>[%d{HH:mm:ss}][%level] %msg%n</pattern>
+            <pattern>[%d{HH:mm:ss}][%level] %msg%n%ex</pattern>
         </encoder>
     </appender>
 

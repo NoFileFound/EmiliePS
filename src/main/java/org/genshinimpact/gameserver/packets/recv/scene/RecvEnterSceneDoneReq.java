@@ -5,6 +5,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import org.genshinimpact.gameserver.enums.Retcode;
 import org.genshinimpact.gameserver.game.Server;
 import org.genshinimpact.gameserver.game.player.Player;
+import org.genshinimpact.gameserver.game.player.PlayerAntiCheat;
 import org.genshinimpact.gameserver.game.world.SceneLoadState;
 import org.genshinimpact.gameserver.packets.RecvPacket;
 
@@ -23,12 +24,13 @@ public final class RecvEnterSceneDoneReq implements RecvPacket {
             return;
         }
 
-        if(player.getSceneLoadState() != SceneLoadState.LOADING) {
+        if(player.getSceneLoadState() != SceneLoadState.LOADING || !player.getAntiCheatInfo().checkToTheMoonEnterScene()) {
             player.sendPacket(new SendEnterSceneDoneRsp(Retcode.RET_ENTER_SCENE_FAIL, enterSceneToken));
             return;
         }
 
         player.setSceneLoadState(SceneLoadState.LOADED);
+        player.getAntiCheatInfo().setACStatus(PlayerAntiCheat.AntiCheatStatus.ACTIVATED);
         player.getScene().sendSceneEntities(player.getAccount().getPlayerTeam().getCurrentAvatarEntity());
         player.sendUpdateLocation();
         player.sendPacket(new SendEnterSceneDoneRsp(Retcode.RET_SUCC, enterSceneToken));

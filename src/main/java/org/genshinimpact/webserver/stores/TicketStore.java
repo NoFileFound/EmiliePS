@@ -28,14 +28,13 @@ public class TicketStore {
         switch(type) {
             case TICKET_REACTIVATE_ACCOUNT:
                 myAccount.setRequireActivation(true, myTicket.getId());
-                myAccount.save(true);
                 break;
             case TICKET_DEVICE_GRANT:
                 myAccount.setDeviceGrant(true, myTicket.getId());
-                myAccount.save(true);
                 break;
         }
 
+        myAccount.save(true);
         return myTicket;
     }
 
