@@ -1,0 +1,8 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// CmdId: 4067
+message UpdatePlayerShowAvatarListReq {
+    repeated uint32 show_avatar_id_list = 13;
+    bool is_show_avatar = 15;
+}

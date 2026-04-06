@@ -1,0 +1,7 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// CmdId: 4080
+message SetChatEmojiCollectionRsp {
+    int32 retcode = 12;
+}

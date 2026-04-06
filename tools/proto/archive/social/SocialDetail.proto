@@ -15,7 +15,7 @@ message SocialDetail {
     Birthday birthday = 6;
     uint32 world_level = 7;
     repeated uint32 reserved_list = 8;
-    FriendOnlineState online_state = 9;
+    uint32 online_state = 9;
     uint32 param = 10;
     bool is_friend = 11;
     bool is_mp_mode_available = 12;
@@ -30,17 +30,6 @@ message SocialDetail {
     bool is_show_avatar = 21;
     repeated SocialShowAvatarInfo show_avatar_info_list = 22;
     repeated uint32 show_name_card_id_list = 23;
-    FriendEnterHomeOption friend_enter_home_option = 24;
+    uint32 friend_enter_home_option = 24;
     ProfilePicture profile_picture = 25;
-		
-	enum FriendOnlineState {
-		FREIEND_DISCONNECT = 0;
-		FRIEND_ONLINE = 1;
-	}
-		
-	enum FriendEnterHomeOption {
-		FRIEND_ENTER_HOME_OPTION_NEED_CONFIRM = 0;
-		FRIEND_ENTER_HOME_OPTION_REFUSE = 1;
-		FRIEND_ENTER_HOME_OPTION_DIRECT = 2;
-	}
 }

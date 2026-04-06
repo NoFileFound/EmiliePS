@@ -6,9 +6,9 @@ import "PropValue.proto";
 
 // CmdId: 190
 message PlayerDataNotify {
+    uint32 region_id = 6;
     uint64 server_time = 7;
     string nick_name = 8;
     bool is_first_login_today = 12;
-    uint32 region_id = 6;
     map<uint32, PropValue> prop_map = 15;
 }

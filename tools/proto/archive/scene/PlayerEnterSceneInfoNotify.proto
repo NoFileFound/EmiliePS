@@ -21,19 +21,19 @@ message PlayerEnterSceneInfoNotify {
 	}
 	
 	message AvatarEnterSceneInfo {
-		repeated ServerBuff server_buff_list = 14;
-		uint32 avatar_entity_id = 7;
-		AbilitySyncStateInfo weapon_ability_info = 12;
-		uint32 weapon_entity_id = 10;
 		AbilitySyncStateInfo avatar_ability_info = 2;
-		uint64 avatar_guid = 13;
-		uint64 weapon_guid = 9;
 		repeated uint32 buff_id_list = 5;
+		uint32 avatar_entity_id = 7;
+		uint64 weapon_guid = 9;
+		uint32 weapon_entity_id = 10;
+		AbilitySyncStateInfo weapon_ability_info = 12;
+		uint64 avatar_guid = 13;
+		repeated ServerBuff server_buff_list = 14;
 	}
 	
 	message MPLevelEntityInfo {
 		AbilitySyncStateInfo ability_info = 2;
-		uint32 entity_id = 11;
 		uint32 authority_peer_id = 3;
+		uint32 entity_id = 11;
 	}
 }

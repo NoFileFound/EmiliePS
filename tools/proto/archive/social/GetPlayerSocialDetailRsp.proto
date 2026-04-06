@@ -6,6 +6,6 @@ import "SocialDetail.proto";
 
 // CmdId: 4099
 message GetPlayerSocialDetailRsp {
-    SocialDetail detail_data = 12;
     int32 retcode = 1;
+    SocialDetail detail_data = 12;
 }

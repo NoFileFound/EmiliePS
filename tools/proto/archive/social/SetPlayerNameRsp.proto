@@ -1,0 +1,8 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// CmdId: 122
+message SetPlayerNameRsp {
+    int32 retcode = 9;
+    string nick_name = 14;
+}

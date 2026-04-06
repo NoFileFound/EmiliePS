@@ -1,0 +1,7 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// CmdId: 159
+message PlayerForceExitRsp {
+    int32 retcode = 15;
+}

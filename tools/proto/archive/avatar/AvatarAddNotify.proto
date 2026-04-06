@@ -1,0 +1,11 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// Imports
+import "AvatarInfo.proto";
+
+// CmdId: 1769
+message AvatarAddNotify {
+    bool is_in_team = 12;
+    AvatarInfo avatar = 13;
+}

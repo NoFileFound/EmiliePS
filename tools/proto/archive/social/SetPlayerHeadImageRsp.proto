@@ -1,0 +1,12 @@
+syntax = "proto3";
+option java_package = "org.generated.protobuf";
+
+// Imports
+import "ProfilePicture.proto";
+
+// CmdId: 4047
+message SetPlayerHeadImageRsp {
+    int32 retcode = 1;
+    uint32 avatar_id = 5;
+    ProfilePicture profile_picture = 6;
+}
